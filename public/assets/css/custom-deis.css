@@ -195,32 +195,98 @@
         left: 0 !important;
         bottom: 0 !important;
         width: 280px !important;
+        max-width: 85vw !important;
         height: 100vh !important;
         z-index: 1060 !important;
-        background-color: var(--bs-body-bg) !important;
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        opacity: 1 !important;
         transform: translateX(-100%) !important;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35) !important;
         overflow-y: auto !important;
         display: block !important;
     }
 
+    [data-bs-theme="dark"] #miniSidebar {
+        background: #0f172a !important;
+        background-color: #0f172a !important;
+        border-right: 1px solid rgba(51, 65, 85, 0.9) !important;
+    }
+
     #miniSidebar.mobile-show {
         transform: translateX(0) !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 
-    #miniSidebar.mobile-show .brand-text-wrapper,
-    #miniSidebar.mobile-show .sidebar-user-details,
-    #miniSidebar.mobile-show .nav-heading,
-    #miniSidebar.mobile-show .nav-link .text,
-    #miniSidebar.mobile-show .nav-link .badge {
+    /* Force all text, headers, and accordion elements to show on mobile drawer */
+    #miniSidebar .brand-text-wrapper,
+    #miniSidebar.mobile-show .brand-text-wrapper {
+        display: flex !important;
+    }
+    #miniSidebar .sidebar-user-details,
+    #miniSidebar.mobile-show .sidebar-user-details {
         display: block !important;
     }
+    #miniSidebar .nav-heading,
+    #miniSidebar.mobile-show .nav-heading {
+        display: block !important;
+    }
+    #miniSidebar .nav-link .text,
+    #miniSidebar.mobile-show .nav-link .text,
+    #miniSidebar .nav-link .badge,
+    #miniSidebar.mobile-show .nav-link .badge,
+    #miniSidebar .sidebar-accordion-toggle .text,
+    #miniSidebar.mobile-show .sidebar-accordion-toggle .text,
+    #miniSidebar .sidebar-accordion-toggle .accordion-arrow,
+    #miniSidebar.mobile-show .sidebar-accordion-toggle .accordion-arrow,
+    #miniSidebar .sidebar-accordion-toggle span:not(.nav-icon),
+    #miniSidebar.mobile-show .sidebar-accordion-toggle span:not(.nav-icon) {
+        display: inline-block !important;
+    }
 
+    #miniSidebar .nav-link,
     #miniSidebar.mobile-show .nav-link {
         display: flex !important;
         justify-content: flex-start !important;
         padding: 0.65rem 1rem !important;
+        width: auto !important;
+        height: auto !important;
+        margin: 0.1rem 0.5rem !important;
+    }
+
+    #miniSidebar .sidebar-accordion-toggle,
+    #miniSidebar.mobile-show .sidebar-accordion-toggle {
+        display: flex !important;
+        width: calc(100% - 1rem) !important;
+        height: auto !important;
+        padding: 0.6rem 0.85rem !important;
+        margin: 0.15rem 0.5rem !important;
+        justify-content: flex-start !important;
+        border-radius: 0.5rem !important;
+    }
+
+    #miniSidebar .sidebar-accordion-toggle .nav-icon,
+    #miniSidebar.mobile-show .sidebar-accordion-toggle .nav-icon {
+        margin-right: 0.65rem !important;
+        width: 1.5rem !important;
+        font-size: 1.1rem !important;
+    }
+
+    #miniSidebar .brand-logo {
+        padding: 1.15rem 1.25rem !important;
+        justify-content: space-between !important;
+        background-color: transparent !important;
+    }
+
+    #miniSidebar .sidebar-user-box {
+        padding: 0.75rem 1rem !important;
+    }
+    #miniSidebar .sidebar-user-card {
+        justify-content: flex-start !important;
+        padding: 0.6rem 0.75rem !important;
+        background: var(--bs-tertiary-bg) !important;
     }
 
     #content {
@@ -246,8 +312,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(2px);
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
     z-index: 1055;
     transition: opacity 0.25s ease;
 }
