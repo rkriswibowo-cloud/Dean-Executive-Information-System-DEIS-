@@ -74,9 +74,97 @@ class CommandCenterService {
     }
 
     /**
+     * Synchronize critical_alerts table with real-time live database state
+     */
+    public static function syncCriticalAlerts(): void {
+        try {
+            $db = Database::getConnection();
+
+            // 1. Synchronize Students at risk
+            $stmt = $db->query("SELECT id, name, current_gpa, semester FROM students WHERE risk_status = 'Critical' AND status = 'Aktif'");
+            $criticalStudents = $stmt->fetchAll();
+            $studentCount = count($criticalStudents);
+
+            if ($studentCount === 0) {
+                $db->exec("UPDATE critical_alerts SET is_resolved = 1 WHERE alert_type = 'Mahasiswa'");
+            } else {
+                $studentNames = implode(', ', array_map(fn($s) => $s['name'] . " (Sem {$s['semester']}, IPK {$s['current_gpa']})", $criticalStudents));
+                $title = "{$studentCount} Mahasiswa Terindikasi Risiko Kritis Drop Out (DO)";
+                $desc = "Mahasiswa {$studentNames} membutuhkan intervensi segera.";
+                
+                $stmt = $db->query("SELECT id FROM critical_alerts WHERE alert_type = 'Mahasiswa'");
+                $existing = $stmt->fetch();
+                if ($existing) {
+                    $upd = $db->prepare("UPDATE critical_alerts SET is_resolved = 0, title = :t, description = :d WHERE id = :id");
+                    $upd->execute(['t' => $title, 'd' => $desc, 'id' => $existing['id']]);
+                } else {
+                    $ins = $db->prepare("INSERT INTO critical_alerts (alert_type, severity, title, description, target_url, is_resolved) VALUES ('Mahasiswa', 'Critical', :t, :d, 'students/early-warning', 0)");
+                    $ins->execute(['t' => $title, 'd' => $desc]);
+                }
+            }
+
+            // 2. Synchronize Problematic Lecturers (Attendance < 75% or BKD Belum Memenuhi)
+            $stmt = $db->query("SELECT id, name, attendance_percentage, bkd_status FROM lecturers WHERE (attendance_percentage < 75.00 OR bkd_status = 'Belum Memenuhi') AND status = 'Aktif'");
+            $problemLecturers = $stmt->fetchAll();
+            $lecCount = count($problemLecturers);
+
+            if ($lecCount === 0) {
+                $db->exec("UPDATE critical_alerts SET is_resolved = 1 WHERE alert_type = 'Dosen'");
+            } else {
+                $lecNames = implode(', ', array_map(fn($l) => $l['name'] . ($l['bkd_status'] === 'Belum Memenuhi' ? ' (BKD Belum Memenuhi)' : ' (Presensi ' . $l['attendance_percentage'] . '%)'), $problemLecturers));
+                $title = "{$lecCount} Dosen Memiliki Beban BKD & Kehadiran di Bawah Batas Minimum";
+                $desc = "Dosen {$lecNames} berpotensi tidak lulus BKD semester ini.";
+
+                $stmt = $db->query("SELECT id FROM critical_alerts WHERE alert_type = 'Dosen'");
+                $existing = $stmt->fetch();
+                if ($existing) {
+                    $upd = $db->prepare("UPDATE critical_alerts SET is_resolved = 0, title = :t, description = :d WHERE id = :id");
+                    $upd->execute(['t' => $title, 'd' => $desc, 'id' => $existing['id']]);
+                }
+            }
+
+            // 3. Synchronize Overdue RTL
+            $stmt = $db->query("SELECT id, item_code, description FROM action_items WHERE (status = 'Terlambat' OR (deadline < CURDATE() AND status NOT IN ('Selesai', 'Dibatalkan')))");
+            $overdueRtls = $stmt->fetchAll();
+            $rtlCount = count($overdueRtls);
+
+            if ($rtlCount === 0) {
+                $db->exec("UPDATE critical_alerts SET is_resolved = 1 WHERE alert_type = 'RTL'");
+            } else {
+                $title = "Tindak Lanjut Rapat (RTL) Terlambat ({$rtlCount} Item)";
+                $desc = "RTL " . $overdueRtls[0]['item_code'] . " (" . substr($overdueRtls[0]['description'], 0, 50) . ") melewati deadline dan belum diserahkan.";
+                $stmt = $db->query("SELECT id FROM critical_alerts WHERE alert_type = 'RTL'");
+                $existing = $stmt->fetch();
+                if ($existing) {
+                    $upd = $db->prepare("UPDATE critical_alerts SET is_resolved = 0, title = :t, description = :d WHERE id = :id");
+                    $upd->execute(['t' => $title, 'd' => $desc, 'id' => $existing['id']]);
+                }
+            }
+
+            // 4. Synchronize Accreditation expiring within 90 days
+            $stmt = $db->query("SELECT a.id, sp.name as program_name, DATEDIFF(a.valid_until, CURDATE()) as days_left FROM accreditations a JOIN study_programs sp ON a.study_program_id = sp.id WHERE a.valid_until <= DATE_ADD(CURDATE(), INTERVAL 90 DAY) AND a.status != 'Aman'");
+            $expiringAcc = $stmt->fetchAll();
+            if (count($expiringAcc) === 0) {
+                $db->exec("UPDATE critical_alerts SET is_resolved = 1 WHERE alert_type = 'Akreditasi'");
+            }
+
+            // 5. Synchronize Cooperations expiring within 30 days
+            $stmt = $db->query("SELECT id, partner_name FROM cooperations WHERE end_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) AND status = 'Akan Berakhir'");
+            $expiringCoop = $stmt->fetchAll();
+            if (count($expiringCoop) === 0) {
+                $db->exec("UPDATE critical_alerts SET is_resolved = 1 WHERE alert_type = 'Deadline'");
+            }
+        } catch (\Exception $e) {
+            error_log("syncCriticalAlerts error: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Get Critical Alerts List
      */
     public static function getCriticalAlerts(): array {
+        self::syncCriticalAlerts();
+
         $db = Database::getConnection();
         $stmt = $db->query("
             SELECT * FROM critical_alerts 
