@@ -72,4 +72,78 @@ class AcademicController extends Controller {
             'filterType' => $filterType
         ]);
     }
+
+    public function actionClass(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $classId = (int)$this->getPost('class_id', 0);
+        $actionType = $this->getPost('action_type', ''); // 'resolve' or 'disposition'
+        $notes = trim($this->getPost('notes', ''));
+
+        if ($classId <= 0) {
+            $this->redirect('academic', ['danger' => 'ID Kelas tidak valid.']);
+        }
+
+        $classModel = new ClassModel();
+        if ($actionType === 'resolve') {
+            $classModel->update($classId, [
+                'problem_flag'  => 0,
+                'problem_notes' => null
+            ]);
+            \App\Services\AuditService::log('EVAL_CLASS_RESOLVED', 'classes', (string)$classId, null, ['status' => 'resolved', 'notes' => $notes]);
+            $this->redirect('academic', ['success' => 'Status masalah kelas berhasil diselesaikan dan dinormalkan.']);
+        } else {
+            $classModel->update($classId, [
+                'problem_flag'  => 1,
+                'problem_notes' => $notes ?: 'Instruksi / Disposisi Dekanat: ' . date('d/m/Y')
+            ]);
+            \App\Services\AuditService::log('DISPOSITION_CLASS', 'classes', (string)$classId, null, ['notes' => $notes]);
+            $this->redirect('academic', ['success' => 'Disposisi & Instruksi Dekanat berhasil diterbitkan dan dicatat dalam audit trail.']);
+        }
+    }
+
+    public function actionRps(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $courseId = (int)$this->getPost('course_id', 0);
+        $status = $this->getPost('status', 'Lengkap'); // 'Lengkap', 'Revisi', 'Belum Lengkap'
+        $notes = trim($this->getPost('notes', ''));
+
+        if ($courseId <= 0) {
+            $this->redirect('academic/courses', ['danger' => 'ID Mata Kuliah tidak valid.']);
+        }
+
+        $courseModel = new Course();
+        $courseModel->update($courseId, [
+            'rps_status' => $status
+        ]);
+
+        \App\Services\AuditService::log('APPROVE_RPS', 'courses', (string)$courseId, null, ['status' => $status, 'notes' => $notes]);
+        $this->redirect('academic/courses', ['success' => "Status RPS berhasil diperbarui menjadi '{$status}' oleh Dekanat."]);
+    }
+
+    public function actionGuidance(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $guidanceId = (int)$this->getPost('guidance_id', 0);
+        $status = $this->getPost('status', 'Aktif');
+        $progress = (float)$this->getPost('progress_percentage', 0);
+        $notes = trim($this->getPost('notes', ''));
+
+        if ($guidanceId <= 0) {
+            $this->redirect('academic/guidance', ['danger' => 'ID Bimbingan tidak valid.']);
+        }
+
+        $guidanceModel = new Guidance();
+        $guidanceModel->update($guidanceId, [
+            'status' => $status,
+            'progress_percentage' => min(100, max(0, $progress))
+        ]);
+
+        \App\Services\AuditService::log('INTERVENE_GUIDANCE', 'guidances', (string)$guidanceId, null, ['status' => $status, 'progress' => $progress, 'notes' => $notes]);
+        $this->redirect('academic/guidance', ['success' => "Aksi intervensi bimbingan mahasiswa berhasil disimpan."]);
+    }
 }

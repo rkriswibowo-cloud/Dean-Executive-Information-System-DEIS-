@@ -208,4 +208,51 @@ class LecturerController extends Controller {
         }
         $this->redirect('lecturers', ['error' => 'Gagal menghapus data dosen.']);
     }
+
+    public function actionBkd(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $lecturerId = (int)$this->getPost('lecturer_id', 0);
+        $bkdStatus = $this->getPost('bkd_status', 'Memenuhi');
+        $notes = trim($this->getPost('action_notes', ''));
+
+        if ($lecturerId <= 0) {
+            $this->redirect('lecturers', ['danger' => 'ID Dosen tidak valid.']);
+        }
+
+        $lecturerModel = new Lecturer();
+        $lecturer = $lecturerModel->find($lecturerId);
+
+        $lecturerModel->update($lecturerId, [
+            'bkd_status' => $bkdStatus
+        ]);
+
+        \App\Services\AuditService::log('EVAL_BKD_DEKAN', 'lecturers', (string)$lecturerId, $lecturer, [
+            'bkd_status'   => $bkdStatus,
+            'action_notes' => $notes
+        ]);
+
+        $this->redirect('lecturers', ['success' => "Keputusan status BKD Dosen ('{$bkdStatus}') berhasil disahkan oleh Dekanat."]);
+    }
+
+    public function actionKpi(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $lecturerId = (int)$this->getPost('lecturer_id', 0);
+        $decisionType = $this->getPost('decision_type', 'Reward'); // 'Reward', 'Incentive', 'Guidance'
+        $notes = trim($this->getPost('action_notes', ''));
+
+        if ($lecturerId <= 0) {
+            $this->redirect('lecturers/kpi', ['danger' => 'ID Dosen tidak valid.']);
+        }
+
+        \App\Services\AuditService::log('KPI_DEAN_DECISION', 'lecturers', (string)$lecturerId, null, [
+            'decision_type' => $decisionType,
+            'action_notes'  => $notes
+        ]);
+
+        $this->redirect('lecturers/kpi', ['success' => "Aksi Penetapan Insentif / Rekomendasi Dekanat ({$decisionType}) berhasil dicatat."]);
+    }
 }

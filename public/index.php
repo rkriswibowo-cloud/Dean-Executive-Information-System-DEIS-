@@ -71,12 +71,17 @@ $app->post('/master/academic-years', 'MasterController@academicYears');
 $app->get('/academic', 'AcademicController@index');
 $app->get('/academic/courses', 'AcademicController@courses');
 $app->get('/academic/guidance', 'AcademicController@guidance');
+$app->post('/academic/action-class', 'AcademicController@actionClass');
+$app->post('/academic/action-rps', 'AcademicController@actionRps');
+$app->post('/academic/action-guidance', 'AcademicController@actionGuidance');
 
 // 6. SDM & Kinerja Dosen
 $app->get('/lecturers', 'LecturerController@index');
 $app->post('/lecturers/create', 'LecturerController@create');
 $app->post('/lecturers/update', 'LecturerController@update');
 $app->post('/lecturers/delete', 'LecturerController@delete');
+$app->post('/lecturers/action-bkd', 'LecturerController@actionBkd');
+$app->post('/lecturers/action-kpi', 'LecturerController@actionKpi');
 $app->get('/lecturers/detail', 'LecturerController@detail');
 $app->get('/lecturers/kpi', 'LecturerController@kpi');
 
@@ -84,6 +89,7 @@ $app->get('/lecturers/kpi', 'LecturerController@kpi');
 $app->get('/students', 'StudentController@index');
 $app->get('/students/early-warning', 'StudentController@earlyWarning');
 $app->get('/students/alumni', 'StudentController@alumni');
+$app->post('/students/action', 'StudentController@actionStudent');
 
 // 8. Mutu / SPMI & AMI
 $app->get('/quality', 'QualityController@index');

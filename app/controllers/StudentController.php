@@ -71,4 +71,32 @@ class StudentController extends Controller {
             'employerSurveys' => $employerSurveys
         ]);
     }
+
+    public function actionStudent(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $studentId = (int)$this->getPost('student_id', 0);
+        $riskStatus = $this->getPost('risk_status', 'Normal');
+        $actionNote = trim($this->getPost('action_notes', ''));
+
+        if ($studentId <= 0) {
+            $this->redirect('students', ['danger' => 'ID Mahasiswa tidak valid.']);
+        }
+
+        $studentModel = new Student();
+        $student = $studentModel->find($studentId);
+
+        $studentModel->update($studentId, [
+            'risk_status' => $riskStatus,
+            'risk_reason' => $actionNote ?: ($student['risk_reason'] ?? 'Tindakan Dekanat')
+        ]);
+
+        \App\Services\AuditService::log('INTERVENE_STUDENT_EWS', 'students', (string)$studentId, $student, [
+            'risk_status'  => $riskStatus,
+            'action_notes' => $actionNote
+        ]);
+
+        $this->redirect('students', ['success' => "Intervensi / Tindakan Dekanat untuk mahasiswa berhasil diterbitkan dan dicatat."]);
+    }
 }

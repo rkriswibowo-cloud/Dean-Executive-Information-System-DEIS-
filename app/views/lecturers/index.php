@@ -100,6 +100,9 @@ use App\Helpers\CsrfHelper;
                             </td>
                             <td class="text-end pe-4 text-nowrap">
                                 <div class="table-actions">
+                                    <button type="button" class="btn btn-sm btn-outline-warning btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalBkdAction<?= $l['id'] ?>" title="Pengesahan BKD Dekanat">
+                                        <i class="ti ti-gavel"></i> Aksi BKD
+                                    </button>
                                     <a href="<?= $baseUrl ?>/lecturers/detail?id=<?= $l['id'] ?>" class="btn btn-sm btn-outline-info btn-crud-sm" title="Lihat Profil Dosen">
                                         <i class="ti ti-eye"></i> Detail
                                     </a>
@@ -113,6 +116,50 @@ use App\Helpers\CsrfHelper;
                                             <i class="ti ti-trash"></i>
                                         </button>
                                     </form>
+                                </div>
+
+                                <!-- Modal Aksi BKD Dekanat -->
+                                <div class="modal fade" id="modalBkdAction<?= $l['id'] ?>" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered text-start">
+                                        <div class="modal-content border-0 shadow-lg rounded-4">
+                                            <div class="modal-header bg-body border-bottom py-3">
+                                                <h6 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                                    <i class="ti ti-gavel text-warning"></i> Pengesahan Status BKD Dekanat
+                                                </h6>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="<?= $baseUrl ?>/lecturers/action-bkd" method="POST">
+                                                <?= CsrfHelper::tokenField() ?>
+                                                <input type="hidden" name="lecturer_id" value="<?= $l['id'] ?>">
+                                                <div class="modal-body p-4">
+                                                    <div class="bg-body-tertiary p-3 rounded-3 mb-3">
+                                                        <div class="fw-bold text-dark"><?= htmlspecialchars($l['name'], ENT_QUOTES, 'UTF-8') ?></div>
+                                                        <div class="small text-muted">NIDN: <?= $l['nidn'] ?> | Beban: <?= $l['teaching_load_sks'] ?> SKS | Presensi: <?= $l['attendance_percentage'] ?>%</div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold small text-muted">Keputusan Status BKD</label>
+                                                        <select name="bkd_status" class="form-select" required>
+                                                            <option value="Memenuhi" <?= $l['bkd_status'] === 'Memenuhi' ? 'selected' : '' ?>>✅ Memenuhi (Sahkan BKD Semester Ini)</option>
+                                                            <option value="Belum Memenuhi" <?= $l['bkd_status'] === 'Belum Memenuhi' ? 'selected' : '' ?>>⚠️ Belum Memenuhi (Keluarkan Surat Teguran Dekan)</option>
+                                                            <option value="Dalam Penilaian" <?= $l['bkd_status'] === 'Dalam Penilaian' ? 'selected' : '' ?>>🔵 Dalam Penilaian / Verifikasi Asesor</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold small text-muted">Catatan Evaluasi / Rekomendasi Dekan</label>
+                                                        <textarea name="action_notes" class="form-control" rows="3" placeholder="Contoh: Disahkan dengan catatan peningkatan publikasi pada jurnal bereputasi di semester depan..."></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-body border-top py-2">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                    <button type="submit" class="btn btn-sm btn-warning text-dark fw-semibold">
+                                                        <i class="ti ti-check me-1"></i> Sahkan Status BKD
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Modal Edit Dosen -->
