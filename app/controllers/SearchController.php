@@ -17,21 +17,48 @@ class SearchController extends Controller {
         $param = '%' . $q . '%';
         $results = [];
 
-        // 1. Lecturers
-        $stmt = $db->prepare("SELECT id, name, nidn, 'Dosen' as type, 'lecturers/detail?id=' as url_prefix FROM lecturers WHERE name LIKE :q OR nidn LIKE :q LIMIT 5");
-        $stmt->execute(['q' => $param]);
+        // 1. Lecturers (SDM Dosen)
+        $stmt = $db->prepare("
+            SELECT id, name, nidn 
+            FROM lecturers 
+            WHERE name LIKE :q1 OR nidn LIKE :q2 
+            LIMIT 5
+        ");
+        $stmt->execute(['q1' => $param, 'q2' => $param]);
         while ($row = $stmt->fetch()) {
             $results[] = [
                 'category' => 'Dosen & SDM',
                 'title'    => $row['name'],
                 'subtitle' => 'NIDN: ' . $row['nidn'],
-                'url'      => $row['url_prefix'] . $row['id']
+                'url'      => 'lecturers/detail?id=' . $row['id']
             ];
         }
 
-        // 2. Students
-        $stmt = $db->prepare("SELECT id, name, nim, 'Mahasiswa' as type FROM students WHERE name LIKE :q OR nim LIKE :q LIMIT 5");
-        $stmt->execute(['q' => $param]);
+        // 2. Study Programs (Program Studi)
+        $stmt = $db->prepare("
+            SELECT id, name, code, degree 
+            FROM study_programs 
+            WHERE name LIKE :q1 OR code LIKE :q2 
+            LIMIT 5
+        ");
+        $stmt->execute(['q1' => $param, 'q2' => $param]);
+        while ($row = $stmt->fetch()) {
+            $results[] = [
+                'category' => 'Program Studi',
+                'title'    => $row['name'] . ' (' . $row['degree'] . ')',
+                'subtitle' => 'Kode: ' . $row['code'],
+                'url'      => 'master/study-programs'
+            ];
+        }
+
+        // 3. Students (Mahasiswa)
+        $stmt = $db->prepare("
+            SELECT id, name, nim 
+            FROM students 
+            WHERE name LIKE :q1 OR nim LIKE :q2 
+            LIMIT 5
+        ");
+        $stmt->execute(['q1' => $param, 'q2' => $param]);
         while ($row = $stmt->fetch()) {
             $results[] = [
                 'category' => 'Mahasiswa',
@@ -41,9 +68,14 @@ class SearchController extends Controller {
             ];
         }
 
-        // 3. Meetings
-        $stmt = $db->prepare("SELECT id, title, meeting_number FROM meetings WHERE title LIKE :q OR meeting_number LIKE :q OR agenda LIKE :q LIMIT 5");
-        $stmt->execute(['q' => $param]);
+        // 4. Meetings (Rapat Digital)
+        $stmt = $db->prepare("
+            SELECT id, title, meeting_number 
+            FROM meetings 
+            WHERE title LIKE :q1 OR meeting_number LIKE :q2 
+            LIMIT 5
+        ");
+        $stmt->execute(['q1' => $param, 'q2' => $param]);
         while ($row = $stmt->fetch()) {
             $results[] = [
                 'category' => 'Rapat & Tata Kelola',
@@ -53,9 +85,14 @@ class SearchController extends Controller {
             ];
         }
 
-        // 4. Action Items (RTL)
-        $stmt = $db->prepare("SELECT id, item_code, description, pic_name FROM action_items WHERE item_code LIKE :q OR description LIKE :q OR pic_name LIKE :q LIMIT 5");
-        $stmt->execute(['q' => $param]);
+        // 5. Action Items (RTL)
+        $stmt = $db->prepare("
+            SELECT id, item_code, description, pic_name 
+            FROM action_items 
+            WHERE item_code LIKE :q1 OR description LIKE :q2 OR pic_name LIKE :q3 
+            LIMIT 5
+        ");
+        $stmt->execute(['q1' => $param, 'q2' => $param, 'q3' => $param]);
         while ($row = $stmt->fetch()) {
             $results[] = [
                 'category' => 'Tindak Lanjut (RTL)',
@@ -65,9 +102,14 @@ class SearchController extends Controller {
             ];
         }
 
-        // 5. Indicators
-        $stmt = $db->prepare("SELECT id, code, name, category FROM indicators WHERE code LIKE :q OR name LIKE :q LIMIT 5");
-        $stmt->execute(['q' => $param]);
+        // 6. Indicators (IKU / Renstra)
+        $stmt = $db->prepare("
+            SELECT id, code, name, category 
+            FROM indicators 
+            WHERE code LIKE :q1 OR name LIKE :q2 
+            LIMIT 5
+        ");
+        $stmt->execute(['q1' => $param, 'q2' => $param]);
         while ($row = $stmt->fetch()) {
             $results[] = [
                 'category' => 'Indikator Kinerja (' . $row['category'] . ')',
@@ -77,9 +119,14 @@ class SearchController extends Controller {
             ];
         }
 
-        // 6. Cooperations
-        $stmt = $db->prepare("SELECT id, partner_name, scope, type FROM cooperations WHERE partner_name LIKE :q OR scope LIKE :q LIMIT 5");
-        $stmt->execute(['q' => $param]);
+        // 7. Cooperations (Kerjasama Mitra)
+        $stmt = $db->prepare("
+            SELECT id, partner_name, scope, type 
+            FROM cooperations 
+            WHERE partner_name LIKE :q1 OR scope LIKE :q2 
+            LIMIT 5
+        ");
+        $stmt->execute(['q1' => $param, 'q2' => $param]);
         while ($row = $stmt->fetch()) {
             $results[] = [
                 'category' => 'Kerja Sama (' . $row['type'] . ')',

@@ -12,24 +12,9 @@ var theme = {
     theme.search();
   },
 
-  // search
+  // search handled by app-deis.js
   search: () => {
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchWord = () => {
-        const input = document.getElementById('globalSearchInput').value.toLowerCase(); // Get search input
-        const listItems = document.querySelectorAll('.modal-body li'); // Select all list items inside the modal body
-
-        listItems.forEach((item) => {
-          const text = item.textContent.toLowerCase(); // Get the text content of each list item
-          item.style.display = text.includes(input) ? '' : 'none'; // Show/hide based on match
-        });
-      };
-
-      const searchInput = document.getElementById('globalSearchInput');
-      if (searchInput) {
-        searchInput.addEventListener('keyup', searchWord);
-      }
-    });
+    // Live AJAX search is managed in app-deis.js
   },
 
   sidbarNav: () => {

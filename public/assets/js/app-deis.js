@@ -99,18 +99,21 @@ document.addEventListener('DOMContentLoaded', function () {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // 3. Global Keyboard Shortcut for Command Palette (⌘K / Ctrl+K)
+    // 3. Global Keyboard Shortcut for Command Palette (⌘K / Ctrl+K) & Autofocus
+    const searchModalEl = document.getElementById('searchModal');
+    if (searchModalEl) {
+        searchModalEl.addEventListener('shown.bs.modal', function () {
+            const input = document.getElementById('globalSearchInput');
+            if (input) input.focus();
+        });
+    }
+
     document.addEventListener('keydown', function (e) {
         if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
             e.preventDefault();
-            const searchModalEl = document.getElementById('searchModal');
             if (searchModalEl) {
                 const searchModal = bootstrap.Modal.getOrCreateInstance(searchModalEl);
                 searchModal.show();
-                setTimeout(() => {
-                    const input = document.getElementById('globalSearchInput');
-                    if (input) input.focus();
-                }, 300);
             }
         }
     });
