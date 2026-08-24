@@ -108,9 +108,14 @@ $app->post('/strategic/realization', 'StrategicController@saveRealization');
 // 11. Kerja Sama
 $app->get('/cooperations', 'CooperationController@index');
 $app->post('/cooperations/create', 'CooperationController@create');
+$app->post('/cooperations/update', 'CooperationController@update');
+$app->post('/cooperations/delete', 'CooperationController@delete');
 
 // 12. Keuangan & Anggaran
 $app->get('/finances', 'FinanceController@index');
+$app->post('/finances/create', 'FinanceController@create');
+$app->post('/finances/update', 'FinanceController@update');
+$app->post('/finances/delete', 'FinanceController@delete');
 
 // 13. Rapat & Tata Kelola Digital
 $app->get('/meetings', 'MeetingController@index');
