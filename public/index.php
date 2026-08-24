@@ -98,6 +98,7 @@ $app->get('/quality/surveys', 'QualityController@surveys');
 
 // 9. Akreditasi
 $app->get('/accreditation', 'AccreditationController@index');
+$app->post('/accreditation/update', 'AccreditationController@updateProgress');
 
 // 10. Kinerja Strategis (IKU & Renstra)
 $app->get('/strategic', 'StrategicController@index');
