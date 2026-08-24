@@ -173,38 +173,55 @@ function isGroupActive(array $paths, $currentPath): bool {
                             </div>
                         </div>
 
-                        <!-- Group 2: Pengawasan Kinerja Fakultas -->
+                        <!-- Group 2: Akademik, Kurikulum & Mahasiswa -->
                         <div class="sidebar-accordion-item mb-1">
-                            <?php $grpMon = isGroupActive(['lecturers', 'academic', 'students', 'accreditation', 'quality', 'cooperations', 'finances'], $currentPath); ?>
+                            <?php $grpAcad = isGroupActive(['academic', 'academic/courses', 'academic/guidance', 'students'], $currentPath); ?>
+                            <button class="sidebar-accordion-toggle <?= $grpAcad ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accDekanAcad" aria-expanded="<?= $grpAcad ? 'true' : 'false' ?>">
+                                <span class="nav-icon"><i class="ti ti-school fs-4 text-primary"></i></span>
+                                <span class="text">Akademik & Mahasiswa</span>
+                                <i class="ti ti-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div id="accDekanAcad" class="collapse sidebar-accordion-collapse <?= $grpAcad ? 'show' : '' ?>" data-bs-parent="#sidebarAccordion">
+                                <ul class="sidebar-subnav">
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('academic', $currentPath) && !isNavActive('academic/courses', $currentPath) && !isNavActive('academic/guidance', $currentPath) ? 'active' : '' ?>" href="<?= $baseUrl ?>/academic">Perkuliahan & Kelas</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('academic/courses', $currentPath) ?>" href="<?= $baseUrl ?>/academic/courses">Kurikulum & Kesiapan RPS</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('academic/guidance', $currentPath) ?>" href="<?= $baseUrl ?>/academic/guidance">Monitoring Bimbingan (TA/MBKM)</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('students', $currentPath) ?>" href="<?= $baseUrl ?>/students">Mahasiswa & EWS Kritis</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Group 3: Kinerja SDM, Mutu & Kelembagaan -->
+                        <div class="sidebar-accordion-item mb-1">
+                            <?php $grpMon = isGroupActive(['lecturers', 'accreditation', 'quality', 'cooperations', 'finances'], $currentPath); ?>
                             <button class="sidebar-accordion-toggle <?= $grpMon ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accDekanMon" aria-expanded="<?= $grpMon ? 'true' : 'false' ?>">
                                 <span class="nav-icon"><i class="ti ti-chart-pie-2 fs-4 text-info"></i></span>
-                                <span class="text">Pengawasan Fakultas</span>
+                                <span class="text">Kinerja SDM & Mutu</span>
                                 <i class="ti ti-chevron-down accordion-arrow"></i>
                             </button>
                             <div id="accDekanMon" class="collapse sidebar-accordion-collapse <?= $grpMon ? 'show' : '' ?>" data-bs-parent="#sidebarAccordion">
                                 <ul class="sidebar-subnav">
-                                    <li><a class="sidebar-subnav-link <?= isNavActive('lecturers', $currentPath) ?>" href="<?= $baseUrl ?>/lecturers">SDM & Kepatuhan BKD</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('lecturers', $currentPath) && !isNavActive('lecturers/kpi', $currentPath) ? 'active' : '' ?>" href="<?= $baseUrl ?>/lecturers">SDM & Kepatuhan BKD</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('lecturers/kpi', $currentPath) ?>" href="<?= $baseUrl ?>/lecturers/kpi">Ranking KPI Dosen</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('accreditation', $currentPath) ?>" href="<?= $baseUrl ?>/accreditation">Radar Akreditasi Prodi</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('quality', $currentPath) ?>" href="<?= $baseUrl ?>/quality">Penjaminan Mutu SPMI</a></li>
-                                    <li><a class="sidebar-subnav-link <?= isNavActive('students', $currentPath) ?>" href="<?= $baseUrl ?>/students">Mahasiswa & EWS Kritis</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('cooperations', $currentPath) ?>" href="<?= $baseUrl ?>/cooperations">Kemitraan & Kerja Sama</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('finances', $currentPath) ?>" href="<?= $baseUrl ?>/finances">Evaluasi Anggaran RKA</a></li>
                                 </ul>
                             </div>
                         </div>
 
-                        <!-- Group 3: Tata Kelola & Laporan Resmi -->
+                        <!-- Group 4: Tata Kelola & Laporan Resmi -->
                         <div class="sidebar-accordion-item mb-1">
                             <?php $grpGov = isGroupActive(['meetings', 'meetings/rtl', 'reports'], $currentPath); ?>
                             <button class="sidebar-accordion-toggle <?= $grpGov ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accDekanGov" aria-expanded="<?= $grpGov ? 'true' : 'false' ?>">
-                                <span class="nav-icon"><i class="ti ti-calendar-event fs-4 text-primary"></i></span>
+                                <span class="nav-icon"><i class="ti ti-calendar-event fs-4 text-success"></i></span>
                                 <span class="text">Tata Kelola & Laporan</span>
                                 <i class="ti ti-chevron-down accordion-arrow"></i>
                             </button>
                             <div id="accDekanGov" class="collapse sidebar-accordion-collapse <?= $grpGov ? 'show' : '' ?>" data-bs-parent="#sidebarAccordion">
                                 <ul class="sidebar-subnav">
-                                    <li><a class="sidebar-subnav-link <?= isNavActive('meetings', $currentPath) ?>" href="<?= $baseUrl ?>/meetings">Rapat Digital Dekanat</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('meetings', $currentPath) && !isNavActive('meetings/rtl', $currentPath) ? 'active' : '' ?>" href="<?= $baseUrl ?>/meetings">Rapat Digital Dekanat</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('meetings/rtl', $currentPath) ?>" href="<?= $baseUrl ?>/meetings/rtl">Tracking RTL Rapat</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('reports', $currentPath) ?>" href="<?= $baseUrl ?>/reports">Laporan Eksekutif Dekan</a></li>
                                 </ul>
