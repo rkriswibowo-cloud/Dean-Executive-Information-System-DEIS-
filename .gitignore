@@ -1,0 +1,22 @@
+# Logs & Caches
+/storage/logs/*.log
+/storage/cache/*
+*.log
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Environment / Local Config Overrides
+app/config/local.php
+.env
