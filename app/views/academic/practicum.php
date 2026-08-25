@@ -2,7 +2,7 @@
 use App\Helpers\CsrfHelper;
 use App\Helpers\FormatHelper;
 
-// Group modules by study program for the top matrix summary
+// Group modules by study program
 $modulesByProgram = [];
 foreach ($modules as $m) {
     $modulesByProgram[$m['program_name']][] = $m;
@@ -12,7 +12,7 @@ foreach ($modules as $m) {
 <div class="container-fluid px-0">
     <!-- Breadcrumb & Header Title -->
     <div class="row mb-3 align-items-center">
-        <div class="col-12 col-md-8">
+        <div class="col-12 col-md-7">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1 small">
                     <li class="breadcrumb-item"><a href="<?= $baseUrl ?>/dashboard" class="text-decoration-none text-muted">Dashboard</a></li>
@@ -20,18 +20,18 @@ foreach ($modules as $m) {
                     <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">Cek Modul Praktikum Lab</li>
                 </ol>
             </nav>
-            <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
-                <i class="ti ti-flask text-primary"></i> Cek & Verifikasi Modul Praktikum Laboratorium
+            <h3 class="fw-bold mb-1 d-flex align-items-center gap-2 flex-wrap">
+                <i class="ti ti-flask text-primary"></i> Cek Modul Praktikum & Laboratorium
                 <span class="badge bg-primary-subtle text-primary fs-7 border border-primary-subtle px-2 py-1">Dekan Leadership Suite</span>
             </h3>
-            <p class="text-muted small mb-0">Pemantauan ketercapaian modul praktikum lab (contoh: target 12/12 per semester) per program studi dan mekanisme konfirmasi langsung ke Kaprodi.</p>
+            <p class="text-muted small mb-0">1 Matakuliah Praktikum wajib memiliki 1 Buku Modul Lab lengkap (contoh: 10 MK Praktikum = 10 Modul, 1 MK = 1 Modul). Hasil verifikasi dapat langsung dikonfirmasikan ke Kaprodi.</p>
         </div>
-        <div class="col-12 col-md-4 text-md-end mt-3 mt-md-0 d-flex flex-wrap justify-content-md-end gap-2">
-            <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#createPracticumModal">
+        <div class="col-12 col-md-5 text-md-end mt-3 mt-md-0 d-flex flex-wrap justify-content-md-end gap-2">
+            <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#createPracticumModal">
                 <i class="ti ti-plus"></i> Tambah Matakuliah Lab
             </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" onclick="window.print()">
-                <i class="ti ti-printer"></i> Cetak Laporan
+            <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 px-3" onclick="window.print()">
+                <i class="ti ti-printer"></i> Cetak Rekap
             </button>
         </div>
     </div>
@@ -52,15 +52,15 @@ foreach ($modules as $m) {
         </div>
     <?php endif; ?>
 
-    <!-- KPI Summary Cards -->
+    <!-- KPI SUMMARY CARDS -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
             <div class="card h-100 border shadow-xs rounded-3">
                 <div class="card-body p-3 d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="text-muted small fw-medium">Total Matakuliah Lab</div>
-                        <div class="fs-4 fw-bold text-dark mt-1"><?= (int)$stats['total_labs'] ?> <span class="fs-7 text-muted fw-normal">Matakuliah</span></div>
-                        <div class="text-muted small mt-1" style="font-size: 0.75rem;">Tersebar di 3 Program Studi</div>
+                        <div class="text-muted small fw-medium">Total MK Praktikum</div>
+                        <div class="fs-4 fw-bold text-dark mt-1"><?= (int)$stats['total_labs'] ?> <span class="fs-7 text-muted fw-normal">MK Lab</span></div>
+                        <div class="text-muted small mt-1" style="font-size: 0.75rem;">Wajib <?= (int)$stats['sum_target_modules'] ?> Modul Lengkap</div>
                     </div>
                     <div class="rounded-circle bg-primary-subtle text-primary p-3 d-flex align-items-center justify-content-center">
                         <i class="ti ti-flask-2 fs-3"></i>
@@ -72,16 +72,14 @@ foreach ($modules as $m) {
             <div class="card h-100 border shadow-xs rounded-3">
                 <div class="card-body p-3 d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="text-muted small fw-medium">Ketercapaian Modul Lab</div>
+                        <div class="text-muted small fw-medium">Total Modul Terbit</div>
                         <div class="fs-4 fw-bold text-success mt-1">
-                            <?= (float)($stats['overall_completion_rate'] ?? 0) ?>%
+                            <?= (int)$stats['sum_completed_modules'] ?> / <?= (int)$stats['sum_target_modules'] ?> <span class="fs-7 text-success fw-semibold">(<?= (float)($stats['overall_completion_rate'] ?? 0) ?>%)</span>
                         </div>
-                        <div class="text-muted small mt-1" style="font-size: 0.75rem;">
-                            <?= (int)$stats['sum_completed_modules'] ?> / <?= (int)$stats['sum_target_modules'] ?> Total Modul
-                        </div>
+                        <div class="text-muted small mt-1" style="font-size: 0.75rem;">Capaian seluruh fakultas</div>
                     </div>
                     <div class="rounded-circle bg-success-subtle text-success p-3 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-chart-bar fs-3"></i>
+                        <i class="ti ti-book fs-3"></i>
                     </div>
                 </div>
             </div>
@@ -90,9 +88,9 @@ foreach ($modules as $m) {
             <div class="card h-100 border shadow-xs rounded-3">
                 <div class="card-body p-3 d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="text-muted small fw-medium">Terpenuhi 100% (12/12)</div>
-                        <div class="fs-4 fw-bold text-primary mt-1"><?= (int)$stats['count_100_percent'] ?> <span class="fs-7 text-muted fw-normal">Kelas Lab</span></div>
-                        <div class="text-success small mt-1 fw-medium" style="font-size: 0.75rem;"><i class="ti ti-circle-check"></i> Siap Pelaksanaan Praktikum</div>
+                        <div class="text-muted small fw-medium">Modul Terpenuhi (1/1)</div>
+                        <div class="fs-4 fw-bold text-primary mt-1"><?= (int)$stats['count_100_percent'] ?> <span class="fs-7 text-muted fw-normal">MK Siap</span></div>
+                        <div class="text-success small mt-1 fw-medium" style="font-size: 0.75rem;"><i class="ti ti-circle-check"></i> Berkas Praktikum Siap</div>
                     </div>
                     <div class="rounded-circle bg-info-subtle text-info p-3 d-flex align-items-center justify-content-center">
                         <i class="ti ti-checklist fs-3"></i>
@@ -104,11 +102,11 @@ foreach ($modules as $m) {
             <div class="card h-100 border shadow-xs rounded-3">
                 <div class="card-body p-3 d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="text-muted small fw-medium">Dikonfirmasi ke Kaprodi</div>
-                        <div class="fs-4 fw-bold <?= (int)$stats['count_confirmed_kaprodi'] > 0 ? 'text-warning' : 'text-dark' ?> mt-1">
-                            <?= (int)$stats['count_confirmed_kaprodi'] + (int)$stats['count_attention_needed'] ?> <span class="fs-7 text-muted fw-normal">Tindak Lanjut</span>
+                        <div class="text-muted small fw-medium">Perlu Tindak Lanjut</div>
+                        <div class="fs-4 fw-bold <?= (int)$stats['count_attention_needed'] > 0 ? 'text-warning' : 'text-dark' ?> mt-1">
+                            <?= (int)$stats['count_attention_needed'] ?> <span class="fs-7 text-muted fw-normal">Modul Belum Ada</span>
                         </div>
-                        <div class="text-muted small mt-1" style="font-size: 0.75rem;">Menunggu verifikasi / revisi modul</div>
+                        <div class="text-muted small mt-1" style="font-size: 0.75rem;">Perlu konfirmasi ke Kaprodi</div>
                     </div>
                     <div class="rounded-circle bg-warning-subtle text-warning p-3 d-flex align-items-center justify-content-center">
                         <i class="ti ti-send fs-3"></i>
@@ -118,76 +116,115 @@ foreach ($modules as $m) {
         </div>
     </div>
 
-    <!-- FORMAT REKAPITULASI KETERCAPAIAN MODUL PER PRODI & SEMESTER (Card Grid Matrix) -->
+    <!-- RINGKASAN CAPAIAN MODUL PER PRODI (10 MK = 10 MODUL) -->
+    <div class="row g-3 mb-4">
+        <?php foreach ($prodiTotals as $pt): ?>
+            <?php 
+            $ptIsFull = ($pt['total_completed_modules'] >= $pt['total_target_modules'] && $pt['total_target_modules'] > 0);
+            $ptBorder = $ptIsFull ? 'border-success-subtle' : 'border-warning-subtle';
+            $ptBadgeClass = $ptIsFull ? 'bg-success text-white' : 'bg-warning text-dark';
+            $ptProgressClass = $ptIsFull ? 'bg-success' : 'bg-warning';
+            ?>
+            <div class="col-12 col-md-4">
+                <div class="card h-100 border shadow-xs rounded-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary-subtle text-primary font-monospace fw-bold"><?= htmlspecialchars($pt['program_code']) ?></span>
+                                <h6 class="fw-bold mb-0 text-dark"><?= htmlspecialchars($pt['program_name']) ?></h6>
+                            </div>
+                            <span class="badge <?= $ptBadgeClass ?> font-monospace fw-bold px-2 py-1" style="font-size: 0.75rem;">
+                                <?= $pt['total_completed_modules'] ?>/<?= $pt['total_target_modules'] ?> Modul (<?= $pt['achievement_rate'] ?>%)
+                            </span>
+                        </div>
+
+                        <div class="text-muted small mb-2" style="font-size: 0.78rem;">
+                            <strong><?= $pt['total_courses'] ?> MK Praktikum</strong> ➡️ Wajib <strong><?= $pt['total_target_modules'] ?> Modul Lab</strong>
+                            <?php if ($pt['unfulfilled_count'] > 0): ?>
+                                <span class="text-warning-emphasis fw-semibold">(<?= $pt['unfulfilled_count'] ?> Belum Terbit)</span>
+                            <?php else: ?>
+                                <span class="text-success fw-semibold"><i class="ti ti-check"></i> Lengkap 100%</span>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="progress mb-2" style="height: 7px;">
+                            <div class="progress-bar <?= $ptProgressClass ?>" role="progressbar" style="width: <?= min(100, $pt['achievement_rate']) ?>%;" aria-valuenow="<?= $pt['achievement_rate'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between text-muted small" style="font-size: 0.72rem;">
+                            <span>Kaprodi: <strong><?= htmlspecialchars($pt['kaprodi_name'] ?? 'Kaprodi') ?></strong></span>
+                            <a href="<?= $baseUrl ?>/academic/practicum?program_id=<?= $pt['program_id'] ?>" class="text-primary text-decoration-none fw-semibold">
+                                Filter Prodi <i class="ti ti-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- MATRIKS CAPAIAN PER SEMESTER -->
     <div class="card border shadow-xs rounded-3 mb-4">
         <div class="card-header bg-transparent border-bottom py-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
             <div>
                 <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
-                    <i class="ti ti-layout-grid text-primary"></i> Matriks Capaian Modul Praktikum per Program Studi & Semester
+                    <i class="ti ti-layout-grid text-primary"></i> Rincian Capaian Modul per Semester (Contoh: 1 MK = 1/1 Modul)
                 </h5>
-                <span class="text-muted small">Ringkasan pemenuhan target modul lab (contoh: 12/12, 10/12, 14/14) per tingkatan semester</span>
+                <span class="text-muted small">Status pemenuhan modul lab di setiap tingkatan semester (1 Semester 1 MK = 1 Modul, 2 MK = 2 Modul)</span>
             </div>
         </div>
         <div class="card-body p-3">
             <div class="row g-3">
                 <?php
-                // Build aggregated matrix data by program
                 $prodiGroups = [];
                 foreach ($prodiSummary as $row) {
                     $prodiGroups[$row['program_name']][] = $row;
                 }
                 ?>
 
-                <?php if (empty($prodiGroups)): ?>
-                    <div class="col-12 text-center py-4 text-muted">
-                        <i class="ti ti-folder-off fs-1 d-block mb-2 text-muted"></i>
-                        Belum ada data modul praktikum yang tercatat.
-                    </div>
-                <?php else: ?>
-                    <?php foreach ($prodiGroups as $pName => $semesters): ?>
-                        <div class="col-12 col-lg-4">
-                            <div class="card h-100 border shadow-xs rounded-3 bg-body-tertiary">
-                                <div class="card-header bg-transparent border-bottom py-2.5 px-3 d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="ti ti-school text-primary fs-5"></i>
-                                        <span class="fw-bold text-dark"><?= htmlspecialchars($pName) ?></span>
-                                    </div>
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace" style="font-size: 0.7rem;">
-                                        Kaprodi: <?= htmlspecialchars($semesters[0]['kaprodi_name'] ?? 'Kaprodi') ?>
-                                    </span>
+                <?php foreach ($prodiGroups as $pName => $semesters): ?>
+                    <div class="col-12 col-lg-4">
+                        <div class="card h-100 border shadow-xs rounded-3 bg-body-tertiary">
+                            <div class="card-header bg-transparent border-bottom py-2.5 px-3 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="ti ti-school text-primary fs-5"></i>
+                                    <span class="fw-bold text-dark"><?= htmlspecialchars($pName) ?></span>
                                 </div>
-                                <div class="card-body p-3">
-                                    <div class="d-flex flex-column gap-2.5">
-                                        <?php foreach ($semesters as $s): ?>
-                                            <?php 
-                                            $isComplete = ($s['total_completed_modules'] >= $s['total_target_modules']);
-                                            $badgeClass = $isComplete ? 'bg-success-subtle text-success border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border-warning-subtle';
-                                            $progressColor = $isComplete ? 'bg-success' : 'bg-warning';
-                                            ?>
-                                            <div class="p-2.5 bg-body rounded-2 border">
-                                                <div class="d-flex align-items-center justify-content-between mb-1">
-                                                    <div class="d-flex align-items-center gap-1.5">
-                                                        <span class="badge bg-secondary-subtle text-secondary border px-1.5 py-0.5" style="font-size: 0.7rem;">
-                                                            Semester <?= $s['semester'] ?>
-                                                        </span>
-                                                        <span class="small text-dark fw-semibold"><?= $s['total_courses'] ?> Matakuliah Lab</span>
-                                                    </div>
-                                                    <span class="badge <?= $badgeClass ?> border font-monospace fw-bold px-2 py-1" style="font-size: 0.75rem;">
-                                                        <i class="ti <?= $isComplete ? 'ti-check' : 'ti-clock' ?> me-0.5"></i>
-                                                        <?= $s['total_completed_modules'] ?>/<?= $s['total_target_modules'] ?> Modul (<?= $s['achievement_rate'] ?>%)
+                                <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.7rem;">
+                                    <?= count($semesters) ?> Tingkatan
+                                </span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="d-flex flex-column gap-2">
+                                    <?php foreach ($semesters as $s): ?>
+                                        <?php 
+                                        $isComplete = ($s['total_completed_modules'] >= $s['total_target_modules']);
+                                        $badgeClass = $isComplete ? 'bg-success-subtle text-success border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border-warning-subtle';
+                                        $progressColor = $isComplete ? 'bg-success' : 'bg-warning';
+                                        ?>
+                                        <div class="p-2.5 bg-body rounded-2 border">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <div class="d-flex align-items-center gap-1.5">
+                                                    <span class="badge bg-secondary-subtle text-secondary border px-1.5 py-0.5" style="font-size: 0.7rem;">
+                                                        Semester <?= $s['semester'] ?>
                                                     </span>
+                                                    <span class="small text-dark fw-semibold"><?= $s['total_courses'] ?> MK Praktikum</span>
                                                 </div>
-                                                <div class="progress" style="height: 6px;">
-                                                    <div class="progress-bar <?= $progressColor ?>" role="progressbar" style="width: <?= min(100, $s['achievement_rate']) ?>%;" aria-valuenow="<?= $s['achievement_rate'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
+                                                <span class="badge <?= $badgeClass ?> border font-monospace fw-bold px-2 py-0.5" style="font-size: 0.75rem;">
+                                                    <i class="ti <?= $isComplete ? 'ti-check' : 'ti-clock' ?> me-0.5"></i>
+                                                    <?= $s['total_completed_modules'] ?>/<?= $s['total_target_modules'] ?> Modul (<?= $s['achievement_rate'] ?>%)
+                                                </span>
                                             </div>
-                                        <?php endforeach; ?>
-                                    </div>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar <?= $progressColor ?>" role="progressbar" style="width: <?= min(100, $s['achievement_rate']) ?>%;"></div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </div>
@@ -196,47 +233,39 @@ foreach ($modules as $m) {
     <div class="card border shadow-xs rounded-3 mb-4">
         <div class="card-header bg-transparent border-bottom py-3">
             <div class="row align-items-center g-2">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-lg-5">
                     <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
-                        <i class="ti ti-table text-primary"></i> Detail Matakuliah & Modul Praktikum Lab
+                        <i class="ti ti-table text-primary"></i> Daftar Matakuliah Praktikum & Dokumen Modul
                     </h5>
-                    <span class="text-muted small">Kelengkapan berkas modul, logbook, rubrik, dan verifikasi Dekan</span>
+                    <span class="text-muted small">Setiap 1 MK Praktikum memiliki 1 Dokumen Modul Lab & Berkas Terkait</span>
                 </div>
-                <div class="col-12 col-md-8">
-                    <!-- Filter Form -->
-                    <form action="<?= $baseUrl ?>/academic/practicum" method="GET" class="row g-2 justify-content-md-end">
-                        <div class="col-auto">
-                            <select name="program_id" class="form-select form-select-sm" onchange="this.form.submit()">
-                                <option value="0">Semua Program Studi</option>
-                                <?php foreach ($programs as $p): ?>
-                                    <option value="<?= $p['id'] ?>" <?= $filterProgram == $p['id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($p['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <select name="semester" class="form-select form-select-sm" onchange="this.form.submit()">
-                                <option value="0">Semua Semester</option>
-                                <?php for ($i = 1; $i <= 8; $i++): ?>
-                                    <option value="<?= $i ?>" <?= $filterSemester == $i ? 'selected' : '' ?>>Semester <?= $i ?></option>
-                                <?php endfor; ?>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                                <option value="">Semua Status</option>
-                                <option value="Terpenuhi 100%" <?= $filterStatus === 'Terpenuhi 100%' ? 'selected' : '' ?>>Terpenuhi 100%</option>
-                                <option value="Dikonfirmasi ke Kaprodi" <?= $filterStatus === 'Dikonfirmasi ke Kaprodi' ? 'selected' : '' ?>>Dikonfirmasi ke Kaprodi</option>
-                                <option value="Perlu Perhatian" <?= $filterStatus === 'Perlu Perhatian' ? 'selected' : '' ?>>Perlu Perhatian</option>
-                            </select>
-                        </div>
+                <div class="col-12 col-lg-7">
+                    <!-- Responsive Filter Form -->
+                    <form action="<?= $baseUrl ?>/academic/practicum" method="GET" class="d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
+                        <select name="program_id" class="form-select form-select-sm" style="width: auto; min-width: 170px;" onchange="this.form.submit()">
+                            <option value="0">Semua Program Studi</option>
+                            <?php foreach ($programs as $p): ?>
+                                <option value="<?= $p['id'] ?>" <?= $filterProgram == $p['id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($p['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <select name="semester" class="form-select form-select-sm" style="width: auto; min-width: 140px;" onchange="this.form.submit()">
+                            <option value="0">Semua Semester</option>
+                            <?php for ($i = 1; $i <= 8; $i++): ?>
+                                <option value="<?= $i ?>" <?= $filterSemester == $i ? 'selected' : '' ?>>Semester <?= $i ?></option>
+                            <?php endfor; ?>
+                        </select>
+                        <select name="status" class="form-select form-select-sm" style="width: auto; min-width: 150px;" onchange="this.form.submit()">
+                            <option value="">Semua Status</option>
+                            <option value="Terpenuhi" <?= $filterStatus === 'Terpenuhi' ? 'selected' : '' ?>>Terpenuhi (1/1)</option>
+                            <option value="Dikonfirmasi ke Kaprodi" <?= $filterStatus === 'Dikonfirmasi ke Kaprodi' ? 'selected' : '' ?>>Dikonfirmasi ke Kaprodi</option>
+                            <option value="Belum Lengkap" <?= $filterStatus === 'Belum Lengkap' ? 'selected' : '' ?>>Belum Lengkap (0/1)</option>
+                        </select>
                         <?php if ($filterProgram || $filterSemester || $filterStatus): ?>
-                            <div class="col-auto">
-                                <a href="<?= $baseUrl ?>/academic/practicum" class="btn btn-outline-secondary btn-sm" title="Reset Filter">
-                                    <i class="ti ti-refresh"></i> Reset
-                                </a>
-                            </div>
+                            <a href="<?= $baseUrl ?>/academic/practicum" class="btn btn-outline-secondary btn-sm" title="Reset Filter">
+                                <i class="ti ti-refresh"></i> Reset
+                            </a>
                         <?php endif; ?>
                     </form>
                 </div>
@@ -248,14 +277,14 @@ foreach ($modules as $m) {
                 <table class="table table-hover align-middle mb-0" id="practicumTable">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-3" style="width: 50px;">No</th>
+                            <th class="ps-3 text-center" style="width: 45px;">No</th>
                             <th style="min-width: 140px;">Prodi & Sem.</th>
                             <th style="min-width: 220px;">Matakuliah Lab & Laboratorium</th>
                             <th style="min-width: 180px;">Dosen Pengampu & Aslab</th>
-                            <th style="min-width: 160px;">Capaian Modul</th>
-                            <th style="min-width: 140px;">Kelengkapan Berkas</th>
-                            <th style="min-width: 170px;">Status & Catatan Dekan</th>
-                            <th class="text-end pe-3" style="min-width: 160px;">Aksi Dekan</th>
+                            <th style="min-width: 150px;" class="text-center">Status Modul Lab</th>
+                            <th style="min-width: 160px;">Dokumen Berkas</th>
+                            <th style="min-width: 160px;">Status & Catatan Dekan</th>
+                            <th class="text-end pe-3" style="min-width: 170px;">Aksi Dekan</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -269,17 +298,14 @@ foreach ($modules as $m) {
                         <?php else: ?>
                             <?php $no = 1; foreach ($modules as $m): ?>
                                 <?php 
-                                $isFull = ($m['completed_modules'] >= $m['target_modules']);
-                                $ratioClass = $isFull ? 'text-success' : 'text-warning-emphasis';
-                                $badgeStatus = 'bg-success-subtle text-success border-success-subtle';
+                                $isReady = ((int)$m['is_module_ready'] === 1);
+                                $badgeStatus = $isReady ? 'bg-success-subtle text-success border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border-warning-subtle';
                                 if ($m['status'] === 'Dikonfirmasi ke Kaprodi') {
                                     $badgeStatus = 'bg-primary-subtle text-primary border-primary-subtle';
-                                } elseif ($m['status'] === 'Perlu Perhatian' || !$isFull) {
-                                    $badgeStatus = 'bg-warning-subtle text-warning-emphasis border-warning-subtle';
                                 }
                                 ?>
                                 <tr>
-                                    <td class="ps-3 text-muted small"><?= $no++ ?></td>
+                                    <td class="ps-3 text-center text-muted small"><?= $no++ ?></td>
                                     <td>
                                         <div class="fw-bold text-dark small"><?= htmlspecialchars($m['program_name']) ?></div>
                                         <div class="d-flex align-items-center gap-1 mt-0.5">
@@ -296,7 +322,7 @@ foreach ($modules as $m) {
                                         </div>
                                         <div class="text-muted small mt-0.5" style="font-size: 0.75rem;">
                                             <i class="ti ti-building-warehouse me-0.5 text-info"></i> <?= htmlspecialchars($m['lab_name']) ?>
-                                            <span class="badge bg-light text-muted border ms-1"><?= $m['sks_lab'] ?> SKS Lab</span>
+                                            <span class="badge bg-light text-muted border ms-1"><?= $m['sks_lab'] ?> SKS</span>
                                         </div>
                                     </td>
                                     <td>
@@ -307,47 +333,50 @@ foreach ($modules as $m) {
                                             </div>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
-                                        <!-- FORMAT CAPAIAN: 12/12 Modul (100%) -->
-                                        <div class="d-flex align-items-center justify-content-between mb-1">
-                                            <span class="badge <?= $isFull ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning-emphasis' ?> border font-monospace fw-bold px-2 py-0.5" style="font-size: 0.8rem;">
-                                                <?= $m['completed_modules'] ?>/<?= $m['target_modules'] ?> Modul
+                                    <td class="text-center">
+                                        <!-- FORMAT 1 MK = 1 MODUL (1/1 atau 0/1) -->
+                                        <?php if ($isReady): ?>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace fw-bold px-2 py-1" style="font-size: 0.8rem;">
+                                                <i class="ti ti-check me-0.5"></i> 1/1 Modul (100%)
                                             </span>
-                                            <span class="small font-monospace fw-bold <?= $ratioClass ?>">
-                                                <?= $m['completion_percentage'] ?>%
+                                        <?php else: ?>
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle font-monospace fw-bold px-2 py-1" style="font-size: 0.8rem;">
+                                                <i class="ti ti-clock me-0.5"></i> 0/1 Modul (0%)
                                             </span>
-                                        </div>
-                                        <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar <?= $isFull ? 'bg-success' : 'bg-warning' ?>" role="progressbar" style="width: <?= min(100, $m['completion_percentage']) ?>%;"></div>
-                                        </div>
+                                        <?php endif; ?>
                                     </td>
                                     <td>
-                                        <div class="d-flex flex-column gap-1" style="font-size: 0.72rem;">
-                                            <span class="text-success d-flex align-items-center gap-1">
-                                                <i class="ti ti-file-text text-primary"></i> Modul Lab PDF: <span class="badge bg-light text-dark border">Siap</span>
-                                            </span>
-                                            <span class="text-muted d-flex align-items-center gap-1">
-                                                <i class="ti ti-book text-info"></i> Logbook: 
-                                                <span class="badge <?= $m['logbook_status'] === 'Lengkap' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' ?> border">
-                                                    <?= $m['logbook_status'] ?>
+                                        <?php if ($isReady && !empty($m['module_file'])): ?>
+                                            <div class="small text-success d-flex align-items-center gap-1">
+                                                <i class="ti ti-file-text text-primary"></i>
+                                                <span class="text-truncate" style="max-width: 140px;" title="<?= htmlspecialchars($m['module_file']) ?>">
+                                                    <?= htmlspecialchars($m['module_file']) ?>
                                                 </span>
+                                            </div>
+                                            <div class="text-muted small" style="font-size: 0.7rem;">
+                                                <i class="ti ti-book text-info"></i> Logbook: <span class="badge bg-light text-dark border"><?= $m['logbook_status'] ?></span>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-danger border">
+                                                <i class="ti ti-alert-triangle me-0.5"></i> Belum Ada File
                                             </span>
-                                        </div>
+                                        <?php endif; ?>
                                     </td>
                                     <td>
-                                        <span class="badge <?= $badgeStatus ?> border px-2 py-1 mb-1 d-inline-block" style="font-size: 0.75rem;">
-                                            <i class="ti <?= $isFull ? 'ti-check' : 'ti-alert-circle' ?> me-0.5"></i> <?= htmlspecialchars($m['status']) ?>
+                                        <span class="badge <?= $badgeStatus ?> border px-2 py-0.5 mb-1 d-inline-block" style="font-size: 0.75rem;">
+                                            <i class="ti <?= $isReady ? 'ti-check' : 'ti-alert-circle' ?> me-0.5"></i> <?= htmlspecialchars($m['status']) ?>
                                         </span>
                                         <?php if (!empty($m['dekan_notes'])): ?>
-                                            <div class="text-muted small fst-italic p-1.5 bg-light rounded border mt-1" style="font-size: 0.7rem; max-width: 220px;">
-                                                <i class="ti ti-notes text-warning me-0.5"></i> "<?= htmlspecialchars($m['dekan_notes']) ?>"
+                                            <div class="text-muted small fst-italic p-1 bg-light rounded border mt-0.5" style="font-size: 0.7rem; max-width: 200px;">
+                                                "<?= htmlspecialchars($m['dekan_notes']) ?>"
                                             </div>
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end pe-3">
-                                        <div class="d-flex align-items-center justify-content-end gap-1">
-                                            <!-- Tombol Konfirmasi ke Kaprodi -->
-                                            <button type="button" class="btn btn-xs btn-outline-primary d-flex align-items-center gap-1" 
+                                        <!-- RESPONSIVE ACTION BUTTONS GROUP -->
+                                        <div class="d-inline-flex flex-wrap align-items-center justify-content-end gap-1">
+                                            <!-- Button Konfirmasi ke Kaprodi -->
+                                            <button type="button" class="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 px-2 py-1 shadow-xs" 
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#confirmModal"
                                                     data-id="<?= $m['id'] ?>"
@@ -355,14 +384,15 @@ foreach ($modules as $m) {
                                                     data-code="<?= htmlspecialchars($m['course_code']) ?>"
                                                     data-prodi="<?= htmlspecialchars($m['program_name']) ?>"
                                                     data-kaprodi="<?= htmlspecialchars($m['kaprodi_name'] ?? 'Kaprodi') ?>"
-                                                    data-progress="<?= $m['completed_modules'] ?>/<?= $m['target_modules'] ?>"
+                                                    data-ready="<?= $m['is_module_ready'] ?>"
                                                     data-notes="<?= htmlspecialchars($m['dekan_notes'] ?? '') ?>"
-                                                    title="Kirim Konfirmasi / Disposisi ke Kaprodi">
-                                                <i class="ti ti-send"></i> <span class="d-none d-xl-inline">Konfirmasi ke Kaprodi</span>
+                                                    title="Konfirmasi / Kirim Disposisi ke Kaprodi">
+                                                <i class="ti ti-send"></i>
+                                                <span class="d-none d-xxl-inline">Konfirmasi</span>
                                             </button>
 
-                                            <!-- Tombol Edit Progres Modul -->
-                                            <button type="button" class="btn btn-xs btn-ghost text-secondary"
+                                            <!-- Button Edit Modul -->
+                                            <button type="button" class="btn btn-xs btn-outline-secondary d-inline-flex align-items-center gap-1 px-2 py-1 shadow-xs"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editModal"
                                                     data-id="<?= $m['id'] ?>"
@@ -371,22 +401,23 @@ foreach ($modules as $m) {
                                                     data-lab="<?= htmlspecialchars($m['lab_name']) ?>"
                                                     data-lecturer="<?= htmlspecialchars($m['lecturer_name']) ?>"
                                                     data-assistant="<?= htmlspecialchars($m['assistant_name'] ?? '') ?>"
-                                                    data-target="<?= $m['target_modules'] ?>"
-                                                    data-completed="<?= $m['completed_modules'] ?>"
+                                                    data-ready="<?= $m['is_module_ready'] ?>"
+                                                    data-file="<?= htmlspecialchars($m['module_file'] ?? '') ?>"
                                                     data-logbook="<?= $m['logbook_status'] ?>"
                                                     data-status="<?= $m['status'] ?>"
                                                     data-notes="<?= htmlspecialchars($m['dekan_notes'] ?? '') ?>"
                                                     data-feedback="<?= htmlspecialchars($m['kaprodi_feedback'] ?? '') ?>"
-                                                    title="Edit Progres Modul">
-                                                <i class="ti ti-edit fs-5"></i>
+                                                    title="Edit Status Modul">
+                                                <i class="ti ti-edit"></i>
+                                                <span class="d-none d-xxl-inline">Edit</span>
                                             </button>
 
-                                            <!-- Tombol Hapus -->
+                                            <!-- Button Hapus -->
                                             <form action="<?= $baseUrl ?>/academic/practicum/delete" method="POST" class="d-inline" onsubmit="return confirm('Hapus data praktikum <?= addslashes($m['course_name']) ?>?');">
                                                 <?= CsrfHelper::tokenField() ?>
                                                 <input type="hidden" name="practicum_id" value="<?= $m['id'] ?>">
-                                                <button type="submit" class="btn btn-xs btn-ghost text-danger" title="Hapus Data">
-                                                    <i class="ti ti-trash fs-5"></i>
+                                                <button type="submit" class="btn btn-xs btn-outline-danger d-inline-flex align-items-center p-1" title="Hapus Data">
+                                                    <i class="ti ti-trash"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -404,12 +435,12 @@ foreach ($modules as $m) {
 <!-- ================= MODAL 1: KONFIRMASI KE KAPRODI ================= -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow-lg">
             <form action="<?= $baseUrl ?>/academic/practicum/confirm" method="POST">
                 <?= CsrfHelper::tokenField() ?>
                 <input type="hidden" name="practicum_id" id="confirm_id">
 
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header bg-primary text-white py-3">
                     <h5 class="modal-title d-flex align-items-center gap-2" id="confirmModalLabel">
                         <i class="ti ti-send"></i> Konfirmasi Modul Lab ke Kaprodi
                     </h5>
@@ -419,8 +450,8 @@ foreach ($modules as $m) {
                 <div class="modal-body p-4">
                     <div class="p-3 bg-light rounded-3 border mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="badge bg-primary" id="confirm_code">TI101</span>
-                            <span class="badge bg-warning text-dark" id="confirm_progress">10/12 Modul</span>
+                            <span class="badge bg-primary font-monospace" id="confirm_code">TI101</span>
+                            <span class="badge" id="confirm_status_badge">1/1 Modul</span>
                         </div>
                         <h6 class="fw-bold text-dark mb-1" id="confirm_course">Nama Matakuliah Praktikum</h6>
                         <div class="text-muted small">Program Studi: <strong class="text-dark" id="confirm_prodi">Teknik Informatika</strong></div>
@@ -429,14 +460,14 @@ foreach ($modules as $m) {
 
                     <div class="mb-3">
                         <label for="confirm_notes" class="form-label fw-semibold text-dark small">Catatan & Instruksi Verifikasi Dekan:</label>
-                        <textarea name="dekan_notes" id="confirm_notes" class="form-control" rows="4" placeholder="Contoh: Mohon Kaprodi memverifikasi penyelesaian modul 11 & 12 sebelum perkuliahan minggu ke-10..." required></textarea>
-                        <div class="form-text small">Catatan ini akan otomatis masuk ke dalam disposisi layanan dan notifikasi pemantauan Kaprodi.</div>
+                        <textarea name="dekan_notes" id="confirm_notes" class="form-control" rows="4" placeholder="Contoh: Mohon Kaprodi segera memverifikasi kelengkapan modul praktikum sebelum perkuliahan minggu ke-2..." required></textarea>
+                        <div class="form-text small">Catatan ini akan otomatis masuk ke dalam disposisi dan notifikasi Kaprodi yang bersangkutan.</div>
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1">
+                <div class="modal-footer bg-light py-2.5">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1 px-3">
                         <i class="ti ti-send"></i> Kirim Konfirmasi ke Kaprodi
                     </button>
                 </div>
@@ -445,17 +476,17 @@ foreach ($modules as $m) {
     </div>
 </div>
 
-<!-- ================= MODAL 2: EDIT PROGRES MODUL PRAKTIKUM ================= -->
+<!-- ================= MODAL 2: EDIT STATUS & DOKUMEN MODUL ================= -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow-lg">
             <form action="<?= $baseUrl ?>/academic/practicum/update" method="POST">
                 <?= CsrfHelper::tokenField() ?>
                 <input type="hidden" name="practicum_id" id="edit_id">
 
-                <div class="modal-header border-bottom">
+                <div class="modal-header border-bottom py-3">
                     <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="editModalLabel">
-                        <i class="ti ti-edit text-primary"></i> Update Ketercapaian Modul Praktikum
+                        <i class="ti ti-edit text-primary"></i> Update Status Modul Praktikum
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -478,35 +509,29 @@ foreach ($modules as $m) {
                             <label class="form-label fw-semibold text-dark small">Asisten Lab / Laboran:</label>
                             <input type="text" name="assistant_name" id="edit_assistant" class="form-control form-control-sm">
                         </div>
-                        <div class="col-12 col-md-3">
-                            <label class="form-label fw-semibold text-dark small">Target Modul:</label>
-                            <input type="number" name="target_modules" id="edit_target" class="form-control form-control-sm" min="1" max="30" required>
-                        </div>
-                        <div class="col-12 col-md-3">
-                            <label class="form-label fw-semibold text-dark small">Modul Tercapai:</label>
-                            <input type="number" name="completed_modules" id="edit_completed" class="form-control form-control-sm" min="0" max="30" required>
-                        </div>
-                        <div class="col-12 col-md-3">
-                            <label class="form-label fw-semibold text-dark small">Logbook Praktikan:</label>
-                            <select name="logbook_status" id="edit_logbook" class="form-select form-select-sm">
-                                <option value="Lengkap">Lengkap</option>
-                                <option value="Sebagian">Sebagian</option>
-                                <option value="Belum Ada">Belum Ada</option>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold text-dark small">Ketersediaan Dokumen Modul:</label>
+                            <select name="is_module_ready" id="edit_ready" class="form-select form-select-sm" required>
+                                <option value="1">Tersedia & Lengkap (1/1 Modul)</option>
+                                <option value="0">Belum Ada / Draft (0/1 Modul)</option>
                             </select>
                         </div>
-                        <div class="col-12 col-md-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold text-dark small">Nama File Modul (PDF/DOC):</label>
+                            <input type="text" name="module_file" id="edit_file" class="form-control form-control-sm" placeholder="Contoh: Modul_PBO_2026.pdf">
+                        </div>
+                        <div class="col-12 col-md-4">
                             <label class="form-label fw-semibold text-dark small">Status Verifikasi:</label>
                             <select name="status" id="edit_status" class="form-select form-select-sm">
-                                <option value="Terpenuhi 100%">Terpenuhi 100%</option>
-                                <option value="Progres Berjalan">Progres Berjalan</option>
+                                <option value="Terpenuhi">Terpenuhi</option>
+                                <option value="Belum Lengkap">Belum Lengkap</option>
                                 <option value="Dikonfirmasi ke Kaprodi">Dikonfirmasi ke Kaprodi</option>
-                                <option value="Perlu Perhatian">Perlu Perhatian</option>
                                 <option value="Revisi Modul">Revisi Modul</option>
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-semibold text-dark small">Catatan Dekan:</label>
-                            <textarea name="dekan_notes" id="edit_dekan_notes" class="form-control form-control-sm" rows="2" placeholder="Catatan evaluasi dekanat..."></textarea>
+                            <label class="form-label fw-semibold text-dark small">Catatan Evaluasi Dekan:</label>
+                            <textarea name="dekan_notes" id="edit_dekan_notes" class="form-control form-control-sm" rows="2" placeholder="Catatan evaluasi atau arahan dekanat..."></textarea>
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold text-dark small">Umpan Balik / Respon Kaprodi:</label>
@@ -515,9 +540,9 @@ foreach ($modules as $m) {
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1">
+                <div class="modal-footer bg-light py-2.5">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1 px-3">
                         <i class="ti ti-device-floppy"></i> Simpan Perubahan
                     </button>
                 </div>
@@ -529,11 +554,11 @@ foreach ($modules as $m) {
 <!-- ================= MODAL 3: TAMBAH MATAKULIAH PRAKTIKUM BARU ================= -->
 <div class="modal fade" id="createPracticumModal" tabindex="-1" aria-labelledby="createPracticumModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow-lg">
             <form action="<?= $baseUrl ?>/academic/practicum/create" method="POST">
                 <?= CsrfHelper::tokenField() ?>
 
-                <div class="modal-header border-bottom bg-primary text-white">
+                <div class="modal-header border-bottom bg-primary text-white py-3">
                     <h5 class="modal-title d-flex align-items-center gap-2" id="createPracticumModalLabel">
                         <i class="ti ti-plus"></i> Tambah Matakuliah Praktikum Laboratorium
                     </h5>
@@ -578,25 +603,24 @@ foreach ($modules as $m) {
                             <label class="form-label fw-semibold text-dark small">Asisten Lab / Laboran:</label>
                             <input type="text" name="assistant_name" class="form-control form-control-sm" placeholder="Nama Aslab pendamping">
                         </div>
-                        <div class="col-12 col-md-3">
-                            <label class="form-label fw-semibold text-dark small">Target Modul:</label>
-                            <input type="number" name="target_modules" class="form-control form-control-sm" value="12" min="1" max="30" required>
-                        </div>
-                        <div class="col-12 col-md-3">
-                            <label class="form-label fw-semibold text-dark small">Modul Selesai Saat Ini:</label>
-                            <input type="number" name="completed_modules" class="form-control form-control-sm" value="12" min="0" max="30" required>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold text-dark small">Ketersediaan Dokumen Modul:</label>
+                            <select name="is_module_ready" class="form-select form-select-sm" required>
+                                <option value="1">Tersedia & Lengkap (1/1 Modul)</option>
+                                <option value="0">Belum Ada / Draft (0/1 Modul)</option>
+                            </select>
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold text-dark small">Catatan Dekan Awal (Opsional):</label>
-                            <textarea name="dekan_notes" class="form-control form-control-sm" rows="2" placeholder="Catatan atau instruksi pemantauan..."></textarea>
+                            <textarea name="dekan_notes" class="form-control form-control-sm" rows="2" placeholder="Catatan instruksi atau arahan pemantauan dekan..."></textarea>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1">
-                        <i class="ti ti-plus"></i> Tambahkan ke Pemantauan Dekan
+                <div class="modal-footer bg-light py-2.5">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center gap-1 px-3">
+                        <i class="ti ti-plus"></i> Tambahkan Matakuliah Lab
                     </button>
                 </div>
             </form>
@@ -612,12 +636,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (confirmModal) {
         confirmModal.addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
+            const isReady = button.getAttribute('data-ready') === '1';
+
             document.getElementById('confirm_id').value = button.getAttribute('data-id');
             document.getElementById('confirm_code').textContent = button.getAttribute('data-code');
             document.getElementById('confirm_course').textContent = button.getAttribute('data-course');
             document.getElementById('confirm_prodi').textContent = button.getAttribute('data-prodi');
             document.getElementById('confirm_kaprodi').textContent = button.getAttribute('data-kaprodi');
-            document.getElementById('confirm_progress').textContent = button.getAttribute('data-progress') + ' Modul';
+            
+            const badge = document.getElementById('confirm_status_badge');
+            if (isReady) {
+                badge.textContent = '1/1 Modul (Tersedia)';
+                badge.className = 'badge bg-success';
+            } else {
+                badge.textContent = '0/1 Modul (Belum Terbit)';
+                badge.className = 'badge bg-warning text-dark';
+            }
             
             const existingNotes = button.getAttribute('data-notes');
             document.getElementById('confirm_notes').value = existingNotes || '';
@@ -634,9 +668,8 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit_lab').value = btn.getAttribute('data-lab');
             document.getElementById('edit_lecturer').value = btn.getAttribute('data-lecturer');
             document.getElementById('edit_assistant').value = btn.getAttribute('data-assistant');
-            document.getElementById('edit_target').value = btn.getAttribute('data-target');
-            document.getElementById('edit_completed').value = btn.getAttribute('data-completed');
-            document.getElementById('edit_logbook').value = btn.getAttribute('data-logbook');
+            document.getElementById('edit_ready').value = btn.getAttribute('data-ready');
+            document.getElementById('edit_file').value = btn.getAttribute('data-file');
             document.getElementById('edit_status').value = btn.getAttribute('data-status');
             document.getElementById('edit_dekan_notes').value = btn.getAttribute('data-notes');
             document.getElementById('edit_feedback').value = btn.getAttribute('data-feedback');

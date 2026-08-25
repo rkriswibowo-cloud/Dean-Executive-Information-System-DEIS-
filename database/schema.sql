@@ -562,11 +562,11 @@ CREATE TABLE `app_settings` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 35. Practicum Modules & Laboratory Verification
+-- 35. Practicum Modules & Laboratory Verification (1 MK = 1 Modul)
 CREATE TABLE `practicum_modules` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `study_program_id` INT NOT NULL,
-    `academic_year_id` INT NOT NULL,
+    `academic_year_id` INT NOT NULL DEFAULT 1,
     `semester` INT NOT NULL DEFAULT 1,
     `course_code` VARCHAR(20) NOT NULL,
     `course_name` VARCHAR(150) NOT NULL,
@@ -574,12 +574,11 @@ CREATE TABLE `practicum_modules` (
     `lab_name` VARCHAR(100) NOT NULL,
     `lecturer_name` VARCHAR(150) NOT NULL,
     `assistant_name` VARCHAR(150) NULL,
-    `target_modules` INT NOT NULL DEFAULT 12,
-    `completed_modules` INT NOT NULL DEFAULT 12,
+    `is_module_ready` TINYINT(1) NOT NULL DEFAULT 1,
     `module_file` VARCHAR(255) NULL,
     `rubric_file` VARCHAR(255) NULL,
     `logbook_status` ENUM('Lengkap', 'Sebagian', 'Belum Ada') DEFAULT 'Lengkap',
-    `status` ENUM('Terpenuhi 100%', 'Progres Berjalan', 'Perlu Perhatian', 'Dikonfirmasi ke Kaprodi', 'Revisi Modul') DEFAULT 'Terpenuhi 100%',
+    `status` ENUM('Terpenuhi', 'Belum Lengkap', 'Dikonfirmasi ke Kaprodi', 'Revisi Modul') DEFAULT 'Terpenuhi',
     `dekan_notes` TEXT NULL,
     `kaprodi_feedback` TEXT NULL,
     `last_confirmed_at` DATETIME NULL,

@@ -98,6 +98,7 @@ class AcademicController extends Controller {
 
         $programs = $programModel->all();
         $prodiSummary = $practicumModel->getSummaryByProdi();
+        $prodiTotals = $practicumModel->getProdiTotals();
         $stats = $practicumModel->getOverallStats();
 
         $this->render('academic/practicum', [
@@ -105,6 +106,7 @@ class AcademicController extends Controller {
             'modules'        => $modules,
             'programs'       => $programs,
             'prodiSummary'   => $prodiSummary,
+            'prodiTotals'    => $prodiTotals,
             'stats'          => $stats,
             'filterProgram'  => $filterProgram,
             'filterSemester' => $filterSemester,
@@ -161,14 +163,20 @@ class AcademicController extends Controller {
             $this->redirect('academic/practicum', ['danger' => 'ID Modul Praktikum tidak valid.']);
         }
 
+        $isReady = (int)$this->getPost('is_module_ready', 1);
+        $status = trim($this->getPost('status', ''));
+        if (empty($status)) {
+            $status = ($isReady === 1) ? 'Terpenuhi' : 'Belum Lengkap';
+        }
+
         $data = [
-            'target_modules'    => (int)$this->getPost('target_modules', 12),
-            'completed_modules' => (int)$this->getPost('completed_modules', 0),
+            'is_module_ready'   => $isReady,
+            'module_file'       => trim($this->getPost('module_file', '')),
             'lab_name'          => trim($this->getPost('lab_name', '')),
             'lecturer_name'     => trim($this->getPost('lecturer_name', '')),
             'assistant_name'    => trim($this->getPost('assistant_name', '')),
             'logbook_status'    => trim($this->getPost('logbook_status', 'Lengkap')),
-            'status'            => trim($this->getPost('status', '')),
+            'status'            => $status,
             'dekan_notes'       => trim($this->getPost('dekan_notes', '')),
             'kaprodi_feedback'  => trim($this->getPost('kaprodi_feedback', ''))
         ];
@@ -178,11 +186,11 @@ class AcademicController extends Controller {
 
         AuditService::log('UPDATE_PRACTICUM_MODULE', 'practicum_modules', (string)$id, null, $data);
 
-        $this->redirect('academic/practicum', ['success' => 'Capaian dan data modul praktikum berhasil diperbarui.']);
+        $this->redirect('academic/practicum', ['success' => 'Status dan kelengkapan modul praktikum berhasil diperbarui.']);
     }
 
     /**
-     * Tambah Modul Praktikum Baru
+     * Tambah Matakuliah Praktikum Baru
      */
     public function createPracticum(): void {
         $this->requireAuth();
@@ -195,15 +203,15 @@ class AcademicController extends Controller {
         $labName = trim($this->getPost('lab_name', ''));
         $lecturerName = trim($this->getPost('lecturer_name', ''));
         $assistantName = trim($this->getPost('assistant_name', ''));
-        $targetModules = (int)$this->getPost('target_modules', 12);
-        $completedModules = (int)$this->getPost('completed_modules', 0);
+        $isReady = (int)$this->getPost('is_module_ready', 1);
+        $moduleFile = trim($this->getPost('module_file', ''));
         $dekanNotes = trim($this->getPost('dekan_notes', ''));
 
         if (empty($courseCode) || empty($courseName) || empty($labName)) {
             $this->redirect('academic/practicum', ['danger' => 'Kode Matakuliah, Nama Matakuliah, dan Laboratorium wajib diisi.']);
         }
 
-        $status = ($completedModules >= $targetModules) ? 'Terpenuhi 100%' : 'Progres Berjalan';
+        $status = ($isReady === 1) ? 'Terpenuhi' : 'Belum Lengkap';
 
         $practicumModel = new PracticumModule();
         $practicumModel->create([
@@ -216,8 +224,8 @@ class AcademicController extends Controller {
             'lab_name'          => $labName,
             'lecturer_name'     => $lecturerName,
             'assistant_name'    => $assistantName,
-            'target_modules'    => $targetModules,
-            'completed_modules' => $completedModules,
+            'is_module_ready'   => $isReady,
+            'module_file'       => $moduleFile ?: ($isReady ? 'Modul_' . $courseCode . '.pdf' : null),
             'logbook_status'    => 'Lengkap',
             'status'            => $status,
             'dekan_notes'       => $dekanNotes
@@ -225,7 +233,7 @@ class AcademicController extends Controller {
 
         AuditService::log('CREATE_PRACTICUM_MODULE', 'practicum_modules', $courseCode, null, ['name' => $courseName]);
 
-        $this->redirect('academic/practicum', ['success' => 'Matakuliah Praktikum baru berhasil ditambahkan ke daftar pemantauan Dekan.']);
+        $this->redirect('academic/practicum', ['success' => 'Matakuliah Praktikum baru berhasil ditambahkan ke pemantauan Dekan.']);
     }
 
     /**

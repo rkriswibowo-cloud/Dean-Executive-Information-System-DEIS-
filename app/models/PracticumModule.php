@@ -8,7 +8,7 @@ class PracticumModule extends Model {
     protected string $table = 'practicum_modules';
 
     /**
-     * Get all practicum modules with joined study program and academic year
+     * Get all practicum courses & modules with joined study program
      */
     public function allWithDetails(?int $studyProgramId = null, ?int $semester = null, ?string $status = null): array {
         $sql = "
@@ -19,7 +19,9 @@ class PracticumModule extends Model {
                 sp.head_name AS kaprodi_name,
                 ay.name AS academic_year_name,
                 ay.semester AS academic_semester,
-                ROUND((pm.completed_modules / pm.target_modules) * 100, 1) AS completion_percentage
+                1 AS target_modules,
+                pm.is_module_ready AS completed_modules,
+                IF(pm.is_module_ready = 1, 100.0, 0.0) AS completion_percentage
             FROM {$this->table} pm
             JOIN study_programs sp ON pm.study_program_id = sp.id
             LEFT JOIN academic_years ay ON pm.academic_year_id = ay.id
@@ -58,7 +60,9 @@ class PracticumModule extends Model {
                 sp.code AS program_code,
                 sp.head_name AS kaprodi_name,
                 ay.name AS academic_year_name,
-                ROUND((pm.completed_modules / pm.target_modules) * 100, 1) AS completion_percentage
+                1 AS target_modules,
+                pm.is_module_ready AS completed_modules,
+                IF(pm.is_module_ready = 1, 100.0, 0.0) AS completion_percentage
             FROM {$this->table} pm
             JOIN study_programs sp ON pm.study_program_id = sp.id
             LEFT JOIN academic_years ay ON pm.academic_year_id = ay.id
@@ -69,7 +73,8 @@ class PracticumModule extends Model {
     }
 
     /**
-     * Get aggregate statistics per study program and semester matrix
+     * Get aggregate statistics grouped per study program & semester
+     * Concept: 1 MK Praktikum = 1 Modul
      */
     public function getSummaryByProdi(): array {
         $sql = "
@@ -80,12 +85,12 @@ class PracticumModule extends Model {
                 sp.head_name AS kaprodi_name,
                 pm.semester,
                 COUNT(pm.id) AS total_courses,
-                SUM(pm.target_modules) AS total_target_modules,
-                SUM(pm.completed_modules) AS total_completed_modules,
-                ROUND((SUM(pm.completed_modules) / SUM(pm.target_modules)) * 100, 1) AS achievement_rate,
-                SUM(CASE WHEN pm.completed_modules >= pm.target_modules THEN 1 ELSE 0 END) AS fully_completed_courses,
+                COUNT(pm.id) AS total_target_modules,
+                SUM(pm.is_module_ready) AS total_completed_modules,
+                ROUND((SUM(pm.is_module_ready) / COUNT(pm.id)) * 100, 1) AS achievement_rate,
+                SUM(CASE WHEN pm.is_module_ready = 1 THEN 1 ELSE 0 END) AS fully_completed_courses,
                 SUM(CASE WHEN pm.status = 'Dikonfirmasi ke Kaprodi' THEN 1 ELSE 0 END) AS confirmed_to_kaprodi_count,
-                SUM(CASE WHEN pm.completed_modules < pm.target_modules THEN 1 ELSE 0 END) AS gap_courses_count
+                SUM(CASE WHEN pm.is_module_ready = 0 THEN 1 ELSE 0 END) AS gap_courses_count
             FROM study_programs sp
             JOIN {$this->table} pm ON sp.id = pm.study_program_id
             GROUP BY sp.id, sp.name, sp.code, sp.head_name, pm.semester
@@ -96,18 +101,43 @@ class PracticumModule extends Model {
     }
 
     /**
-     * Get overall high-level statistics
+     * Get aggregate summary per entire Study Program (Total across all semesters)
+     * e.g. Teknik Informatika: 10 MK = 10 Target Modul (e.g. 9/10 Modul)
+     */
+    public function getProdiTotals(): array {
+        $sql = "
+            SELECT 
+                sp.id AS program_id,
+                sp.name AS program_name,
+                sp.code AS program_code,
+                sp.head_name AS kaprodi_name,
+                COUNT(pm.id) AS total_courses,
+                COUNT(pm.id) AS total_target_modules,
+                SUM(pm.is_module_ready) AS total_completed_modules,
+                ROUND((SUM(pm.is_module_ready) / COUNT(pm.id)) * 100, 1) AS achievement_rate,
+                SUM(CASE WHEN pm.is_module_ready = 0 THEN 1 ELSE 0 END) AS unfulfilled_count
+            FROM study_programs sp
+            LEFT JOIN {$this->table} pm ON sp.id = pm.study_program_id
+            GROUP BY sp.id, sp.name, sp.code, sp.head_name
+            ORDER BY sp.id ASC
+        ";
+
+        return $this->rawFetch($sql);
+    }
+
+    /**
+     * Get overall high-level statistics across all faculty
      */
     public function getOverallStats(): array {
         $sql = "
             SELECT 
                 COUNT(id) AS total_labs,
-                SUM(target_modules) AS sum_target_modules,
-                SUM(completed_modules) AS sum_completed_modules,
-                ROUND((SUM(completed_modules) / NULLIF(SUM(target_modules), 0)) * 100, 1) AS overall_completion_rate,
-                SUM(CASE WHEN completed_modules >= target_modules THEN 1 ELSE 0 END) AS count_100_percent,
+                COUNT(id) AS sum_target_modules,
+                SUM(is_module_ready) AS sum_completed_modules,
+                ROUND((SUM(is_module_ready) / NULLIF(COUNT(id), 0)) * 100, 1) AS overall_completion_rate,
+                SUM(CASE WHEN is_module_ready = 1 THEN 1 ELSE 0 END) AS count_100_percent,
                 SUM(CASE WHEN status = 'Dikonfirmasi ke Kaprodi' THEN 1 ELSE 0 END) AS count_confirmed_kaprodi,
-                SUM(CASE WHEN completed_modules < target_modules THEN 1 ELSE 0 END) AS count_attention_needed
+                SUM(CASE WHEN is_module_ready = 0 THEN 1 ELSE 0 END) AS count_attention_needed
             FROM {$this->table}
         ";
 
@@ -145,25 +175,14 @@ class PracticumModule extends Model {
      * Update progress and module fulfillment
      */
     public function updateProgress(int $id, array $data): bool {
-        $target = (int)($data['target_modules'] ?? 12);
-        $completed = (int)($data['completed_modules'] ?? 0);
-        
-        $status = $data['status'] ?? null;
-        if (!$status) {
-            if ($completed >= $target) {
-                $status = 'Terpenuhi 100%';
-            } elseif ($completed > 0) {
-                $status = 'Progres Berjalan';
-            } else {
-                $status = 'Perlu Perhatian';
-            }
-        }
+        $isReady = (int)($data['is_module_ready'] ?? 1);
+        $status = $data['status'] ?? ($isReady ? 'Terpenuhi' : 'Belum Lengkap');
 
         $sql = "
             UPDATE {$this->table}
             SET 
-                target_modules = :target,
-                completed_modules = :completed,
+                is_module_ready = :is_ready,
+                module_file = :module_file,
                 lab_name = :lab_name,
                 lecturer_name = :lecturer_name,
                 assistant_name = :assistant_name,
@@ -176,8 +195,8 @@ class PracticumModule extends Model {
 
         return $this->rawQuery($sql, [
             'id'               => $id,
-            'target'           => $target,
-            'completed'        => $completed,
+            'is_ready'         => $isReady,
+            'module_file'      => !empty($data['module_file']) ? $data['module_file'] : ($isReady ? 'Modul_Praktikum_Terbit.pdf' : null),
             'lab_name'         => $data['lab_name'] ?? '',
             'lecturer_name'    => $data['lecturer_name'] ?? '',
             'assistant_name'   => $data['assistant_name'] ?? '',
