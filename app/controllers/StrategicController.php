@@ -51,7 +51,7 @@ class StrategicController extends Controller {
         $this->requireCsrf();
 
         $code = strtoupper(trim($this->getPost('code', '')));
-        $name = trim($this->getPost('name', '')));
+        $name = trim($this->getPost('name', ''));
         $category = trim($this->getPost('category', 'IKU'));
         $formula = trim($this->getPost('formula', ''));
         $unit = trim($this->getPost('unit', '%'));
@@ -117,7 +117,7 @@ class StrategicController extends Controller {
 
         $id = (int)$this->getPost('id', 0);
         $code = strtoupper(trim($this->getPost('code', '')));
-        $name = trim($this->getPost('name', '')));
+        $name = trim($this->getPost('name', ''));
         $category = trim($this->getPost('category', 'IKU'));
         $formula = trim($this->getPost('formula', ''));
         $unit = trim($this->getPost('unit', '%'));
