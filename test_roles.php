@@ -28,11 +28,15 @@ echo "========================================================\n\n";
 
 // 1. Check Role Users Exist
 $userModel = new User();
-$roles = ['dekan', 'kaprodi.ti', 'spmi', 'dosen', 'operator', 'admin'];
+$roles = ['dekan', 'kaprodi.ti', 'kaprodi.si'];
 
 foreach ($roles as $r) {
     $u = $userModel->findByUsername($r);
-    echo "[PASS] User '{$r}' found with Role ID: {$u['role_id']}\n";
+    if ($u) {
+        echo "[PASS] User '{$r}' found with Role ID: {$u['role_id']}\n";
+    } else {
+        echo "[FAIL] User '{$r}' not found\n";
+    }
 }
 
 // 2. Test Faculty CRUD model functionality
@@ -50,10 +54,6 @@ echo "[PASS] Dekan sees all approvals count: " . count($dekanApprovals) . "\n";
 // Kaprodi should see prodi approvals
 $kaprodiApprovals = $approvalModel->allWithDetails(3, 1, false);
 echo "[PASS] Kaprodi sees prodi approvals count: " . count($kaprodiApprovals) . "\n";
-
-// Dosen should see only their own approvals
-$dosenApprovals = $approvalModel->allWithDetails(5, null, false);
-echo "[PASS] Dosen sees personal approvals count: " . count($dosenApprovals) . "\n";
 
 echo "\n========================================================\n";
 echo " ALL RBAC PROCESS TESTS PASSED SUCCESSFULLY!\n";

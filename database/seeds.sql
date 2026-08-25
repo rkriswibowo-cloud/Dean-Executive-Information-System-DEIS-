@@ -60,13 +60,9 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
 -- 3. Users (Default password: password)
 -- bcrypt of 'password': $2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi
 INSERT INTO `users` (`id`, `role_id`, `name`, `username`, `email`, `password`, `phone`, `nidn`, `status`) VALUES
-(1, 1, 'Administrator DEIS', 'admin', 'admin@deis.ac.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '081234567890', NULL, 'active'),
 (2, 2, 'Prof. Dr. Ir. Hendra Wijaya, M.Kom.', 'dekan', 'dekan@deis.ac.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '081234567891', '0012057801', 'active'),
 (3, 3, 'Dr. Rony Setiawan, S.Kom., M.T.', 'kaprodi.ti', 'rony@deis.ac.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '081234567892', '0015088202', 'active'),
-(4, 3, 'Dr. Siti Nurhaliza, M.Cs.', 'kaprodi.si', 'siti@deis.ac.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '081234567893', '0020048503', 'active'),
-(5, 4, 'Bambang Kusumo, Ph.D.', 'dosen', 'bambang@deis.ac.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '081234567894', '0011038904', 'active'),
-(6, 5, 'Dr. Maya Kartika, M.T.', 'spmi', 'spmi@deis.ac.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '081234567895', '0009028005', 'active'),
-(7, 6, 'Ahmad Fauzi, S.Kom.', 'operator', 'operator@deis.ac.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '081234567896', NULL, 'active');
+(4, 3, 'Dr. Siti Nurhaliza, M.Cs.', 'kaprodi.si', 'siti@deis.ac.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '081234567893', '0020048503', 'active');
 
 -- 4. Faculty
 INSERT INTO `faculties` (`id`, `code`, `name`, `dean_name`, `vision`, `mission`) VALUES

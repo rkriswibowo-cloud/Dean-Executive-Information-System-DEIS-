@@ -1,6 +1,7 @@
 /* DEIS Custom Executive & Responsive Styles */
 :root {
     --deis-primary: #3b82f6;
+    --deis-primary-hover: #2563eb;
     --deis-critical: #ef4444;
     --deis-warning: #f59e0b;
     --deis-attention: #eab308;
@@ -28,6 +29,7 @@
         overflow-y: auto !important;
     }
     [data-bs-theme="dark"] #miniSidebar {
+        background-color: #0f172a !important;
         border-right: 1px solid rgba(51, 65, 85, 0.8) !important;
     }
 
@@ -220,7 +222,6 @@
         opacity: 1 !important;
     }
 
-    /* Force all text, headers, and accordion elements to show on mobile drawer */
     #miniSidebar .brand-text-wrapper,
     #miniSidebar.mobile-show .brand-text-wrapper {
         display: flex !important;
@@ -357,7 +358,290 @@
 }
 
 /* ========================================================
-   3. RESPONSIVE CARDS, TABLES & MOBILE POLISH
+   3. HIGH-CONTRAST TABLE HOVER & COLOR OVERRIDES (FIX)
+   ======================================================== */
+
+/* Reset harmful theme.css black table-hover defaults */
+.table {
+    --ds-table-hover-bg: rgba(59, 130, 246, 0.04) !important;
+    --ds-table-hover-color: inherit !important;
+    --bs-table-hover-bg: rgba(59, 130, 246, 0.04) !important;
+    --bs-table-hover-color: inherit !important;
+}
+
+/* Light Mode Tables */
+.table-hover > tbody > tr:hover > * {
+    background-color: rgba(59, 130, 246, 0.05) !important;
+    color: inherit !important;
+}
+.table-hover > tbody > tr:hover .text-dark {
+    color: #0f172a !important;
+}
+.table-hover > tbody > tr:hover .text-muted {
+    color: #64748b !important;
+}
+
+/* Contextual Table Colors in Light Mode */
+.table-danger {
+    --bs-table-bg: rgba(239, 68, 68, 0.08) !important;
+    --bs-table-color: #1e293b !important;
+    --bs-table-border-color: rgba(239, 68, 68, 0.2) !important;
+    --ds-table-hover-bg: rgba(239, 68, 68, 0.14) !important;
+    --ds-table-hover-color: #0f172a !important;
+    background-color: rgba(239, 68, 68, 0.08) !important;
+    color: #1e293b !important;
+}
+.table-danger > td, .table-danger > th {
+    background-color: rgba(239, 68, 68, 0.08) !important;
+    color: #1e293b !important;
+}
+.table-hover > tbody > tr.table-danger:hover > * {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    color: #0f172a !important;
+}
+
+.table-warning {
+    --bs-table-bg: rgba(245, 158, 11, 0.08) !important;
+    --bs-table-color: #1e293b !important;
+    --bs-table-border-color: rgba(245, 158, 11, 0.2) !important;
+    --ds-table-hover-bg: rgba(245, 158, 11, 0.14) !important;
+    --ds-table-hover-color: #0f172a !important;
+    background-color: rgba(245, 158, 11, 0.08) !important;
+    color: #1e293b !important;
+}
+.table-warning > td, .table-warning > th {
+    background-color: rgba(245, 158, 11, 0.08) !important;
+    color: #1e293b !important;
+}
+.table-hover > tbody > tr.table-warning:hover > * {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+    color: #0f172a !important;
+}
+
+.table-info {
+    --bs-table-bg: rgba(14, 165, 233, 0.08) !important;
+    --bs-table-color: #1e293b !important;
+    background-color: rgba(14, 165, 233, 0.08) !important;
+    color: #1e293b !important;
+}
+.table-hover > tbody > tr.table-info:hover > * {
+    background-color: rgba(14, 165, 233, 0.15) !important;
+    color: #0f172a !important;
+}
+
+.table-success {
+    --bs-table-bg: rgba(16, 185, 129, 0.08) !important;
+    --bs-table-color: #1e293b !important;
+    background-color: rgba(16, 185, 129, 0.08) !important;
+    color: #1e293b !important;
+}
+.table-hover > tbody > tr.table-success:hover > * {
+    background-color: rgba(16, 185, 129, 0.15) !important;
+    color: #0f172a !important;
+}
+
+/* ========================================================
+   3.1 DARK MODE HIGH-CONTRAST & READABILITY FIXES
+   ======================================================== */
+[data-bs-theme="dark"] {
+    --bs-body-bg: #0b1120;
+    --bs-body-color: #f1f5f9;
+    --bs-tertiary-bg: #1e293b;
+}
+
+/* Force dark mode text readability */
+[data-bs-theme="dark"] .text-dark {
+    color: #f8fafc !important;
+}
+[data-bs-theme="dark"] .text-muted {
+    color: #94a3b8 !important;
+}
+[data-bs-theme="dark"] .text-secondary {
+    color: #cbd5e1 !important;
+}
+
+/* Dark Mode Tables */
+[data-bs-theme="dark"] .table {
+    --bs-table-color: #f1f5f9;
+    --bs-table-bg: transparent;
+    --bs-table-border-color: #334155;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+[data-bs-theme="dark"] .table thead th,
+[data-bs-theme="dark"] .table thead tr,
+[data-bs-theme="dark"] .bg-body-tertiary {
+    background-color: #131d31 !important;
+    color: #94a3b8 !important;
+    border-bottom: 1px solid #334155 !important;
+}
+[data-bs-theme="dark"] .table-hover > tbody > tr:hover > * {
+    background-color: rgba(59, 130, 246, 0.12) !important;
+    color: #f8fafc !important;
+}
+[data-bs-theme="dark"] .table-hover > tbody > tr:hover .text-dark {
+    color: #ffffff !important;
+}
+[data-bs-theme="dark"] .table-hover > tbody > tr:hover .text-muted {
+    color: #cbd5e1 !important;
+}
+
+/* Contextual Table Colors in Dark Mode */
+[data-bs-theme="dark"] .table-danger {
+    --bs-table-bg: rgba(239, 68, 68, 0.18) !important;
+    --bs-table-color: #fecaca !important;
+    --bs-table-border-color: rgba(239, 68, 68, 0.3) !important;
+    background-color: rgba(239, 68, 68, 0.18) !important;
+    color: #fecaca !important;
+}
+[data-bs-theme="dark"] .table-danger > td,
+[data-bs-theme="dark"] .table-danger > th {
+    background-color: rgba(239, 68, 68, 0.18) !important;
+    color: #fecaca !important;
+}
+[data-bs-theme="dark"] .table-danger .text-dark {
+    color: #ffffff !important;
+}
+[data-bs-theme="dark"] .table-hover > tbody > tr.table-danger:hover > * {
+    background-color: rgba(239, 68, 68, 0.28) !important;
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .table-warning {
+    --bs-table-bg: rgba(245, 158, 11, 0.18) !important;
+    --bs-table-color: #fef08a !important;
+    --bs-table-border-color: rgba(245, 158, 11, 0.3) !important;
+    background-color: rgba(245, 158, 11, 0.18) !important;
+    color: #fef08a !important;
+}
+[data-bs-theme="dark"] .table-warning > td,
+[data-bs-theme="dark"] .table-warning > th {
+    background-color: rgba(245, 158, 11, 0.18) !important;
+    color: #fef08a !important;
+}
+[data-bs-theme="dark"] .table-warning .text-dark {
+    color: #ffffff !important;
+}
+[data-bs-theme="dark"] .table-hover > tbody > tr.table-warning:hover > * {
+    background-color: rgba(245, 158, 11, 0.28) !important;
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .table-info {
+    --bs-table-bg: rgba(14, 165, 233, 0.18) !important;
+    --bs-table-color: #bae6fd !important;
+    background-color: rgba(14, 165, 233, 0.18) !important;
+    color: #bae6fd !important;
+}
+[data-bs-theme="dark"] .table-info > td,
+[data-bs-theme="dark"] .table-info > th {
+    background-color: rgba(14, 165, 233, 0.18) !important;
+    color: #bae6fd !important;
+}
+[data-bs-theme="dark"] .table-hover > tbody > tr.table-info:hover > * {
+    background-color: rgba(14, 165, 233, 0.28) !important;
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .table-success {
+    --bs-table-bg: rgba(16, 185, 129, 0.18) !important;
+    --bs-table-color: #a7f3d0 !important;
+    background-color: rgba(16, 185, 129, 0.18) !important;
+    color: #a7f3d0 !important;
+}
+[data-bs-theme="dark"] .table-success > td,
+[data-bs-theme="dark"] .table-success > th {
+    background-color: rgba(16, 185, 129, 0.18) !important;
+    color: #a7f3d0 !important;
+}
+[data-bs-theme="dark"] .table-hover > tbody > tr.table-success:hover > * {
+    background-color: rgba(16, 185, 129, 0.28) !important;
+    color: #ffffff !important;
+}
+
+/* Dark Mode Cards, Modals, Dropdowns & Controls */
+[data-bs-theme="dark"] .card {
+    background-color: #111a2e !important;
+    border-color: #243048 !important;
+    color: #f1f5f9 !important;
+}
+[data-bs-theme="dark"] .card-header.bg-body,
+[data-bs-theme="dark"] .modal-header.bg-body,
+[data-bs-theme="dark"] .modal-footer.bg-body {
+    background-color: #111a2e !important;
+    border-color: #243048 !important;
+}
+[data-bs-theme="dark"] .modal-content {
+    background-color: #111a2e !important;
+    border: 1px solid #334155 !important;
+    color: #f1f5f9 !important;
+}
+[data-bs-theme="dark"] .dropdown-menu {
+    background-color: #111a2e !important;
+    border: 1px solid #334155 !important;
+}
+[data-bs-theme="dark"] .dropdown-item {
+    color: #cbd5e1 !important;
+}
+[data-bs-theme="dark"] .dropdown-item:hover,
+[data-bs-theme="dark"] .dropdown-item:focus {
+    background-color: #1e293b !important;
+    color: #3b82f6 !important;
+}
+
+/* Dark Mode Inputs */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: #0b1120 !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    background-color: #0b1120 !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Dark Mode Badges */
+[data-bs-theme="dark"] .badge.bg-light.text-dark {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+[data-bs-theme="dark"] .badge.bg-primary-subtle {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    color: #93c5fd !important;
+}
+[data-bs-theme="dark"] .badge.bg-success-subtle {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+    color: #6ee7b7 !important;
+}
+[data-bs-theme="dark"] .badge.bg-warning-subtle {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+    color: #fde68a !important;
+}
+[data-bs-theme="dark"] .badge.bg-danger-subtle {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+    color: #fca5a5 !important;
+}
+[data-bs-theme="dark"] .badge.bg-info-subtle {
+    background-color: rgba(14, 165, 233, 0.2) !important;
+    color: #7dd3fc !important;
+}
+[data-bs-theme="dark"] .badge.bg-secondary-subtle {
+    background-color: rgba(148, 163, 184, 0.2) !important;
+    color: #cbd5e1 !important;
+}
+[data-bs-theme="dark"] .bg-light {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+/* ========================================================
+   4. RESPONSIVE CARDS, TABLES & MOBILE POLISH
    ======================================================== */
 .kpi-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -366,6 +650,9 @@
 .kpi-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+[data-bs-theme="dark"] .kpi-card {
+    border-color: #243048 !important;
 }
 
 .icon-shape-lg {
@@ -448,7 +735,7 @@
 }
 
 /* ========================================================
-   4. RESPONSIVE CRUD BUTTONS & TABLE ACTIONS
+   5. RESPONSIVE CRUD BUTTONS & TABLE ACTIONS
    ======================================================== */
 .btn-crud {
     display: inline-flex;
