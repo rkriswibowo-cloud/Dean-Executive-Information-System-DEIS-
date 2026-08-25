@@ -57,9 +57,15 @@ use App\Helpers\CsrfHelper;
                             <td><strong><?= $ind['target_value'] ?></strong> <?= $ind['unit'] ?></td>
                             <td><strong class="text-primary"><?= $ind['realization_value'] ?? 0 ?></strong> <?= $ind['unit'] ?></td>
                             <td>
-                                <strong><?= $ind['achievement_percentage'] ?? 0 ?>%</strong>
-                                <div class="progress mt-1" style="height: 4px;">
-                                    <div class="progress-bar bg-<?= ($ind['achievement_percentage'] ?? 0) >= 100 ? 'success' : (($ind['achievement_percentage'] ?? 0) >= 80 ? 'warning' : 'danger') ?>" style="width: <?= min($ind['achievement_percentage'] ?? 0, 100) ?>%"></div>
+                                <?php 
+                                $ach = min(100.0, (float)($ind['achievement_percentage'] ?? 0)); 
+                                $isFull = ($ach >= 100.0);
+                                ?>
+                                <span class="badge <?= $isFull ? 'bg-success-subtle text-success border border-success-subtle' : ($ach >= 80 ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle') ?> font-monospace fw-bold px-2 py-0.5" style="font-size: 0.8rem;">
+                                    <?= $ach ?>%
+                                </span>
+                                <div class="progress mt-1" style="height: 5px;">
+                                    <div class="progress-bar <?= $isFull ? 'bg-success' : ($ach >= 80 ? 'bg-warning' : 'bg-danger') ?>" style="width: <?= $ach ?>%"></div>
                                 </div>
                             </td>
                             <td><?= FormatHelper::statusBadge($ind['realization_status'] ?? 'Proses') ?></td>

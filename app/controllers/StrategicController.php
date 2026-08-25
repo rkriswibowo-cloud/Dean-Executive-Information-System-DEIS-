@@ -19,9 +19,12 @@ class StrategicController extends Controller {
         $indicators = $indicatorModel->allWithTargetAndRealization(2026);
         $renstraPrograms = $renstraModel->all();
 
-        // Calculate average achievement
-        $achievements = array_filter(array_column($indicators, 'achievement_percentage'), fn($v) => $v !== null);
+        // Calculate average achievement (capped at 100% per indicator)
+        $achievements = array_map(function($ind) {
+            return min(100.0, (float)($ind['achievement_percentage'] ?? 0));
+        }, $indicators);
         $avgAchievement = count($achievements) > 0 ? round(array_sum($achievements) / count($achievements), 1) : 0;
+        $avgAchievement = min(100.0, $avgAchievement);
 
         $this->render('strategic/index', [
             'title'           => 'Kinerja Strategis & Capaian IKU',
@@ -53,14 +56,15 @@ class StrategicController extends Controller {
         $notes = trim($this->getPost('notes', ''));
 
         if ($targetValue <= 0) $targetValue = 1;
-        $achievement = round(($realizationValue / $targetValue) * 100, 2);
+        $rawAchievement = round(($realizationValue / $targetValue) * 100, 2);
+        $achievement = min(100.0, $rawAchievement); // Capped at 100% max if target met/exceeded
 
         $status = 'Success';
-        if ($achievement < 70) {
+        if ($rawAchievement < 70) {
             $status = 'Critical';
-        } elseif ($achievement < 85) {
+        } elseif ($rawAchievement < 85) {
             $status = 'Warning';
-        } elseif ($achievement < 100) {
+        } elseif ($rawAchievement < 100) {
             $status = 'Attention';
         }
 

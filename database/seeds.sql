@@ -198,16 +198,16 @@ INSERT INTO `indicator_targets` (`id`, `indicator_id`, `faculty_id`, `study_prog
 
 -- 17. Indicator Realizations
 INSERT INTO `indicator_realizations` (`id`, `indicator_target_id`, `realization_value`, `achievement_percentage`, `status`, `notes`, `verified_by`, `verified_at`) VALUES
-(1, 1, 84.50, 105.62, 'Success', 'Capaian tracer study melebihi target nasional berkat kemitraan alumni aktif.', 'Prof. Dr. Ir. Hendra Wijaya', '2026-08-20 10:00:00'),
-(2, 2, 38.20, 109.14, 'Success', 'Tingginya antusiasme mahasiswa pada program MSIB Kemendikbudristek.', 'Prof. Dr. Ir. Hendra Wijaya', '2026-08-20 10:15:00'),
+(1, 1, 84.50, 100.00, 'Success', 'Capaian tracer study melebihi target nasional berkat kemitraan alumni aktif.', 'Prof. Dr. Ir. Hendra Wijaya', '2026-08-20 10:00:00'),
+(2, 2, 38.20, 100.00, 'Success', 'Tingginya antusiasme mahasiswa pada program MSIB Kemendikbudristek.', 'Prof. Dr. Ir. Hendra Wijaya', '2026-08-20 10:15:00'),
 (3, 3, 21.00, 84.00, 'Attention', 'Perlu akselerasi dosen berkegiatan praktisi pada semester ganjil mendatang.', 'Dr. Maya Kartika', '2026-08-21 11:00:00'),
 (4, 4, 46.50, 77.50, 'Warning', '3 Calon doktor sedang menyelesaikan tahap disertasi akhir tahun 2026.', 'Dekan FTIK', '2026-08-21 11:30:00'),
-(5, 5, 48.00, 106.67, 'Success', 'Target publikasi Scopus Q1/Q2 dan HKI sudah terlampaui di Q3.', 'Prof. Dr. Ir. Hendra Wijaya', '2026-08-22 09:00:00'),
+(5, 5, 48.00, 100.00, 'Success', 'Target publikasi Scopus Q1/Q2 dan HKI sudah terlampaui di Q3.', 'Prof. Dr. Ir. Hendra Wijaya', '2026-08-22 09:00:00'),
 (6, 6, 10.00, 83.33, 'Attention', '2 Draft MoA dengan Oracle Academy dan AWS sedang tahap legal review.', 'Dekan FTIK', '2026-08-22 09:30:00'),
-(7, 7, 78.00, 104.00, 'Success', '92% Rombel perkuliahan telah menggunakan silabus case method.', 'Ketua GKM', '2026-08-22 10:00:00'),
+(7, 7, 78.00, 100.00, 'Success', '92% Rombel perkuliahan telah menggunakan silabus case method.', 'Ketua GKM', '2026-08-22 10:00:00'),
 (8, 8, 33.33, 50.00, 'Critical', 'Hanya 1 dari 3 prodi yang terakreditasi Unggul (Prodi SI dalam masa kritis).', 'Prof. Dr. Ir. Hendra Wijaya', '2026-08-23 14:00:00'),
 (9, 9, 88.50, 96.20, 'Success', 'Serapan anggaran berjalan sehat sesuai time schedule RKA.', 'Kabag Keuangan', '2026-08-23 15:00:00'),
-(10, 10, 89.20, 101.36, 'Success', 'Kepuasan mahasiswa dan mitra terhadap sarana laboratorium AI sangat tinggi.', 'Ketua GKM', '2026-08-23 16:00:00');
+(10, 10, 89.20, 100.00, 'Success', 'Kepuasan mahasiswa dan mitra terhadap sarana laboratorium AI sangat tinggi.', 'Ketua GKM', '2026-08-23 16:00:00');
 
 -- 18. Renstra Programs
 INSERT INTO `renstra_programs` (`id`, `faculty_id`, `strategic_objective`, `program_name`, `pic`, `budget`, `start_year`, `end_year`, `progress_percentage`, `status`) VALUES
