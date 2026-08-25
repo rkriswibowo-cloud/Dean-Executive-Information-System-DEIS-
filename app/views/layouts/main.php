@@ -98,7 +98,7 @@ function isGroupActive(array $paths, $currentPath): bool {
     <!-- Sidebar Backdrop for Mobile Screens -->
     <div id="sidebarBackdrop" class="sidebar-backdrop d-none"></div>
 
-    <div>
+    <div class="app-layout-wrapper">
         <!-- Sidebar -->
         <div id="miniSidebar">
             <!-- Brand Logo -->
@@ -380,9 +380,9 @@ function isGroupActive(array $paths, $currentPath): bool {
         </div>
 
         <!-- Main Content Area -->
-        <div id="content" class="position-relative h-100">
+        <div id="content" class="position-relative d-flex flex-column min-vh-100 w-100">
             <!-- Topbar -->
-            <div class="navbar-glass navbar navbar-expand-lg px-3 px-lg-4 py-2 border-bottom">
+            <div class="navbar-glass navbar navbar-expand-lg px-3 px-lg-4 py-2 border-bottom flex-shrink-0">
                 <div class="container-fluid px-0 d-flex align-items-center justify-content-between">
                     <!-- Left: Collapse toggle & Brand indicator -->
                     <div class="d-flex align-items-center gap-2 gap-md-3">
@@ -558,7 +558,7 @@ function isGroupActive(array $paths, $currentPath): bool {
             </div>
 
             <!-- Page Content Container -->
-            <div class="custom-container py-4 px-3 px-lg-4">
+            <div class="custom-container py-4 px-3 px-lg-4 flex-grow-1 main-content-container">
                 <!-- Flash Messages -->
                 <?php if (!empty($flash)): ?>
                     <?php if (isset($flash['success'])): ?>
@@ -589,7 +589,7 @@ function isGroupActive(array $paths, $currentPath): bool {
             </div>
 
             <!-- Footer -->
-            <footer class="footer mt-auto py-3 border-top bg-body">
+            <footer class="footer mt-auto py-3 border-top bg-body flex-shrink-0">
                 <div class="container-fluid px-4 d-flex flex-column flex-md-row align-items-center justify-content-between text-muted small">
                     <div>
                         © <?= date('Y') ?> <strong><?= $appConfig['short_name'] ?></strong> - Sistem Informasi Eksekutif Dekan <?= htmlspecialchars($activeFacultyName) ?>.
