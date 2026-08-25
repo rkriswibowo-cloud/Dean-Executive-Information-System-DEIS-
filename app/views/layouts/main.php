@@ -188,7 +188,7 @@ function isGroupActive(array $paths, $currentPath): bool {
 
                         <!-- Group 3: Kinerja SDM, Mutu & Kelembagaan -->
                         <div class="sidebar-accordion-item mb-1">
-                            <?php $grpMon = isGroupActive(['lecturers', 'accreditation', 'quality', 'cooperations', 'finances'], $currentPath); ?>
+                            <?php $grpMon = isGroupActive(['lecturers', 'accreditation', 'quality', 'cooperations', 'finances', 'strategic/indicators'], $currentPath); ?>
                             <button class="sidebar-accordion-toggle <?= $grpMon ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accDekanMon" aria-expanded="<?= $grpMon ? 'true' : 'false' ?>">
                                 <span class="nav-icon"><i class="ti ti-chart-pie-2 fs-4 text-info"></i></span>
                                 <span class="text">Kinerja SDM & Mutu</span>
@@ -200,6 +200,7 @@ function isGroupActive(array $paths, $currentPath): bool {
                                     <li><a class="sidebar-subnav-link <?= isNavActive('lecturers/kpi', $currentPath) ?>" href="<?= $baseUrl ?>/lecturers/kpi">Ranking KPI Dosen</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('accreditation', $currentPath) ?>" href="<?= $baseUrl ?>/accreditation">Radar Akreditasi Prodi</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('quality', $currentPath) ?>" href="<?= $baseUrl ?>/quality">Penjaminan Mutu SPMI</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('strategic/indicators', $currentPath) ?>" href="<?= $baseUrl ?>/strategic/indicators">Master Indikator IKU</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('cooperations', $currentPath) ?>" href="<?= $baseUrl ?>/cooperations">Kemitraan & Kerja Sama</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('finances', $currentPath) ?>" href="<?= $baseUrl ?>/finances">Evaluasi Anggaran RKA</a></li>
                                 </ul>
@@ -301,7 +302,7 @@ function isGroupActive(array $paths, $currentPath): bool {
 
                         <!-- Group 2: Arsitektur & Integritas Schema -->
                         <div class="sidebar-accordion-item mb-1">
-                            <?php $grpSchema = isGroupActive(['users', 'master/faculties', 'command-center/approvals', 'quality/ami'], $currentPath); ?>
+                            <?php $grpSchema = isGroupActive(['users', 'master/faculties', 'command-center/approvals', 'quality/ami', 'strategic/indicators'], $currentPath); ?>
                             <button class="sidebar-accordion-toggle <?= $grpSchema ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accDevSchema" aria-expanded="<?= $grpSchema ? 'true' : 'false' ?>">
                                 <span class="nav-icon"><i class="ti ti-server-2 fs-4 text-info"></i></span>
                                 <span class="text">Integritas Schema</span>
@@ -311,6 +312,7 @@ function isGroupActive(array $paths, $currentPath): bool {
                                 <ul class="sidebar-subnav">
                                     <li><a class="sidebar-subnav-link <?= isNavActive('users', $currentPath) ?>" href="<?= $baseUrl ?>/users">Matriks Permissions & Roles</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('master/faculties', $currentPath) ?>" href="<?= $baseUrl ?>/master/faculties">Relasi Master Data</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('strategic/indicators', $currentPath) ?>" href="<?= $baseUrl ?>/strategic/indicators">Master Indikator IKU</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('command-center/approvals', $currentPath) ?>" href="<?= $baseUrl ?>/command-center/approvals">Log Transaksi Persetujuan</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('quality/ami', $currentPath) ?>" href="<?= $baseUrl ?>/quality/ami">Log Audit Mutu Internal</a></li>
                                 </ul>
@@ -342,7 +344,7 @@ function isGroupActive(array $paths, $currentPath): bool {
 
                         <!-- Group 2: Mutu & Akreditasi -->
                         <div class="sidebar-accordion-item mb-1">
-                            <?php $grpMutu = isGroupActive(['accreditation', 'quality'], $currentPath); ?>
+                            <?php $grpMutu = isGroupActive(['accreditation', 'quality', 'strategic/indicators'], $currentPath); ?>
                             <button class="sidebar-accordion-toggle <?= $grpMutu ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accMutuProdi" aria-expanded="<?= $grpMutu ? 'true' : 'false' ?>">
                                 <span class="nav-icon"><i class="ti ti-certificate fs-4 text-warning"></i></span>
                                 <span class="text">Mutu & Akreditasi</span>
@@ -353,6 +355,7 @@ function isGroupActive(array $paths, $currentPath): bool {
                                     <li><a class="sidebar-subnav-link <?= isNavActive('accreditation', $currentPath) ?>" href="<?= $baseUrl ?>/accreditation">Akreditasi Prodi (LED/LKPS)</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('quality', $currentPath) ?>" href="<?= $baseUrl ?>/quality">Standar SPMI</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('quality/ami', $currentPath) ?>" href="<?= $baseUrl ?>/quality/ami">Audit Mutu Internal (AMI)</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('strategic/indicators', $currentPath) ?>" href="<?= $baseUrl ?>/strategic/indicators">Indikator IKU Fakultas</a></li>
                                 </ul>
                             </div>
                         </div>

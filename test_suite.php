@@ -131,6 +131,12 @@ try {
     $prodiSummary = $practicumModel->getSummaryByProdi();
     assertTest("Practicum prodi & semester summary matrix", count($prodiSummary) >= 3);
 
+    // Test 12: Master IKU & Dynamic Indicators
+    $allIndicators = $indicatorModel->allWithTargetAndRealization(2026, false);
+    assertTest("Master IKU all indicators query >= 10", count($allIndicators) >= 10);
+    $iku1 = $indicatorModel->findByCode('IKU-1');
+    assertTest("Master IKU findByCode('IKU-1') exists", $iku1 !== null && $iku1['code'] === 'IKU-1');
+
     echo "\n========================================================\n";
     echo " RESULTS: {$passed} / {$total} Tests Passed!\n";
     echo "========================================================\n";

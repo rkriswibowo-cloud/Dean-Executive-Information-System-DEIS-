@@ -108,6 +108,9 @@ $app->post('/accreditation/update', 'AccreditationController@updateProgress');
 // 10. Kinerja Strategis (IKU & Renstra)
 $app->get('/strategic', 'StrategicController@index');
 $app->get('/strategic/indicators', 'StrategicController@indicators');
+$app->post('/strategic/indicators/create', 'StrategicController@createIndicator');
+$app->post('/strategic/indicators/update', 'StrategicController@updateIndicator');
+$app->post('/strategic/indicators/delete', 'StrategicController@deleteIndicator');
 $app->post('/strategic/realization', 'StrategicController@saveRealization');
 
 // 11. Kerja Sama
