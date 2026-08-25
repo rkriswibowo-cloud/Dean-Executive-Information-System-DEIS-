@@ -169,7 +169,7 @@ function isGroupActive(array $paths, $currentPath): bool {
 
                         <!-- Group 2: Akademik, Kurikulum & Mahasiswa -->
                         <div class="sidebar-accordion-item mb-1">
-                            <?php $grpAcad = isGroupActive(['academic', 'academic/courses', 'academic/guidance', 'students'], $currentPath); ?>
+                            <?php $grpAcad = isGroupActive(['academic', 'academic/courses', 'academic/practicum', 'academic/guidance', 'students'], $currentPath); ?>
                             <button class="sidebar-accordion-toggle <?= $grpAcad ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accDekanAcad" aria-expanded="<?= $grpAcad ? 'true' : 'false' ?>">
                                 <span class="nav-icon"><i class="ti ti-school fs-4 text-primary"></i></span>
                                 <span class="text">Akademik & Mahasiswa</span>
@@ -177,8 +177,9 @@ function isGroupActive(array $paths, $currentPath): bool {
                             </button>
                             <div id="accDekanAcad" class="collapse sidebar-accordion-collapse <?= $grpAcad ? 'show' : '' ?>" data-bs-parent="#sidebarAccordion">
                                 <ul class="sidebar-subnav">
-                                    <li><a class="sidebar-subnav-link <?= isNavActive('academic', $currentPath) && !isNavActive('academic/courses', $currentPath) && !isNavActive('academic/guidance', $currentPath) ? 'active' : '' ?>" href="<?= $baseUrl ?>/academic">Perkuliahan & Kelas</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('academic', $currentPath) && !isNavActive('academic/courses', $currentPath) && !isNavActive('academic/practicum', $currentPath) && !isNavActive('academic/guidance', $currentPath) ? 'active' : '' ?>" href="<?= $baseUrl ?>/academic">Perkuliahan & Kelas</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('academic/courses', $currentPath) ?>" href="<?= $baseUrl ?>/academic/courses">Kurikulum & Kesiapan RPS</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('academic/practicum', $currentPath) ?>" href="<?= $baseUrl ?>/academic/practicum">Cek Modul Praktikum Lab</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('academic/guidance', $currentPath) ?>" href="<?= $baseUrl ?>/academic/guidance">Monitoring Bimbingan (TA/MBKM)</a></li>
                                     <li><a class="sidebar-subnav-link <?= isNavActive('students', $currentPath) ?>" href="<?= $baseUrl ?>/students">Mahasiswa & EWS Kritis</a></li>
                                 </ul>

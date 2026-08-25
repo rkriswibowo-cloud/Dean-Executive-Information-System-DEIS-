@@ -561,3 +561,29 @@ CREATE TABLE `app_settings` (
     `description` VARCHAR(255) NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 35. Practicum Modules & Laboratory Verification
+CREATE TABLE `practicum_modules` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `study_program_id` INT NOT NULL,
+    `academic_year_id` INT NOT NULL,
+    `semester` INT NOT NULL DEFAULT 1,
+    `course_code` VARCHAR(20) NOT NULL,
+    `course_name` VARCHAR(150) NOT NULL,
+    `sks_lab` INT DEFAULT 1,
+    `lab_name` VARCHAR(100) NOT NULL,
+    `lecturer_name` VARCHAR(150) NOT NULL,
+    `assistant_name` VARCHAR(150) NULL,
+    `target_modules` INT NOT NULL DEFAULT 12,
+    `completed_modules` INT NOT NULL DEFAULT 12,
+    `module_file` VARCHAR(255) NULL,
+    `rubric_file` VARCHAR(255) NULL,
+    `logbook_status` ENUM('Lengkap', 'Sebagian', 'Belum Ada') DEFAULT 'Lengkap',
+    `status` ENUM('Terpenuhi 100%', 'Progres Berjalan', 'Perlu Perhatian', 'Dikonfirmasi ke Kaprodi', 'Revisi Modul') DEFAULT 'Terpenuhi 100%',
+    `dekan_notes` TEXT NULL,
+    `kaprodi_feedback` TEXT NULL,
+    `last_confirmed_at` DATETIME NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`study_program_id`) REFERENCES `study_programs`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

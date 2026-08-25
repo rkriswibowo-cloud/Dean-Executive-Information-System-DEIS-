@@ -124,6 +124,13 @@ try {
     $finances = $financeModel->allWithProgram(2026);
     assertTest("Finances budget records for 2026", count($finances) >= 5);
 
+    // Test 11: Practicum Modules
+    $practicumModel = new \App\Models\PracticumModule();
+    $practicumList = $practicumModel->allWithDetails();
+    assertTest("Practicum modules count >= 10", count($practicumList) >= 10);
+    $prodiSummary = $practicumModel->getSummaryByProdi();
+    assertTest("Practicum prodi & semester summary matrix", count($prodiSummary) >= 3);
+
     echo "\n========================================================\n";
     echo " RESULTS: {$passed} / {$total} Tests Passed!\n";
     echo "========================================================\n";
