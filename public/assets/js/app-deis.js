@@ -233,4 +233,234 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
+    // ========================================================
+    // 6. Universal Responsive Table Pagination Engine
+    // ========================================================
+    function initTablePagination() {
+        const tables = document.querySelectorAll('table.table:not([data-no-paginate])');
+        tables.forEach((table, tableIndex) => {
+            // Check if inside print view or specifically excluded
+            if (table.closest('.print-area, .d-print-block, .no-pagination')) return;
+
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+
+            // Collect all normal data rows (skip colspan empty rows)
+            const allRows = Array.from(tbody.querySelectorAll('tr')).filter(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length === 1 && tds[0].hasAttribute('colspan')) return false;
+                return true;
+            });
+
+            if (allRows.length === 0) return;
+
+            // Prevent duplicate initialization
+            if (table.dataset.paginated === 'true') return;
+            table.dataset.paginated = 'true';
+
+            let pageSize = parseInt(table.getAttribute('data-page-size') || '10', 10);
+            let currentPage = 1;
+
+            // Build Pagination Wrapper Container
+            const paginationWrapper = document.createElement('div');
+            paginationWrapper.className = 'table-pagination-wrapper';
+            paginationWrapper.id = `tablePagination_${tableIndex}`;
+
+            paginationWrapper.innerHTML = `
+                <div class="table-pagination-info">
+                    <span>Menampilkan <strong class="page-start text-dark">1</strong> - <strong class="page-end text-dark">10</strong> dari <strong class="page-total text-dark">${allRows.length}</strong> data</span>
+                    <div class="table-page-size-select">
+                        <label for="pageSizeSelect_${tableIndex}" class="mb-0 text-muted">Tampilkan:</label>
+                        <select class="form-select form-select-sm page-size-select" id="pageSizeSelect_${tableIndex}">
+                            <option value="5" ${pageSize === 5 ? 'selected' : ''}>5</option>
+                            <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
+                            <option value="25" ${pageSize === 25 ? 'selected' : ''}>25</option>
+                            <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
+                            <option value="all">Semua</option>
+                        </select>
+                    </div>
+                </div>
+                <nav aria-label="Navigasi Halaman Tabel">
+                    <ul class="deis-pagination pagination-nav"></ul>
+                </nav>
+            `;
+
+            // Insert pagination wrapper right after the table's container
+            const responsiveParent = table.closest('.table-responsive');
+            if (responsiveParent) {
+                responsiveParent.parentNode.insertBefore(paginationWrapper, responsiveParent.nextSibling);
+            } else {
+                table.parentNode.insertBefore(paginationWrapper, table.nextSibling);
+            }
+
+            const startEl = paginationWrapper.querySelector('.page-start');
+            const endEl = paginationWrapper.querySelector('.page-end');
+            const totalEl = paginationWrapper.querySelector('.page-total');
+            const selectEl = paginationWrapper.querySelector('.page-size-select');
+            const navEl = paginationWrapper.querySelector('.pagination-nav');
+
+            function render() {
+                const total = allRows.length;
+                totalEl.textContent = total;
+
+                if (total === 0) {
+                    startEl.textContent = '0';
+                    endEl.textContent = '0';
+                    navEl.innerHTML = '';
+                    return;
+                }
+
+                const actualPageSize = (pageSize === 'all' || pageSize >= total) ? total : pageSize;
+                const totalPages = Math.ceil(total / actualPageSize);
+
+                if (currentPage > totalPages) currentPage = totalPages;
+                if (currentPage < 1) currentPage = 1;
+
+                const startIdx = (currentPage - 1) * actualPageSize;
+                const endIdx = Math.min(startIdx + actualPageSize, total);
+
+                startEl.textContent = startIdx + 1;
+                endEl.textContent = endIdx;
+
+                // Slice row visibility
+                allRows.forEach((row, idx) => {
+                    if (idx >= startIdx && idx < endIdx) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // Build pagination buttons
+                navEl.innerHTML = '';
+                if (totalPages <= 1) return; // Hide navigation buttons if only 1 page
+
+                // 1. First button
+                const firstLi = document.createElement('li');
+                firstLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                firstLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Halaman Pertama"><i class="ti ti-chevrons-left"></i></a>`;
+                firstLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage !== 1) {
+                        currentPage = 1;
+                        render();
+                    }
+                });
+                navEl.appendChild(firstLi);
+
+                // 2. Previous button
+                const prevLi = document.createElement('li');
+                prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                prevLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Sebelumnya"><i class="ti ti-chevron-left"></i></a>`;
+                prevLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) {
+                        currentPage--;
+                        render();
+                    }
+                });
+                navEl.appendChild(prevLi);
+
+                // 3. Numbered pages with sliding window
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, currentPage + 2);
+
+                if (currentPage <= 3) {
+                    endPage = Math.min(totalPages, 5);
+                }
+                if (currentPage >= totalPages - 2) {
+                    startPage = Math.max(1, totalPages - 4);
+                }
+
+                if (startPage > 1) {
+                    const p1 = document.createElement('li');
+                    p1.className = 'page-item';
+                    p1.innerHTML = `<a class="page-link" href="javascript:void(0);">1</a>`;
+                    p1.addEventListener('click', (e) => { e.preventDefault(); currentPage = 1; render(); });
+                    navEl.appendChild(p1);
+
+                    if (startPage > 2) {
+                        const dots = document.createElement('li');
+                        dots.className = 'page-item disabled';
+                        dots.innerHTML = `<span class="page-link">...</span>`;
+                        navEl.appendChild(dots);
+                    }
+                }
+
+                for (let p = startPage; p <= endPage; p++) {
+                    const pLi = document.createElement('li');
+                    pLi.className = `page-item ${p === currentPage ? 'active' : ''}`;
+                    pLi.innerHTML = `<a class="page-link" href="javascript:void(0);">${p}</a>`;
+                    const targetP = p;
+                    pLi.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (currentPage !== targetP) {
+                            currentPage = targetP;
+                            render();
+                        }
+                    });
+                    navEl.appendChild(pLi);
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        const dots = document.createElement('li');
+                        dots.className = 'page-item disabled';
+                        dots.innerHTML = `<span class="page-link">...</span>`;
+                        navEl.appendChild(dots);
+                    }
+
+                    const pLast = document.createElement('li');
+                    pLast.className = 'page-item';
+                    pLast.innerHTML = `<a class="page-link" href="javascript:void(0);">${totalPages}</a>`;
+                    pLast.addEventListener('click', (e) => { e.preventDefault(); currentPage = totalPages; render(); });
+                    navEl.appendChild(pLast);
+                }
+
+                // 4. Next button
+                const nextLi = document.createElement('li');
+                nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+                nextLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Berikutnya"><i class="ti ti-chevron-right"></i></a>`;
+                nextLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        render();
+                    }
+                });
+                navEl.appendChild(nextLi);
+
+                // 5. Last button
+                const lastLi = document.createElement('li');
+                lastLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+                lastLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Halaman Terakhir"><i class="ti ti-chevrons-right"></i></a>`;
+                lastLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage !== totalPages) {
+                        currentPage = totalPages;
+                        render();
+                    }
+                });
+                navEl.appendChild(lastLi);
+            }
+
+            selectEl.addEventListener('change', function () {
+                const val = this.value;
+                pageSize = val === 'all' ? 'all' : parseInt(val, 10);
+                currentPage = 1;
+                render();
+            });
+
+            // Initial render
+            render();
+        });
+    }
+
+    // Initialize pagination on DOM Ready
+    initTablePagination();
+
+    // Expose for dynamic re-renders if necessary
+    window.refreshTablePagination = initTablePagination;
 });
+
