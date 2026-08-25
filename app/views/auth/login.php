@@ -45,8 +45,9 @@
             <div class="fw-semibold mb-1 text-dark">Demo Akun Cepat:</div>
             <div class="d-flex flex-wrap gap-1">
                 <button type="button" class="btn btn-xs btn-outline-primary" onclick="document.getElementById('username').value='dekan';document.getElementById('password').value='password';">Dekan (Eksekutif)</button>
-                <button type="button" class="btn btn-xs btn-outline-info" onclick="document.getElementById('username').value='kaprodi.ti';document.getElementById('password').value='password';">Kaprodi Teknik Informatika</button>
-                <button type="button" class="btn btn-xs btn-outline-info" onclick="document.getElementById('username').value='kaprodi.si';document.getElementById('password').value='password';">Kaprodi Sistem Informasi</button>
+                <button type="button" class="btn btn-xs btn-outline-info" onclick="document.getElementById('username').value='kaprodi.ti';document.getElementById('password').value='password';">Kaprodi TI</button>
+                <button type="button" class="btn btn-xs btn-outline-secondary" onclick="document.getElementById('username').value='admin';document.getElementById('password').value='password';">Super Admin</button>
+                <button type="button" class="btn btn-xs btn-outline-danger" onclick="document.getElementById('username').value='developer';document.getElementById('password').value='password';">Developer</button>
             </div>
         </div>
     </div>

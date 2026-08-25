@@ -28,7 +28,7 @@ echo "========================================================\n\n";
 
 // 1. Check Role Users Exist
 $userModel = new User();
-$roles = ['dekan', 'kaprodi.ti', 'kaprodi.si'];
+$roles = ['admin', 'dekan', 'kaprodi.ti', 'kaprodi.si', 'developer'];
 
 foreach ($roles as $r) {
     $u = $userModel->findByUsername($r);

@@ -21,7 +21,11 @@ $activeFacultyName = $activeFaculty['name'] ?? 'Fakultas';
 if ($currentRole === 'dekan') {
     $userContextLabel = 'Dekan ' . $activeFacultyCode . ' (Eksekutif)';
 } elseif ($currentRole === 'kaprodi') {
-    $userContextLabel = !empty($currentUser['program_name']) ? 'Kaprodi ' . $currentUser['program_name'] : $activeFacultyCode . ' Kaprodi';
+    $userContextLabel = !empty($currentUser['program_name']) ? 'Kaprodi ' . $currentUser['program_name'] : 'Kaprodi ' . $activeFacultyCode;
+} elseif ($currentRole === 'super_admin') {
+    $userContextLabel = 'Super Admin Sistem ' . $activeFacultyCode;
+} elseif ($currentRole === 'developer') {
+    $userContextLabel = 'Developer & Audit ' . $activeFacultyCode;
 } else {
     $userContextLabel = 'Dekanat ' . $activeFacultyCode;
 }
@@ -218,8 +222,102 @@ function isGroupActive(array $paths, $currentPath): bool {
                             </div>
                         </div>
 
+                    <?php elseif ($currentRole === 'super_admin'): ?>
+                        <!-- ================= 2. SUPER ADMIN (SYSTEM & MASTER DATA) ACCORDION ================= -->
+                        
+                        <!-- Group 1: Pusat Pengelolaan Sistem -->
+                        <div class="sidebar-accordion-item mb-1">
+                            <?php $grpSys = isGroupActive(['dashboard', 'users', 'master/academic-years'], $currentPath); ?>
+                            <button class="sidebar-accordion-toggle <?= $grpSys ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accAdminSys" aria-expanded="<?= $grpSys ? 'true' : 'false' ?>">
+                                <span class="nav-icon"><i class="ti ti-adjustments fs-4 text-primary"></i></span>
+                                <span class="text">Tata Kelola Sistem</span>
+                                <i class="ti ti-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div id="accAdminSys" class="collapse sidebar-accordion-collapse <?= $grpSys ? 'show' : '' ?>" data-bs-parent="#sidebarAccordion">
+                                <ul class="sidebar-subnav">
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('dashboard', $currentPath) ?>" href="<?= $baseUrl ?>/dashboard">Dashboard Sistem</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('users', $currentPath) ?>" href="<?= $baseUrl ?>/users">Manajemen User & RBAC</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('master/academic-years', $currentPath) ?>" href="<?= $baseUrl ?>/master/academic-years">Tahun Akademik</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Group 2: Data Master Universitas & Fakultas -->
+                        <div class="sidebar-accordion-item mb-1">
+                            <?php $grpMaster = isGroupActive(['master/faculties', 'master/study-programs', 'master/lecturers', 'lecturers', 'students', 'strategic/indicators'], $currentPath); ?>
+                            <button class="sidebar-accordion-toggle <?= $grpMaster ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accAdminMaster" aria-expanded="<?= $grpMaster ? 'true' : 'false' ?>">
+                                <span class="nav-icon"><i class="ti ti-database fs-4 text-secondary"></i></span>
+                                <span class="text">Data Master</span>
+                                <i class="ti ti-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div id="accAdminMaster" class="collapse sidebar-accordion-collapse <?= $grpMaster ? 'show' : '' ?>" data-bs-parent="#sidebarAccordion">
+                                <ul class="sidebar-subnav">
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('master/faculties', $currentPath) ?>" href="<?= $baseUrl ?>/master/faculties">Master Fakultas</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('master/study-programs', $currentPath) ?>" href="<?= $baseUrl ?>/master/study-programs">Master Program Studi</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('lecturers', $currentPath) ?>" href="<?= $baseUrl ?>/lecturers">Master Data Dosen & SDM</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('students', $currentPath) ?>" href="<?= $baseUrl ?>/students">Database Mahasiswa</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('strategic', $currentPath) ?>" href="<?= $baseUrl ?>/strategic">Master Indikator IKU</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Group 3: Operasional & Arsip -->
+                        <div class="sidebar-accordion-item mb-1">
+                            <?php $grpOp = isGroupActive(['meetings', 'cooperations', 'finances', 'audit'], $currentPath); ?>
+                            <button class="sidebar-accordion-toggle <?= $grpOp ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accAdminOp" aria-expanded="<?= $grpOp ? 'true' : 'false' ?>">
+                                <span class="nav-icon"><i class="ti ti-folder fs-4 text-warning"></i></span>
+                                <span class="text">Operasional & Arsip</span>
+                                <i class="ti ti-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div id="accAdminOp" class="collapse sidebar-accordion-collapse <?= $grpOp ? 'show' : '' ?>" data-bs-parent="#sidebarAccordion">
+                                <ul class="sidebar-subnav">
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('meetings', $currentPath) ?>" href="<?= $baseUrl ?>/meetings">Arsip Notulensi Rapat</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('cooperations', $currentPath) ?>" href="<?= $baseUrl ?>/cooperations">Dokumen Kerja Sama</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('finances', $currentPath) ?>" href="<?= $baseUrl ?>/finances">Pagu & Pos Anggaran</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('audit', $currentPath) ?>" href="<?= $baseUrl ?>/audit">Audit Trail & Log</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    <?php elseif ($currentRole === 'developer'): ?>
+                        <!-- ================= 3. DEVELOPER (DIAGNOSTICS & AUDIT) ACCORDION ================= -->
+                        
+                        <!-- Group 1: Konsol Diagnostik & Health Check -->
+                        <div class="sidebar-accordion-item mb-1">
+                            <?php $grpDev = isGroupActive(['dashboard', 'audit'], $currentPath); ?>
+                            <button class="sidebar-accordion-toggle <?= $grpDev ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accDevConsole" aria-expanded="<?= $grpDev ? 'true' : 'false' ?>">
+                                <span class="nav-icon"><i class="ti ti-code fs-4 text-danger"></i></span>
+                                <span class="text">Konsol Pengembang</span>
+                                <i class="ti ti-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div id="accDevConsole" class="collapse sidebar-accordion-collapse <?= $grpDev ? 'show' : '' ?>" data-bs-parent="#sidebarAccordion">
+                                <ul class="sidebar-subnav">
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('dashboard', $currentPath) ?>" href="<?= $baseUrl ?>/dashboard">Overview Server & DB</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('audit', $currentPath) ?>" href="<?= $baseUrl ?>/audit">Audit Trail & Security Logs</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Group 2: Arsitektur & Integritas Schema -->
+                        <div class="sidebar-accordion-item mb-1">
+                            <?php $grpSchema = isGroupActive(['users', 'master/faculties', 'command-center/approvals', 'quality/ami'], $currentPath); ?>
+                            <button class="sidebar-accordion-toggle <?= $grpSchema ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accDevSchema" aria-expanded="<?= $grpSchema ? 'true' : 'false' ?>">
+                                <span class="nav-icon"><i class="ti ti-server-2 fs-4 text-info"></i></span>
+                                <span class="text">Integritas Schema</span>
+                                <i class="ti ti-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div id="accDevSchema" class="collapse sidebar-accordion-collapse <?= $grpSchema ? 'show' : '' ?>" data-bs-parent="#sidebarAccordion">
+                                <ul class="sidebar-subnav">
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('users', $currentPath) ?>" href="<?= $baseUrl ?>/users">Matriks Permissions & Roles</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('master/faculties', $currentPath) ?>" href="<?= $baseUrl ?>/master/faculties">Relasi Master Data</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('command-center/approvals', $currentPath) ?>" href="<?= $baseUrl ?>/command-center/approvals">Log Transaksi Persetujuan</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('quality/ami', $currentPath) ?>" href="<?= $baseUrl ?>/quality/ami">Log Audit Mutu Internal</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
                     <?php else: ?>
-                        <!-- ================= 2. KAPRODI (PROGRAM STUDI) ACCORDION ================= -->
+                        <!-- ================= 4. KAPRODI (PROGRAM STUDI) ACCORDION ================= -->
                         
                         <!-- Group 1: Program Studi & Akademik -->
                         <div class="sidebar-accordion-item mb-1">
@@ -308,8 +406,8 @@ function isGroupActive(array $paths, $currentPath): bool {
                             <span class="badge bg-light text-dark border ms-1 py-1 px-1.5" style="font-size: 0.65rem;">⌘K</span>
                         </button>
 
-                        <!-- Context Switcher for Dekan / Kaprodi -->
-                        <?php if ($currentUser['role_slug'] === 'dekan' || $currentUser['role_slug'] === 'kaprodi'): ?>
+                        <!-- Context Switcher for Dekan / Kaprodi / Super Admin / Developer -->
+                        <?php if (in_array($currentUser['role_slug'] ?? '', ['dekan', 'kaprodi', 'super_admin', 'developer'])): ?>
                         <div class="dropdown">
                             <button class="btn btn-ghost btn-sm dropdown-toggle d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown">
                                 <i class="ti ti-switch-horizontal text-primary"></i>
@@ -332,6 +430,24 @@ function isGroupActive(array $paths, $currentPath): bool {
                                         <input type="hidden" name="role_slug" value="kaprodi">
                                         <button type="submit" class="dropdown-item d-flex align-items-center gap-2 <?= $currentRole === 'kaprodi' ? 'active' : '' ?>">
                                             <i class="ti ti-school text-primary"></i> Kaprodi (Program Studi)
+                                        </button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form action="<?= $baseUrl ?>/switch-context" method="POST" class="d-inline">
+                                        <?= CsrfHelper::tokenField() ?>
+                                        <input type="hidden" name="role_slug" value="super_admin">
+                                        <button type="submit" class="dropdown-item d-flex align-items-center gap-2 <?= $currentRole === 'super_admin' ? 'active' : '' ?>">
+                                            <i class="ti ti-adjustments text-secondary"></i> Super Admin (Sistem)
+                                        </button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form action="<?= $baseUrl ?>/switch-context" method="POST" class="d-inline">
+                                        <?= CsrfHelper::tokenField() ?>
+                                        <input type="hidden" name="role_slug" value="developer">
+                                        <button type="submit" class="dropdown-item d-flex align-items-center gap-2 <?= $currentRole === 'developer' ? 'active' : '' ?>">
+                                            <i class="ti ti-code text-danger"></i> Developer (Audit & Logs)
                                         </button>
                                     </form>
                                 </li>
