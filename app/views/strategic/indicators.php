@@ -8,6 +8,27 @@ $ikuCount = count(array_filter($indicators, fn($i) => ($i['category'] ?? '') ===
 $renstraCount = count(array_filter($indicators, fn($i) => in_array($i['category'] ?? '', ['Renstra', 'Fakultas', 'SPMI'])));
 ?>
 
+<!-- Tab Switcher: Realisasi vs Master CRUD -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-2 border-bottom">
+    <ul class="nav nav-pills gap-2">
+        <li class="nav-item">
+            <a class="nav-link text-muted fw-bold px-3 py-2" href="<?= $baseUrl ?>/strategic">
+                <i class="ti ti-chart-bar me-1"></i> Capaian & Realisasi IKU
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active fw-bold px-3 py-2" href="<?= $baseUrl ?>/strategic/indicators">
+                <i class="ti ti-database-cog me-1"></i> Master Indikator IKU (CRUD)
+            </a>
+        </li>
+    </ul>
+    <div>
+        <button type="button" class="btn btn-sm btn-primary shadow-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalAddIndicator">
+            <i class="ti ti-plus"></i> Tambah Indikator Baru
+        </button>
+    </div>
+</div>
+
 <!-- 1. Header & Summary Stats -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">

@@ -3,6 +3,27 @@ use App\Helpers\FormatHelper;
 use App\Helpers\CsrfHelper;
 ?>
 
+<!-- Tab Switcher: Realisasi vs Master CRUD -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-2 border-bottom">
+    <ul class="nav nav-pills gap-2">
+        <li class="nav-item">
+            <a class="nav-link active fw-bold px-3 py-2" href="<?= $baseUrl ?>/strategic">
+                <i class="ti ti-chart-bar me-1"></i> Capaian & Realisasi IKU
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-muted fw-bold px-3 py-2" href="<?= $baseUrl ?>/strategic/indicators">
+                <i class="ti ti-database-cog me-1"></i> Master Indikator IKU (CRUD)
+            </a>
+        </li>
+    </ul>
+    <div>
+        <a href="<?= $baseUrl ?>/strategic/indicators" class="btn btn-sm btn-primary shadow-sm d-flex align-items-center gap-1">
+            <i class="ti ti-plus"></i> Tambah / Kelola Master IKU
+        </a>
+    </div>
+</div>
+
 <div class="row g-4 mb-4">
     <div class="col-md-4">
         <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
@@ -26,9 +47,14 @@ use App\Helpers\CsrfHelper;
 
 <!-- 1. Indikator Kinerja Utama (IKU & Renstra) Table -->
 <div class="card card-lg shadow-sm border-0 rounded-4 mb-4">
-    <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between">
-        <h5 class="card-title fw-bold mb-0">Capaian Target vs Realisasi Indikator Strategis (2026)</h5>
-        <a href="<?= $baseUrl ?>/strategic/indicators" class="btn btn-sm btn-outline-secondary">Master Indikator Dinamis</a>
+    <div class="card-header bg-body border-bottom py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+        <div>
+            <h5 class="card-title fw-bold mb-0">Capaian Target vs Realisasi Indikator Strategis (2026)</h5>
+            <small class="text-muted">Pantau realisasi berkala atau klik <strong>Master Indikator IKU</strong> untuk menambah / mengubah parameter indikator.</small>
+        </div>
+        <a href="<?= $baseUrl ?>/strategic/indicators" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
+            <i class="ti ti-settings"></i> Master Indikator IKU (CRUD)
+        </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

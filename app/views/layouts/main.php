@@ -135,9 +135,9 @@ function isGroupActive(array $paths, $currentPath): bool {
                     <?php if ($currentRole === 'dekan'): ?>
                         <!-- ================= 1. DEKAN (EXECUTIVE LEADERSHIP) ACCORDION ================= -->
                         
-                        <!-- Group 1: Pusat Kendali Eksekutif -->
+                        <!-- Group 1: Pusat Kendali Dekan (Executive Command) -->
                         <div class="sidebar-accordion-item mb-1">
-                            <?php $grpExec = isGroupActive(['dashboard', 'command-center', 'dashboard/analytics'], $currentPath); ?>
+                            <?php $grpExec = isGroupActive(['dashboard', 'command-center', 'dashboard/analytics', 'strategic', 'strategic/indicators'], $currentPath); ?>
                             <button class="sidebar-accordion-toggle <?= $grpExec ? 'active' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#accDekanExec" aria-expanded="<?= $grpExec ? 'true' : 'false' ?>">
                                 <span class="nav-icon"><i class="ti ti-crown fs-4 text-warning"></i></span>
                                 <span class="text">Pusat Kendali Dekan</span>
@@ -162,7 +162,8 @@ function isGroupActive(array $paths, $currentPath): bool {
                                             <?php endif; ?>
                                         </a>
                                     </li>
-                                    <li><a class="sidebar-subnav-link <?= isNavActive('strategic', $currentPath) ?>" href="<?= $baseUrl ?>/strategic">Analitik & Tren Kinerja</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('strategic', $currentPath) && !isNavActive('strategic/indicators', $currentPath) ? 'active' : '' ?>" href="<?= $baseUrl ?>/strategic">Capaian Realisasi IKU</a></li>
+                                    <li><a class="sidebar-subnav-link <?= isNavActive('strategic/indicators', $currentPath) ?>" href="<?= $baseUrl ?>/strategic/indicators">Master Indikator IKU (CRUD)</a></li>
                                 </ul>
                             </div>
                         </div>
