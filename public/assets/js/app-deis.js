@@ -259,7 +259,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (table.dataset.paginated === 'true') return;
             table.dataset.paginated = 'true';
 
-            let pageSize = parseInt(table.getAttribute('data-page-size') || '10', 10);
+            // Default page size: 5 for responsive view, or from data attribute
+            let defaultSize = table.getAttribute('data-page-size') || '5';
+            let pageSize = defaultSize === 'all' ? 'all' : parseInt(defaultSize, 10);
             let currentPage = 1;
 
             // Build Pagination Wrapper Container
@@ -269,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             paginationWrapper.innerHTML = `
                 <div class="table-pagination-info">
-                    <span>Menampilkan <strong class="page-start text-dark">1</strong> - <strong class="page-end text-dark">10</strong> dari <strong class="page-total text-dark">${allRows.length}</strong> data</span>
+                    <span>Menampilkan <strong class="page-start text-dark">1</strong> - <strong class="page-end text-dark">5</strong> dari <strong class="page-total text-dark">${allRows.length}</strong> data</span>
                     <div class="table-page-size-select">
                         <label for="pageSizeSelect_${tableIndex}" class="mb-0 text-muted">Tampilkan:</label>
                         <select class="form-select form-select-sm page-size-select" id="pageSizeSelect_${tableIndex}">
@@ -277,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
                             <option value="25" ${pageSize === 25 ? 'selected' : ''}>25</option>
                             <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
-                            <option value="all">Semua</option>
+                            <option value="all" ${pageSize === 'all' ? 'selected' : ''}>Semua</option>
                         </select>
                     </div>
                 </div>
@@ -312,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 const actualPageSize = (pageSize === 'all' || pageSize >= total) ? total : pageSize;
-                const totalPages = Math.ceil(total / actualPageSize);
+                const totalPages = Math.max(1, Math.ceil(total / actualPageSize));
 
                 if (currentPage > totalPages) currentPage = totalPages;
                 if (currentPage < 1) currentPage = 1;
@@ -332,9 +334,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
-                // Build pagination buttons
+                // Build pagination buttons (Always build buttons so user sees pagination is active!)
                 navEl.innerHTML = '';
-                if (totalPages <= 1) return; // Hide navigation buttons if only 1 page
 
                 // 1. First button
                 const firstLi = document.createElement('li');
@@ -459,6 +460,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize pagination on DOM Ready
     initTablePagination();
+
+    // Re-check on window load in case some DOM tables were rendered slightly after
+    window.addEventListener('load', initTablePagination);
 
     // Expose for dynamic re-renders if necessary
     window.refreshTablePagination = initTablePagination;

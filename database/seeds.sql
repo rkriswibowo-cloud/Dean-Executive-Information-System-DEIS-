@@ -128,9 +128,15 @@ INSERT INTO `classes` (`id`, `course_id`, `academic_year_id`, `lecturer_id`, `cl
 (1, 1, 1, 4, 'TI-5A', 'Lab AI 301', 16, 12, 94.50, 0, NULL),
 (2, 2, 1, 2, 'TI-4A', 'Ruang 204', 16, 12, 96.00, 0, NULL),
 (3, 3, 1, 7, 'TI-2B', 'Lab RPL 102', 16, 11, 91.20, 0, NULL),
-(4, 4, 1, 8, 'TI-6A', 'Lab Jaringan 201', 16, 6, 68.00, 1, 'Realisasi pertemuan tertinggal 6 pekan & presensi rendah'), -- Problem Alert
+(4, 4, 1, 8, 'TI-6A', 'Lab Jaringan 201', 16, 6, 68.00, 1, 'Realisasi pertemuan tertinggal 6 pekan & presensi rendah'),
 (5, 5, 1, 3, 'SI-5A', 'Ruang 305', 16, 12, 95.00, 0, NULL),
-(6, 7, 1, 6, 'DS-3A', 'Lab Big Data 401', 16, 12, 93.80, 0, NULL);
+(6, 6, 1, 9, 'SI-4A', 'Ruang 302', 16, 12, 92.40, 0, NULL),
+(7, 7, 1, 6, 'DS-3A', 'Lab Big Data 401', 16, 12, 93.80, 0, NULL),
+(8, 8, 1, 10, 'DS-5A', 'Lab Komputasi 203', 16, 11, 90.50, 0, NULL),
+(9, 1, 1, 4, 'TI-5B', 'Lab AI 302', 16, 11, 93.00, 0, NULL),
+(10, 2, 1, 2, 'TI-4B', 'Ruang 205', 16, 12, 95.50, 0, NULL),
+(11, 5, 1, 3, 'SI-5B', 'Ruang 306', 16, 11, 89.00, 0, NULL),
+(12, 4, 1, 8, 'TI-6B', 'Lab Jaringan 202', 16, 7, 71.50, 1, 'Keterlambatan silabus & absensi mahasiswa di bawah 75%');
 
 -- 11. Guidances
 INSERT INTO `guidances` (`id`, `lecturer_id`, `student_id`, `type`, `title`, `progress_percentage`, `status`, `last_guidance_date`) VALUES
