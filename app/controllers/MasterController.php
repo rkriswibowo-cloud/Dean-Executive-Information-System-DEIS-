@@ -216,6 +216,7 @@ class MasterController extends Controller {
 
     public function academicYears(): void {
         $this->requireAuth();
+        $this->requireRole(['super_admin', 'developer']);
         $ayModel = new AcademicYear();
 
         if ($this->isPost()) {

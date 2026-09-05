@@ -41,6 +41,9 @@ $app->get('/logout', 'AuthController@logout');
 $app->get('/profile', 'AuthController@profile');
 $app->post('/profile', 'AuthController@profile');
 $app->post('/switch-context', 'AuthController@switchContext');
+$app->post('/impersonate', 'AuthController@impersonate');
+$app->post('/impersonate/leave', 'AuthController@leaveImpersonation');
+$app->get('/impersonate/leave', 'AuthController@leaveImpersonation');
 
 // 2. Executive Dashboard & Analytics
 $app->get('/dashboard', 'DashboardController@index');

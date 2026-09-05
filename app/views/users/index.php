@@ -1,6 +1,7 @@
 <?php
 use App\Helpers\FormatHelper;
 use App\Helpers\CsrfHelper;
+use App\Helpers\AuthHelper;
 ?>
 
 <!-- Header -->
@@ -66,7 +67,16 @@ use App\Helpers\CsrfHelper;
                                 <small class="text-muted"><?= FormatHelper::timeAgo($u['last_login_at']) ?></small>
                             </td>
                             <td class="text-end pe-4 text-nowrap">
-                                <div class="table-actions">
+                                <div class="table-actions d-flex align-items-center justify-content-end gap-1">
+                                    <?php if ((int)$u['id'] !== (int)AuthHelper::id() && AuthHelper::isSuperAdmin()): ?>
+                                        <form action="<?= $baseUrl ?>/impersonate" method="POST" class="d-inline">
+                                            <?= CsrfHelper::tokenField() ?>
+                                            <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary btn-crud-sm" title="Masuk sebagai <?= htmlspecialchars($u['name']) ?> (Impersonate)">
+                                                <i class="ti ti-mask"></i> Impersonate
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                     <form action="<?= $baseUrl ?>/users/toggle-status" method="POST" class="d-inline">
                                         <?= CsrfHelper::tokenField() ?>
                                         <input type="hidden" name="user_id" value="<?= $u['id'] ?>">

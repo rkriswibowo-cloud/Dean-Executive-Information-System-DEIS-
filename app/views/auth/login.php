@@ -101,13 +101,24 @@
             </div>
             <div class="row g-2">
                 <div class="col-6">
+                    <button type="button" class="auth-role-card" onclick="setDemoCredentials('admin', 'password')">
+                        <span class="avatar avatar-xs bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 26px; height: 26px;">
+                            <i class="ti ti-shield-check" style="font-size: 0.85rem;"></i>
+                        </span>
+                        <div class="overflow-hidden text-truncate">
+                            <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">Super Admin</strong>
+                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Rony Kriswibowo (Full)</span>
+                        </div>
+                    </button>
+                </div>
+                <div class="col-6">
                     <button type="button" class="auth-role-card" onclick="setDemoCredentials('dekan', 'password')">
                         <span class="avatar avatar-xs bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 26px; height: 26px;">
                             <i class="ti ti-crown" style="font-size: 0.85rem;"></i>
                         </span>
                         <div class="overflow-hidden text-truncate">
                             <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">Dekan</strong>
-                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Eksekutif</span>
+                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Rony Kriswibowo (Eksekutif)</span>
                         </div>
                     </button>
                 </div>
@@ -118,29 +129,18 @@
                         </span>
                         <div class="overflow-hidden text-truncate">
                             <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">Kaprodi TI</strong>
-                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Ketua Prodi</span>
+                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Dr. Rony Setiawan</span>
                         </div>
                     </button>
                 </div>
                 <div class="col-6">
-                    <button type="button" class="auth-role-card" onclick="setDemoCredentials('admin', 'password')">
-                        <span class="avatar avatar-xs bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 26px; height: 26px;">
-                            <i class="ti ti-adjustments" style="font-size: 0.85rem;"></i>
+                    <button type="button" class="auth-role-card" onclick="setDemoCredentials('spmi', 'password')">
+                        <span class="avatar avatar-xs bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 26px; height: 26px;">
+                            <i class="ti ti-certificate" style="font-size: 0.85rem;"></i>
                         </span>
                         <div class="overflow-hidden text-truncate">
-                            <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">Super Admin</strong>
-                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Administrator</span>
-                        </div>
-                    </button>
-                </div>
-                <div class="col-6">
-                    <button type="button" class="auth-role-card" onclick="setDemoCredentials('developer', 'password')">
-                        <span class="avatar avatar-xs bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 26px; height: 26px;">
-                            <i class="ti ti-code" style="font-size: 0.85rem;"></i>
-                        </span>
-                        <div class="overflow-hidden text-truncate">
-                            <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">Developer</strong>
-                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Konsol Pengembang</span>
+                            <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">GKM / SPMI</strong>
+                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Penjaminan Mutu & AMI</span>
                         </div>
                     </button>
                 </div>

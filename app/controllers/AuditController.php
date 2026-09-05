@@ -7,7 +7,7 @@ use App\Models\AuditLog;
 class AuditController extends Controller {
     public function index(): void {
         $this->requireAuth();
-        $this->requireRole(['super_admin', 'dekan', 'developer']);
+        $this->requireRole(['super_admin', 'developer']);
 
         $filterModule = $this->getQuery('module', '');
         $filterAction = $this->getQuery('action', '');

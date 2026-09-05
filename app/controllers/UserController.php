@@ -9,7 +9,7 @@ use App\Services\AuditService;
 class UserController extends Controller {
     public function index(): void {
         $this->requireAuth();
-        $this->requireRole(['super_admin', 'dekan', 'developer']);
+        $this->requireRole(['super_admin', 'developer']);
 
         $userModel = new User();
         $roleModel = new Role();
@@ -26,7 +26,7 @@ class UserController extends Controller {
 
     public function create(): void {
         $this->requireAuth();
-        $this->requireRole(['super_admin', 'dekan', 'developer']);
+        $this->requireRole(['super_admin', 'developer']);
         $this->requireCsrf();
 
         $name = trim($this->getPost('name', ''));
@@ -57,7 +57,7 @@ class UserController extends Controller {
 
     public function toggleStatus(): void {
         $this->requireAuth();
-        $this->requireRole(['super_admin', 'dekan', 'developer']);
+        $this->requireRole(['super_admin', 'developer']);
         $this->requireCsrf();
 
         $userId = (int)$this->getPost('user_id', 0);

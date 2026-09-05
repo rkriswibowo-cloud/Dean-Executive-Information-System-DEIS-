@@ -66,6 +66,55 @@ class AuthController extends Controller {
         $this->redirect('dashboard', ['info' => 'Konteks peran beralih ke: ' . strtoupper($roleSlug)]);
     }
 
+    public function impersonate(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        if (!AuthHelper::isSuperAdmin()) {
+            $this->redirect('dashboard', ['error' => 'Akses ditolak: Hanya Super Admin yang memiliki wewenang untuk impersonasi akun.']);
+        }
+
+        $targetUserId = (int)$this->getPost('user_id', 0);
+        if (!$targetUserId) {
+            $this->redirect('users', ['error' => 'Pengguna tujuan impersonasi tidak valid.']);
+        }
+
+        $prevUser = AuthHelper::user();
+        if (AuthHelper::impersonate($targetUserId)) {
+            $newUser = AuthHelper::user();
+            AuditService::log('IMPERSONATE_START', 'auth', (string)$targetUserId, null, [
+                'impersonator_id'   => $prevUser['id'] ?? null,
+                'impersonator_name' => $prevUser['name'] ?? null,
+                'target_user'       => $newUser['username'] ?? null,
+                'target_role'       => $newUser['role_slug'] ?? null,
+            ]);
+            $this->redirect('dashboard', ['info' => 'Mode Impersonasi aktif: Anda sedang mengakses sistem sebagai ' . $newUser['name'] . ' (' . strtoupper($newUser['role_name'] ?? $newUser['role_slug']) . ').']);
+        } else {
+            $this->redirect('users', ['error' => 'Gagal melakukan impersonasi. Akun pengguna tidak ditemukan atau tidak aktif.']);
+        }
+    }
+
+    public function leaveImpersonation(): void {
+        $this->requireAuth();
+
+        if (!AuthHelper::isImpersonating()) {
+            $this->redirect('dashboard');
+        }
+
+        $impersonatedUser = AuthHelper::user();
+        $impersonator = AuthHelper::getImpersonator();
+
+        if (AuthHelper::leaveImpersonation()) {
+            AuditService::log('IMPERSONATE_END', 'auth', (string)($impersonator['id'] ?? AuthHelper::id()), null, [
+                'left_user'   => $impersonatedUser['username'] ?? null,
+                'super_admin' => $impersonator['name'] ?? null
+            ]);
+            $this->redirect('users', ['success' => 'Berhasil keluar dari mode penyamaran. Anda telah kembali ke akun Super Admin.']);
+        } else {
+            $this->redirect('dashboard', ['error' => 'Gagal kembali ke sesi Super Admin.']);
+        }
+    }
+
     public function profile(): void {
         $this->requireAuth();
         $userModel = new User();

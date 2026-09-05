@@ -169,6 +169,14 @@ html.collapsed .navbar-glass {
     background: transparent;
     border: none;
     cursor: pointer;
+    text-align: left;
+}
+.sidebar-accordion-toggle .text {
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .sidebar-accordion-toggle:hover {
     background-color: var(--bs-tertiary-bg);
