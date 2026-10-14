@@ -1,189 +1,131 @@
 <?php use App\Helpers\CsrfHelper; ?>
 
-<div class="card auth-card border-0 p-4 p-sm-5">
-    <div class="card-body p-0">
-        <!-- Brand Header -->
-        <div class="text-center mb-4">
-            <div class="auth-brand-logo mx-auto mb-3">
-                <img src="<?= $baseUrl ?>/assets/images/brand/logo/logo-icon.svg" alt="DEIS Logo" width="34" height="34">
-            </div>
-            <div class="d-inline-flex align-items-center gap-1 badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 mb-2 rounded-pill small">
-                <i class="ti ti-shield-check"></i>
-                <span>Portal Masuk Eksekutif</span>
-            </div>
-            <h3 class="fw-bold text-dark mb-1 fs-4"><?= $appConfig['short_name'] ?></h3>
-            <p class="text-muted small mb-0">Dean Executive Information System</p>
-        </div>
-
-        <!-- Alert Error Message -->
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger py-2.5 px-3 small d-flex align-items-center mb-3 rounded-3 shadow-sm border-danger-subtle">
-                <i class="ti ti-alert-circle fs-5 me-2 flex-shrink-0"></i>
-                <div><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
-            </div>
-        <?php endif; ?>
-
-        <!-- Login Form -->
-        <form action="<?= $baseUrl ?>/login" method="POST" autocomplete="on">
-            <?= CsrfHelper::tokenField() ?>
-
-            <!-- Username Field -->
-            <div class="mb-3">
-                <label for="username" class="form-label small fw-bold text-body-secondary mb-1.5">
-                    Username / ID Pengguna <span class="text-danger">*</span>
-                </label>
-                <div class="auth-input-group">
-                    <span class="input-icon">
-                        <i class="ti ti-user"></i>
-                    </span>
-                    <input type="text" 
-                           class="form-control" 
-                           id="username" 
-                           name="username" 
-                           value="<?= htmlspecialchars($oldUsername ?? '', ENT_QUOTES, 'UTF-8') ?>" 
-                           placeholder="Contoh: dekan, kaprodi.ti, admin" 
-                           required 
-                           autofocus>
-                </div>
+<div class="deis-login-split">
+    <section class="deis-form-panel">
+        <div class="deis-form-wrap">
+            <div class="deis-brand deis-reveal d1">
+                <span class="deis-brand-icon"><i class="fa-solid fa-building-columns"></i></span>
+                <span><strong>DEIS</strong><small>Dean Executive Information System</small></span>
             </div>
 
-            <!-- Password Field -->
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1.5">
-                    <label for="password" class="form-label small fw-bold text-body-secondary mb-0">
-                        Kata Sandi (Password) <span class="text-danger">*</span>
-                    </label>
-                </div>
-                <div class="auth-input-group">
-                    <span class="input-icon">
-                        <i class="ti ti-lock"></i>
-                    </span>
-                    <input type="password" 
-                           class="form-control" 
-                           id="password" 
-                           name="password" 
-                           placeholder="Masukkan kata sandi akun Anda" 
-                           required>
-                    <button type="button" class="btn-password-toggle" id="togglePasswordBtn" title="Tampilkan / Sembunyikan Kata Sandi" tabindex="-1">
-                        <i class="ti ti-eye" id="togglePasswordIcon"></i>
-                    </button>
-                </div>
-            </div>
+            <header class="deis-heading">
+                <h1 class="deis-reveal d2"><span>Selamat datang</span> kembali</h1>
+                <p class="deis-reveal d3">Akses pusat kendali untuk memantau kinerja dan tata kelola fakultas secara terpadu.</p>
+            </header>
 
-            <!-- Remember & Security Info -->
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="checkbox" id="rememberMe" checked>
-                    <label class="form-check-label small text-muted user-select-none" for="rememberMe" style="font-size: 0.8rem;">
-                        Ingat sesi saya
-                    </label>
+            <?php if (!empty($error)): ?>
+                <div class="deis-alert deis-reveal d3" role="alert">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
-                <div class="small text-muted d-flex align-items-center gap-1" style="font-size: 0.75rem;">
-                    <i class="ti ti-shield-lock text-success"></i>
-                    <span>RBAC 256-Bit</span>
-                </div>
-            </div>
+            <?php endif; ?>
 
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 rounded-3 mb-4">
-                <span>Masuk ke Dashboard</span>
-                <i class="ti ti-arrow-right"></i>
-            </button>
-        </form>
+            <form action="<?= $baseUrl ?>/login" method="POST" autocomplete="on" class="deis-login-form">
+                <?= CsrfHelper::tokenField() ?>
 
-        <!-- Quick Demo Login Switcher -->
-        <div class="pt-3 border-top">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="small fw-bold text-muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                    Akses Cepat Demo:
-                </span>
-                <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.65rem;">Klik untuk isi otomatis</span>
-            </div>
-            <div class="row g-2">
-                <div class="col-6">
-                    <button type="button" class="auth-role-card" onclick="setDemoCredentials('admin', 'password')">
-                        <span class="avatar avatar-xs bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 26px; height: 26px;">
-                            <i class="ti ti-shield-check" style="font-size: 0.85rem;"></i>
-                        </span>
-                        <div class="overflow-hidden text-truncate">
-                            <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">Super Admin</strong>
-                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Rony Kriswibowo (Full)</span>
-                        </div>
-                    </button>
+                <div class="deis-field deis-reveal d4">
+                    <label for="username">Username / ID Pengguna</label>
+                    <div class="deis-glass-input">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" id="username" name="username" value="<?= htmlspecialchars($oldUsername ?? '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Contoh: dekan atau kaprodi.ti" autocomplete="username" required autofocus>
+                    </div>
                 </div>
-                <div class="col-6">
-                    <button type="button" class="auth-role-card" onclick="setDemoCredentials('dekan', 'password')">
-                        <span class="avatar avatar-xs bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 26px; height: 26px;">
-                            <i class="ti ti-crown" style="font-size: 0.85rem;"></i>
-                        </span>
-                        <div class="overflow-hidden text-truncate">
-                            <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">Dekan</strong>
-                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Rony Kriswibowo (Eksekutif)</span>
-                        </div>
-                    </button>
+
+                <div class="deis-field deis-reveal d5">
+                    <label for="password">Password</label>
+                    <div class="deis-glass-input">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Masukkan password" autocomplete="current-password" required>
+                        <button type="button" id="togglePasswordBtn" class="deis-password-toggle" title="Tampilkan password" aria-label="Tampilkan password">
+                            <i class="fa-regular fa-eye" id="togglePasswordIcon"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="col-6">
-                    <button type="button" class="auth-role-card" onclick="setDemoCredentials('kaprodi.ti', 'password')">
-                        <span class="avatar avatar-xs bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 26px; height: 26px;">
-                            <i class="ti ti-school" style="font-size: 0.85rem;"></i>
-                        </span>
-                        <div class="overflow-hidden text-truncate">
-                            <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">Kaprodi TI</strong>
-                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Dr. Rony Setiawan</span>
-                        </div>
-                    </button>
+
+                <div class="deis-form-meta deis-reveal d6">
+                    <span><i class="fa-solid fa-shield-halved"></i> Akses berbasis peran (RBAC)</span>
+                    <button type="button" onclick="showDeisLoginHelp()">Bantuan login</button>
                 </div>
-                <div class="col-6">
-                    <button type="button" class="auth-role-card" onclick="setDemoCredentials('spmi', 'password')">
-                        <span class="avatar avatar-xs bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 26px; height: 26px;">
-                            <i class="ti ti-certificate" style="font-size: 0.85rem;"></i>
-                        </span>
-                        <div class="overflow-hidden text-truncate">
-                            <strong class="d-block text-truncate text-dark" style="font-size: 0.775rem;">GKM / SPMI</strong>
-                            <span class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Penjaminan Mutu & AMI</span>
-                        </div>
-                    </button>
+
+                <button type="submit" class="deis-submit deis-reveal d7">
+                    <span>Masuk ke Dashboard</span><i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="deis-demo deis-reveal d8">
+                <div class="deis-demo-head"><span>Akses cepat demo</span><small>Klik untuk mengisi akun</small></div>
+                <div class="deis-demo-grid">
+                    <button type="button" onclick="setDemoCredentials('admin', 'password')"><i class="fa-solid fa-shield-halved"></i><span><strong>Super Admin</strong><small>Akses penuh</small></span></button>
+                    <button type="button" onclick="setDemoCredentials('dekan', 'password')"><i class="fa-solid fa-crown"></i><span><strong>Dekan</strong><small>Eksekutif</small></span></button>
+                    <button type="button" onclick="setDemoCredentials('kaprodi.ti', 'password')"><i class="fa-solid fa-graduation-cap"></i><span><strong>Kaprodi TI</strong><small>Program studi</small></span></button>
+                    <button type="button" onclick="setDemoCredentials('spmi', 'password')"><i class="fa-solid fa-certificate"></i><span><strong>SPMI</strong><small>Mutu & AMI</small></span></button>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Footer Caption -->
-        <div class="text-center mt-4">
-            <small class="text-muted" style="font-size: 0.725rem;">
-                © <?= date('Y') ?> <?= $appConfig['short_name'] ?> • Sistem Informasi Eksekutif Dekan
-            </small>
+    <section class="deis-visual-panel" aria-label="Pusat kendali eksekutif fakultas">
+        <div class="deis-visual-card">
+            <div class="deis-live deis-slide d2"><span></span> Executive Command Center</div>
+            <div class="deis-visual-copy deis-slide d3">
+                <span>DATA-DRIVEN LEADERSHIP</span>
+                <h2>Satu data.<br>Keputusan bermakna.</h2>
+                <p>Ringkasan akademik, mutu, keuangan, dan indikator strategis untuk pengambilan keputusan pimpinan.</p>
+            </div>
+
+            <div class="deis-dashboard-card deis-board d5">
+                <div class="deis-board-head">
+                    <div><small>Executive Overview</small><strong>Kinerja Fakultas</strong></div>
+                    <span><i class="fa-solid fa-arrow-trend-up"></i> Semester Aktif</span>
+                </div>
+                <div class="deis-kpi-grid">
+                    <div><i class="fa-solid fa-users"></i><span><small>Mahasiswa Aktif</small><strong>1.248</strong></span></div>
+                    <div><i class="fa-solid fa-user-tie"></i><span><small>Dosen</small><strong>64</strong></span></div>
+                    <div><i class="fa-solid fa-chart-line"></i><span><small>Capaian IKU</small><strong>86%</strong></span></div>
+                </div>
+                <div class="deis-chart">
+                    <div class="deis-chart-label"><span>Tren kinerja fakultas</span><strong>+12,4%</strong></div>
+                    <svg viewBox="0 0 520 120" preserveAspectRatio="none" aria-hidden="true">
+                        <defs><linearGradient id="deisChartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#818cf8" stop-opacity=".4"/><stop offset="1" stop-color="#818cf8" stop-opacity="0"/></linearGradient></defs>
+                        <path d="M0 100 C55 88 68 92 110 70 S180 82 225 55 S292 72 340 38 S420 55 520 12 L520 120 L0 120 Z" fill="url(#deisChartFill)"/>
+                        <path d="M0 100 C55 88 68 92 110 70 S180 82 225 55 S292 72 340 38 S420 55 520 12" fill="none" stroke="#818cf8" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="deis-feature-chips deis-board d7">
+                <span><i class="fa-solid fa-bullseye"></i> IKU & Renstra</span>
+                <span><i class="fa-solid fa-award"></i> Akreditasi</span>
+                <span><i class="fa-solid fa-file-signature"></i> Persetujuan</span>
+            </div>
         </div>
-    </div>
+    </section>
 </div>
 
 <script>
 function setDemoCredentials(username, password) {
-    const userField = document.getElementById('username');
-    const passField = document.getElementById('password');
-    if (userField && passField) {
-        userField.value = username;
-        passField.value = password;
-        userField.focus();
-    }
+    const user = document.getElementById('username');
+    const pass = document.getElementById('password');
+    if (!user || !pass) return;
+    user.value = username;
+    pass.value = password;
+    user.focus();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleBtn = document.getElementById('togglePasswordBtn');
-    const passInput = document.getElementById('password');
-    const toggleIcon = document.getElementById('togglePasswordIcon');
+function showDeisLoginHelp() {
+    alert('Gunakan username yang diberikan administrator. Jika akun terkunci atau lupa password, hubungi Super Admin DEIS.');
+}
 
-    if (toggleBtn && passInput && toggleIcon) {
-        toggleBtn.addEventListener('click', function() {
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                toggleIcon.classList.remove('ti-eye');
-                toggleIcon.classList.add('ti-eye-off');
-            } else {
-                passInput.type = 'password';
-                toggleIcon.classList.remove('ti-eye-off');
-                toggleIcon.classList.add('ti-eye');
-            }
-        });
-    }
+document.addEventListener('DOMContentLoaded', function () {
+    const button = document.getElementById('togglePasswordBtn');
+    const input = document.getElementById('password');
+    const icon = document.getElementById('togglePasswordIcon');
+    if (!button || !input || !icon) return;
+    button.addEventListener('click', function () {
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        button.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
+    });
 });
 </script>

@@ -3,49 +3,76 @@ use App\Helpers\FormatHelper;
 use App\Helpers\CsrfHelper;
 ?>
 
-<div class="row g-4 mb-4">
+<div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Total Kelas Perkuliahan</span>
-            <h3 class="fw-bold mb-0 mt-1"><?= $totalClasses ?> <span class="fs-6 fw-normal text-muted">Kelas</span></h3>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Total Kelas Perkuliahan</div>
+                <div class="kpi-value"><?= number_format($totalClasses) ?></div>
+                <div class="text-muted small mt-1">Kelas Aktif Semester Ini</div>
+            </div>
+            <div class="kpi-icon-wrap">
+                <i class="fa-solid fa-chalkboard"></i>
+            </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Realisasi Pertemuan</span>
-            <h3 class="fw-bold mb-0 mt-1"><?= $realizationRate ?>%</h3>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Realisasi Pertemuan</div>
+                <div class="kpi-value"><?= $realizationRate ?>%</div>
+                <div class="text-muted small mt-1">Target 16 Pertemuan</div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Rata-rata Presensi Mahasiswa</span>
-            <h3 class="fw-bold mb-0 mt-1"><?= $avgAttendance ?>%</h3>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Rata-rata Presensi</div>
+                <div class="kpi-value"><?= $avgAttendance ?>%</div>
+                <div class="text-muted small mt-1">Kehadiran Mahasiswa</div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(var(--primary-rgb), 0.12); color: var(--primary);">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold text-danger">Kelas Bermasalah</span>
-            <h3 class="fw-bold mb-0 mt-1 text-danger"><?= $problemClasses ?> <span class="fs-6 fw-normal text-muted">Kelas</span></h3>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title text-danger">Kelas Bermasalah</div>
+                <div class="kpi-value text-danger"><?= $problemClasses ?></div>
+                <div class="text-muted small mt-1">Realisasi < 50% / Presensi Rendah</div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="card card-lg shadow-sm border-0 rounded-4">
-    <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h5 class="card-title fw-bold mb-0">Monitoring Perkuliahan & Presensi</h5>
+<div class="card card-lg shadow-sm">
+    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <h5 class="card-title fw-bold mb-0">Monitoring Perkuliahan & Presensi</h5>
+            <div class="card-subtitle">Pengawasan langsung perkuliahan, jurnal mengajar, dan tingkat kehadiran kelas</div>
+        </div>
         <div class="d-flex gap-2">
             <a href="<?= $baseUrl ?>/academic/courses" class="btn btn-sm btn-outline-secondary btn-crud-sm">
-                <i class="ti ti-books"></i> Kurikulum & RPS
+                <i class="fa-solid fa-book"></i> Kurikulum & RPS
             </a>
-            <a href="<?= $baseUrl ?>/academic/guidance" class="btn btn-sm btn-outline-primary btn-crud-sm">
-                <i class="ti ti-users"></i> Bimbingan
+            <a href="<?= $baseUrl ?>/academic/guidance" class="btn btn-sm btn-soft-primary btn-crud-sm">
+                <i class="fa-solid fa-users-rectangle"></i> Bimbingan
             </a>
         </div>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="bg-body-tertiary text-muted small text-uppercase">
+                <thead>
                     <tr>
                         <th class="ps-4">Mata Kuliah</th>
                         <th>Kelas</th>
@@ -62,7 +89,7 @@ use App\Helpers\CsrfHelper;
                         <tr class="<?= $c['problem_flag'] ? 'table-danger' : '' ?>">
                             <td class="ps-4">
                                 <span class="badge bg-light text-dark border mb-1"><?= $c['course_code'] ?></span>
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($c['course_name'], ENT_QUOTES, 'UTF-8') ?> (<?= $c['sks'] ?> SKS)</div>
+                                <div class="fw-bold"><?= htmlspecialchars($c['course_name'], ENT_QUOTES, 'UTF-8') ?> (<?= $c['sks'] ?> SKS)</div>
                             </td>
                             <td><span class="badge bg-primary-subtle text-primary"><?= $c['class_name'] ?></span></td>
                             <td class="fw-semibold text-dark"><?= htmlspecialchars($c['lecturer_name'], ENT_QUOTES, 'UTF-8') ?></td>

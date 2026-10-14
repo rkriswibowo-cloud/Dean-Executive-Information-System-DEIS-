@@ -19,23 +19,23 @@ use App\Helpers\CsrfHelper;
 </div>
 
 <!-- 1. Critical Alerts Panel (PRD Section 8.1) -->
-<div class="card card-lg shadow-sm border-0 rounded-4 mb-4">
-    <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+<div class="card card-lg shadow-sm mb-4">
+    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h5 class="card-title fw-bold mb-0 text-danger d-flex align-items-center gap-2">
-            <i class="ti ti-alert-octagon fs-4"></i> Critical & Warning Alerts Radar
+            <i class="fa-solid fa-triangle-exclamation"></i> Critical & Warning Alerts Radar
         </h5>
-        <span class="badge bg-danger rounded-pill px-3 py-1"><?= count($criticalAlerts) ?> Peringatan Aktif</span>
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1"><?= count($criticalAlerts) ?> Peringatan Aktif</span>
     </div>
     <div class="card-body p-0">
         <?php if (empty($criticalAlerts)): ?>
             <div class="text-center py-5 text-muted">
-                <i class="ti ti-circle-check text-success fs-1 mb-2 d-block"></i>
+                <i class="fa-solid fa-circle-check text-success fs-1 mb-2 d-block"></i>
                 Tidak ada peringatan kritis. Seluruh operasional fakultas dalam batas normal.
             </div>
         <?php else: ?>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-body-tertiary text-muted small text-uppercase">
+                    <thead>
                         <tr>
                             <th class="ps-4">Tingkat</th>
                             <th>Kategori</th>
@@ -52,15 +52,15 @@ use App\Helpers\CsrfHelper;
                                         <?= strtoupper($alert['severity']) ?>
                                     </span>
                                 </td>
-                                <td class="fw-semibold text-dark"><?= htmlspecialchars($alert['alert_type'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td class="fw-semibold"><?= htmlspecialchars($alert['alert_type'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td>
-                                    <div class="fw-bold text-dark"><?= htmlspecialchars($alert['title'], ENT_QUOTES, 'UTF-8') ?></div>
+                                    <div class="fw-bold"><?= htmlspecialchars($alert['title'], ENT_QUOTES, 'UTF-8') ?></div>
                                     <small class="text-muted"><?= htmlspecialchars($alert['description'], ENT_QUOTES, 'UTF-8') ?></small>
                                 </td>
                                 <td>
                                     <?php if (!empty($alert['target_url'])): ?>
                                         <a href="<?= $baseUrl ?>/<?= $alert['target_url'] ?>" class="btn btn-sm btn-primary btn-crud-sm">
-                                            Periksa <i class="ti ti-arrow-right"></i>
+                                            Periksa <i class="fa-solid fa-arrow-right"></i>
                                         </a>
                                     <?php endif; ?>
                                 </td>
@@ -70,7 +70,7 @@ use App\Helpers\CsrfHelper;
                                             <?= CsrfHelper::tokenField() ?>
                                             <input type="hidden" name="alert_id" value="<?= $alert['id'] ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-secondary btn-crud-sm" onclick="return confirm('Tandai peringatan ini sebagai telah diselesaikan?');">
-                                                <i class="ti ti-check"></i> Selesai
+                                                <i class="fa-solid fa-check"></i> Selesai
                                             </button>
                                         </form>
                                     </div>
@@ -87,17 +87,17 @@ use App\Helpers\CsrfHelper;
 <!-- 2. Deadline Radar (PRD Section 8.2) -->
 <div class="row g-4 mb-4">
     <div class="col-12 col-xl-7">
-        <div class="card card-lg shadow-sm border-0 rounded-4 h-100">
-            <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between">
-                <h5 class="card-title fw-bold mb-0 text-dark d-flex align-items-center gap-2">
-                    <i class="ti ti-clock-exclamation text-warning fs-4"></i> Deadline Radar (Waktu Tersisa)
+        <div class="card card-lg shadow-sm h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="card-title fw-bold mb-0 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-warning"></i> Deadline Radar (Waktu Tersisa)
                 </h5>
-                <span class="badge bg-warning text-dark"><?= count($deadlines) ?> Deadline</span>
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle"><?= count($deadlines) ?> Deadline</span>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-body-tertiary text-muted small text-uppercase">
+                        <thead>
                             <tr>
                                 <th class="ps-4">Item & Kategori</th>
                                 <th>Jatuh Tempo</th>

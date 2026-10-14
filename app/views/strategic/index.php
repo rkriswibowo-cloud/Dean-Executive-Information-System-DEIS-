@@ -12,7 +12,7 @@ use App\Helpers\CsrfHelper;
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-muted fw-bold px-3 py-2" href="<?= $baseUrl ?>/strategic/indicators">
+            <a class="nav-link text-body-secondary fw-semibold px-3 py-2" href="<?= $baseUrl ?>/strategic/indicators">
                 <i class="ti ti-database-cog me-1"></i> Master Indikator IKU (CRUD)
             </a>
         </li>
@@ -24,35 +24,50 @@ use App\Helpers\CsrfHelper;
     </div>
 </div>
 
-<div class="row g-4 mb-4">
+<div class="row g-3 mb-4">
     <div class="col-md-4">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Rata-rata Capaian IKU & Renstra</span>
-            <h3 class="fw-bold mb-0 mt-1 text-primary"><?= $avgAchievement ?>%</h3>
+        <div class="kpi-card p-3 p-md-4">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Rata-rata Capaian IKU</span>
+                <span class="kpi-icon bg-primary-subtle text-primary">
+                    <i class="ti ti-chart-arrows"></i>
+                </span>
+            </div>
+            <h3 class="fw-bold mb-0 text-primary"><?= $avgAchievement ?>%</h3>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Jumlah Indikator Dinamis</span>
-            <h3 class="fw-bold mb-0 mt-1"><?= count($indicators) ?> <span class="fs-6 fw-normal text-muted">Indikator</span></h3>
+        <div class="kpi-card p-3 p-md-4">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Indikator Dinamis</span>
+                <span class="kpi-icon bg-info-subtle text-info">
+                    <i class="ti ti-target-arrow"></i>
+                </span>
+            </div>
+            <h3 class="fw-bold mb-0"><?= count($indicators) ?> <span class="fs-6 fw-normal text-muted">Indikator</span></h3>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Program Strategis Renstra</span>
-            <h3 class="fw-bold mb-0 mt-1"><?= count($renstraPrograms) ?> <span class="fs-6 fw-normal text-muted">Program</span></h3>
+        <div class="kpi-card p-3 p-md-4">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Program Renstra</span>
+                <span class="kpi-icon bg-success-subtle text-success">
+                    <i class="ti ti-flag"></i>
+                </span>
+            </div>
+            <h3 class="fw-bold mb-0"><?= count($renstraPrograms) ?> <span class="fs-6 fw-normal text-muted">Program</span></h3>
         </div>
     </div>
 </div>
 
 <!-- 1. Indikator Kinerja Utama (IKU & Renstra) Table -->
-<div class="card card-lg shadow-sm border-0 rounded-4 mb-4">
-    <div class="card-header bg-body border-bottom py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-header bg-transparent border-bottom py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
         <div>
             <h5 class="card-title fw-bold mb-0">Capaian Target vs Realisasi Indikator Strategis (2026)</h5>
             <small class="text-muted">Pantau realisasi berkala atau klik <strong>Master Indikator IKU</strong> untuk menambah / mengubah parameter indikator.</small>
         </div>
-        <a href="<?= $baseUrl ?>/strategic/indicators" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
+        <a href="<?= $baseUrl ?>/strategic/indicators" class="btn btn-sm btn-soft-primary d-flex align-items-center gap-1">
             <i class="ti ti-settings"></i> Master Indikator IKU (CRUD)
         </a>
     </div>
@@ -74,12 +89,12 @@ use App\Helpers\CsrfHelper;
                 <tbody>
                     <?php foreach ($indicators as $ind): ?>
                         <tr>
-                            <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($ind['code'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="ps-4 fw-bold"><?= htmlspecialchars($ind['code'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td style="max-width: 280px;">
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($ind['name'], ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="fw-bold"><?= htmlspecialchars($ind['name'], ENT_QUOTES, 'UTF-8') ?></div>
                                 <small class="text-muted"><?= htmlspecialchars($ind['formula'] ?? '', ENT_QUOTES, 'UTF-8') ?></small>
                             </td>
-                            <td><span class="badge bg-light text-dark border"><?= $ind['category'] ?></span></td>
+                            <td><span class="badge bg-light-subtle text-body border"><?= $ind['category'] ?></span></td>
                             <td><strong><?= $ind['target_value'] ?></strong> <?= $ind['unit'] ?></td>
                             <td><strong class="text-primary"><?= $ind['realization_value'] ?? 0 ?></strong> <?= $ind['unit'] ?></td>
                             <td>
@@ -97,7 +112,7 @@ use App\Helpers\CsrfHelper;
                             <td><?= FormatHelper::statusBadge($ind['realization_status'] ?? 'Proses') ?></td>
                             <td class="text-end pe-4 text-nowrap">
                                 <div class="table-actions">
-                                    <button type="button" class="btn btn-sm btn-outline-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalRealization<?= $ind['id'] ?>" title="Input Realisasi Capaian">
+                                    <button type="button" class="btn btn-sm btn-soft-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalRealization<?= $ind['id'] ?>" title="Input Realisasi Capaian">
                                         <i class="ti ti-edit"></i> Realisasi
                                     </button>
                                 </div>
@@ -146,8 +161,8 @@ use App\Helpers\CsrfHelper;
 </div>
 
 <!-- 2. Renstra Strategic Programs -->
-<div class="card card-lg shadow-sm border-0 rounded-4">
-    <div class="card-header bg-body border-bottom py-3">
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-transparent border-bottom py-3">
         <h5 class="card-title fw-bold mb-0">Program Strategis Rencana Strategis (Renstra) Fakultas</h5>
     </div>
     <div class="card-body p-0">
@@ -167,8 +182,8 @@ use App\Helpers\CsrfHelper;
                 <tbody>
                     <?php foreach ($renstraPrograms as $prog): ?>
                         <tr>
-                            <td class="ps-4 fw-semibold text-dark" style="max-width: 220px;"><?= htmlspecialchars($prog['strategic_objective'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td class="fw-bold text-dark" style="max-width: 240px;"><?= htmlspecialchars($prog['program_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="ps-4 fw-semibold" style="max-width: 220px;"><?= htmlspecialchars($prog['strategic_objective'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="fw-bold" style="max-width: 240px;"><?= htmlspecialchars($prog['program_name'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($prog['pic'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= FormatHelper::currency($prog['budget']) ?></td>
                             <td><?= $prog['start_year'] ?> - <?= $prog['end_year'] ?></td>
@@ -186,3 +201,4 @@ use App\Helpers\CsrfHelper;
         </div>
     </div>
 </div>
+

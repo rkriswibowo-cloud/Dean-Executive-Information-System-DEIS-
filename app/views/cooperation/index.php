@@ -3,32 +3,50 @@ use App\Helpers\FormatHelper;
 use App\Helpers\CsrfHelper;
 ?>
 
-<div class="row g-4 mb-4">
+<div class="row g-3 mb-4">
     <div class="col-md-4">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Kerja Sama Aktif</span>
-            <h3 class="fw-bold mb-0 mt-1 text-success"><?= $totalActive ?> <span class="fs-6 fw-normal text-muted">Kemitraan</span></h3>
+        <div class="kpi-card p-3 p-md-4">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Kerja Sama Aktif</span>
+                <span class="kpi-icon bg-success-subtle text-success">
+                    <i class="fa-solid fa-handshake"></i>
+                </span>
+            </div>
+            <h3 class="fw-bold mb-0 text-success"><?= $totalActive ?> <span class="fs-6 fw-normal text-muted">Kemitraan</span></h3>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold text-warning">Akan Segera Berakhir</span>
-            <h3 class="fw-bold mb-0 mt-1 text-warning"><?= $totalExpiring ?> <span class="fs-6 fw-normal text-muted">Dokumen</span></h3>
+        <div class="kpi-card p-3 p-md-4">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Akan Segera Berakhir</span>
+                <span class="kpi-icon bg-warning-subtle text-warning">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </span>
+            </div>
+            <h3 class="fw-bold mb-0 text-warning"><?= $totalExpiring ?> <span class="fs-6 fw-normal text-muted">Dokumen</span></h3>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Realisasi Aktivitas Nyata</span>
-            <h3 class="fw-bold mb-0 mt-1 text-primary"><?= $totalActivities ?> <span class="fs-6 fw-normal text-muted">Kegiatan</span></h3>
+        <div class="kpi-card p-3 p-md-4">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Realisasi Aktivitas Nyata</span>
+                <span class="kpi-icon bg-primary-subtle text-primary">
+                    <i class="fa-solid fa-list-check"></i>
+                </span>
+            </div>
+            <h3 class="fw-bold mb-0 text-primary"><?= $totalActivities ?> <span class="fs-6 fw-normal text-muted">Kegiatan</span></h3>
         </div>
     </div>
 </div>
 
-<div class="card card-lg shadow-sm border-0 rounded-4">
-    <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h5 class="card-title fw-bold mb-0">Daftar Dokumen Kemitraan & Kerja Sama (MoU / MoA / IA)</h5>
-        <button type="button" class="btn btn-sm btn-primary btn-crud" data-bs-toggle="modal" data-bs-target="#modalAddCooperation">
-            <i class="ti ti-plus me-1"></i> Tambah Kerja Sama
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <h5 class="card-title fw-bold mb-0 text-body">Daftar Dokumen Kemitraan & Kerja Sama (MoU / MoA / IA)</h5>
+            <small class="text-muted">Monitoring masa berlaku kemitraan industri, perguruan tinggi, dan instansi</small>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#modalAddCooperation">
+            <i class="fa-solid fa-plus"></i> Tambah Kerja Sama
         </button>
     </div>
     <div class="card-body p-0">
@@ -50,8 +68,8 @@ use App\Helpers\CsrfHelper;
                     <?php foreach ($cooperations as $c): ?>
                         <tr class="<?= $c['status'] === 'Akan Berakhir' ? 'table-warning' : ($c['status'] === 'Kadaluarsa' ? 'table-danger' : '') ?>">
                             <td class="ps-4">
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($c['partner_name'], ENT_QUOTES, 'UTF-8') ?></div>
-                                <span class="badge bg-light text-dark border"><?= $c['type'] ?></span>
+                                <div class="fw-bold text-body"><?= htmlspecialchars($c['partner_name'], ENT_QUOTES, 'UTF-8') ?></div>
+                                <span class="badge bg-light-subtle text-body border"><?= $c['type'] ?></span>
                                 <small class="text-muted ms-1">PIC: <?= htmlspecialchars($c['pic_internal'], ENT_QUOTES, 'UTF-8') ?></small>
                             </td>
                             <td><span class="badge bg-info-subtle text-info border border-info-subtle"><?= $c['level'] ?></span></td>
@@ -72,14 +90,14 @@ use App\Helpers\CsrfHelper;
                             <td><?= FormatHelper::statusBadge($c['status']) ?></td>
                             <td class="text-end pe-4 text-nowrap">
                                 <div class="table-actions">
-                                    <button type="button" class="btn btn-sm btn-outline-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalEditCooperation<?= $c['id'] ?>" title="Update Kemitraan">
-                                        <i class="ti ti-edit"></i> Aksi Mitra
+                                    <button type="button" class="btn btn-sm btn-soft-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalEditCooperation<?= $c['id'] ?>" title="Update Kemitraan">
+                                        <i class="fa-solid fa-pen-to-square"></i> Aksi Mitra
                                     </button>
                                     <form action="<?= $baseUrl ?>/cooperations/delete" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data kemitraan dengan <?= htmlspecialchars($c['partner_name'], ENT_QUOTES, 'UTF-8') ?>?');">
                                         <?= CsrfHelper::tokenField() ?>
                                         <input type="hidden" name="id" value="<?= $c['id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger btn-icon-square" title="Hapus Kerja Sama">
-                                            <i class="ti ti-trash"></i>
+                                        <button type="submit" class="btn btn-sm btn-soft-danger btn-icon-square" title="Hapus Kerja Sama">
+                                            <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -88,9 +106,9 @@ use App\Helpers\CsrfHelper;
                                 <div class="modal fade" id="modalEditCooperation<?= $c['id'] ?>" tabindex="-1" aria-hidden="true" style="text-align: left;">
                                     <div class="modal-dialog modal-dialog-centered modal-lg">
                                         <div class="modal-content border-0 shadow-lg rounded-4">
-                                            <div class="modal-header bg-body border-bottom py-3">
-                                                <h6 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                                                    <i class="ti ti-handshake text-primary"></i> Update & Aksi Kemitraan Strategis
+                                            <div class="modal-header bg-transparent border-bottom py-3">
+                                                <h6 class="modal-title fw-bold text-body d-flex align-items-center gap-2">
+                                                    <i class="fa-solid fa-handshake text-primary"></i> Update & Aksi Kemitraan Strategis
                                                 </h6>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
@@ -151,10 +169,10 @@ use App\Helpers\CsrfHelper;
                                                         <input type="text" class="form-control" name="pic_internal" value="<?= htmlspecialchars($c['pic_internal'], ENT_QUOTES, 'UTF-8') ?>" required>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer bg-body border-top py-2">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                <div class="modal-footer bg-transparent border-top py-2">
+                                                    <button type="button" class="btn btn-sm btn-soft-secondary" data-bs-dismiss="modal">Tutup</button>
                                                     <button type="submit" class="btn btn-sm btn-primary fw-semibold">
-                                                        <i class="ti ti-device-floppy me-1"></i> Simpan Perubahan Mitra
+                                                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan Mitra
                                                     </button>
                                                 </div>
                                             </form>
@@ -176,8 +194,8 @@ use App\Helpers\CsrfHelper;
         <div class="modal-content border-0 shadow-lg rounded-4">
             <form action="<?= $baseUrl ?>/cooperations/create" method="POST">
                 <?= CsrfHelper::tokenField() ?>
-                <div class="modal-header bg-body border-bottom py-3">
-                    <h5 class="modal-title fw-bold">Tambah Dokumen Kerja Sama</h5>
+                <div class="modal-header bg-transparent border-bottom py-3">
+                    <h5 class="modal-title fw-bold text-body">Tambah Dokumen Kerja Sama</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
@@ -226,11 +244,12 @@ use App\Helpers\CsrfHelper;
                         <input type="text" class="form-control" name="pic_internal" placeholder="Nama dosen / pimpinan" required>
                     </div>
                 </div>
-                <div class="modal-footer bg-body border-top py-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <div class="modal-footer bg-transparent border-top py-2">
+                    <button type="button" class="btn btn-sm btn-soft-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sm btn-primary">Simpan Kerja Sama</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+

@@ -7,27 +7,27 @@ use App\Helpers\AuthHelper;
 <!-- Header -->
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
     <div>
-        <h3 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
-            <i class="ti ti-user-shield text-primary fs-2"></i> Manajemen Pengguna & Hak Akses (RBAC)
+        <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-users-gear text-primary fs-3"></i> Manajemen Pengguna & Hak Akses (RBAC)
         </h3>
         <p class="text-muted small mb-0">Kelola akun pengguna, peran sistem (Dekan, Kaprodi, Dosen, SPMI, Operator, Admin), dan status akses.</p>
     </div>
     <div class="page-header-actions">
-        <button type="button" class="btn btn-primary shadow-sm btn-crud" data-bs-toggle="modal" data-bs-target="#modalAddUser">
-            <i class="ti ti-user-plus"></i> Tambah Pengguna Baru
+        <button type="button" class="btn btn-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalAddUser">
+            <i class="fa-solid fa-user-plus"></i> Tambah Pengguna Baru
         </button>
     </div>
 </div>
 
-<div class="card card-lg shadow-sm border-0 rounded-4">
-    <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+<div class="card card-lg shadow-sm">
+    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h5 class="card-title fw-bold mb-0">Daftar Pengguna Sistem</h5>
         <span class="badge bg-primary-subtle text-primary"><?= count($users) ?> Pengguna</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="bg-body-tertiary text-muted small text-uppercase">
+                <thead>
                     <tr>
                         <th class="ps-4">Nama Lengkap & NIDN</th>
                         <th>Username</th>
@@ -43,16 +43,16 @@ use App\Helpers\AuthHelper;
                         <tr>
                             <td class="ps-4">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="avatar avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold">
+                                    <div class="avatar avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px; font-size: 0.85rem;">
                                         <?= strtoupper(substr($u['name'], 0, 1)) ?>
                                     </div>
                                     <div>
-                                        <div class="fw-bold text-dark"><?= htmlspecialchars($u['name'], ENT_QUOTES, 'UTF-8') ?></div>
+                                        <div class="fw-bold"><?= htmlspecialchars($u['name'], ENT_QUOTES, 'UTF-8') ?></div>
                                         <small class="text-muted"><?= !empty($u['nidn']) ? 'NIDN: ' . $u['nidn'] : 'Pengguna Non-Dosen' ?></small>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge bg-light text-dark border">@<?= htmlspecialchars($u['username'], ENT_QUOTES, 'UTF-8') ?></span></td>
+                            <td><span class="badge bg-light border">@<?= htmlspecialchars($u['username'], ENT_QUOTES, 'UTF-8') ?></span></td>
                             <td>
                                 <div><?= htmlspecialchars($u['email'], ENT_QUOTES, 'UTF-8') ?></div>
                                 <small class="text-muted"><?= htmlspecialchars($u['phone'] ?? '-', ENT_QUOTES, 'UTF-8') ?></small>

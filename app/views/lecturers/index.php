@@ -6,55 +6,79 @@ use App\Helpers\CsrfHelper;
 <!-- Header -->
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
     <div>
-        <h3 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
-            <i class="ti ti-users text-primary fs-2"></i> Data Master SDM & Kinerja Dosen
+        <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-chalkboard-user text-primary fs-3"></i> Data Master SDM & Kinerja Dosen
         </h3>
         <p class="text-muted small mb-0">Kelola biodata dosen, jabatan fungsional, kualifikasi pendidikan, kepatuhan BKD, dan capaian Tri Dharma.</p>
     </div>
     <div class="page-header-actions d-flex gap-2">
-        <a href="<?= $baseUrl ?>/lecturers/kpi" class="btn btn-outline-warning shadow-sm btn-crud">
-            <i class="ti ti-trophy"></i> Ranking KPI Dosen
+        <a href="<?= $baseUrl ?>/lecturers/kpi" class="btn btn-outline-warning btn-crud-sm">
+            <i class="fa-solid fa-trophy"></i> Ranking KPI Dosen
         </a>
-        <button type="button" class="btn btn-primary shadow-sm btn-crud" data-bs-toggle="modal" data-bs-target="#modalAddLecturer">
-            <i class="ti ti-user-plus"></i> Tambah Dosen Baru
+        <button type="button" class="btn btn-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalAddLecturer">
+            <i class="fa-solid fa-user-plus"></i> Tambah Dosen Baru
         </button>
     </div>
 </div>
 
 <!-- Statistics Cards -->
-<div class="row g-4 mb-4">
+<div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Total Dosen Fakultas</span>
-            <h3 class="fw-bold mb-0 mt-1"><?= $totalLecturers ?> <span class="fs-6 fw-normal text-muted">Dosen</span></h3>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Total Dosen Fakultas</div>
+                <div class="kpi-value"><?= number_format($totalLecturers) ?></div>
+                <div class="text-muted small mt-1">Tenaga Pendidik Aktif</div>
+            </div>
+            <div class="kpi-icon-wrap">
+                <i class="fa-solid fa-users"></i>
+            </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Kualifikasi S3 (Doktor)</span>
-            <h3 class="fw-bold mb-0 mt-1"><?= $s3Count ?> <span class="fs-6 fw-normal text-muted">(<?= round(($s3Count/($totalLecturers?:1))*100, 1) ?>%)</span></h3>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Kualifikasi S3 (Doktor)</div>
+                <div class="kpi-value"><?= $s3Count ?></div>
+                <div class="text-muted small mt-1"><?= round(($s3Count/($totalLecturers?:1))*100, 1) ?>% dari total dosen</div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(var(--primary-rgb), 0.12); color: var(--primary);">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Tersertifikasi Pendidik</span>
-            <h3 class="fw-bold mb-0 mt-1"><?= $certifiedCount ?> <span class="fs-6 fw-normal text-muted">Dosen</span></h3>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Tersertifikasi Pendidik</div>
+                <div class="kpi-value"><?= $certifiedCount ?></div>
+                <div class="text-muted small mt-1">Serdos Nasional</div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                <i class="fa-solid fa-certificate"></i>
+            </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card card-lg shadow-sm border-0 rounded-4 p-3">
-            <span class="text-muted small fw-semibold">Total Publikasi & PkM</span>
-            <h3 class="fw-bold mb-0 mt-1"><?= $totalPubs ?> Pub / <?= $totalPkm ?> PkM</h3>
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Total Publikasi & PkM</div>
+                <div class="kpi-value" style="font-size: 1.45rem;"><?= $totalPubs ?> <span class="fs-6 fw-normal text-muted">/ <?= $totalPkm ?></span></div>
+                <div class="text-muted small mt-1">Tri Dharma Terindeks</div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+                <i class="fa-solid fa-book-bookmark"></i>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Main Table Card -->
-<div class="card card-lg shadow-sm border-0 rounded-4">
-    <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+<div class="card card-lg shadow-sm">
+    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h5 class="card-title fw-bold mb-0">Daftar Dosen Fakultas</h5>
         <div class="d-flex align-items-center gap-2">
-            <select class="form-select form-select-sm" onchange="location.href='<?= $baseUrl ?>/lecturers?program_id=' + this.value">
+            <select class="form-select form-select-sm" style="width: auto; min-width: 200px;" onchange="location.href='<?= $baseUrl ?>/lecturers?program_id=' + this.value">
                 <option value="">Semua Program Studi</option>
                 <?php foreach ($programs as $p): ?>
                     <option value="<?= $p['id'] ?>" <?= $filterProgram == $p['id'] ? 'selected' : '' ?>><?= $p['name'] ?></option>
@@ -65,7 +89,7 @@ use App\Helpers\CsrfHelper;
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="bg-body-tertiary text-muted small text-uppercase">
+                <thead>
                     <tr>
                         <th class="ps-4">Nama Dosen & NIDN</th>
                         <th>Jabatan & Pendidikan</th>
@@ -81,7 +105,7 @@ use App\Helpers\CsrfHelper;
                     <?php foreach ($lecturers as $l): ?>
                         <tr class="<?= $l['bkd_status'] === 'Belum Memenuhi' || $l['attendance_percentage'] < 75 ? 'table-warning' : '' ?>">
                             <td class="ps-4">
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($l['name'], ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="fw-bold"><?= htmlspecialchars($l['name'], ENT_QUOTES, 'UTF-8') ?></div>
                                 <small class="text-muted">NIDN: <?= $l['nidn'] ?> <?= !empty($l['email']) ? '• ' . $l['email'] : '' ?></small>
                             </td>
                             <td>

@@ -88,13 +88,13 @@ class FormatHelper {
     public static function priorityBadge(?string $priority): string {
         switch ($priority) {
             case 'Tinggi':
-                return '<span class="badge bg-danger text-white"><i class="ti ti-flame me-1"></i>Tinggi</span>';
+                return '<span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1"><i class="ti ti-flame me-1"></i>Tinggi</span>';
             case 'Sedang':
-                return '<span class="badge bg-warning text-dark"><i class="ti ti-alert-triangle me-1"></i>Sedang</span>';
+                return '<span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1"><i class="ti ti-alert-triangle me-1"></i>Sedang</span>';
             case 'Rendah':
-                return '<span class="badge bg-secondary text-white"><i class="ti ti-arrow-down me-1"></i>Rendah</span>';
+                return '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1"><i class="ti ti-arrow-down me-1"></i>Rendah</span>';
             default:
-                return '<span class="badge bg-light text-dark">' . htmlspecialchars($priority ?? '-', ENT_QUOTES, 'UTF-8') . '</span>';
+                return '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">' . htmlspecialchars($priority ?? '-', ENT_QUOTES, 'UTF-8') . '</span>';
         }
     }
 

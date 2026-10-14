@@ -3,10 +3,10 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Sidebar Toggle Logic (Desktop collapse & Mobile offcanvas drawer)
-    const sidebar = document.getElementById('miniSidebar');
+    // 1. Sidebar Toggle Logic (Handled cleanly by OBE Design System in main.php)
+    const sidebar = document.getElementById('appSidebar') || document.getElementById('miniSidebar');
     const backdrop = document.getElementById('sidebarBackdrop');
-    const toggleButtons = document.querySelectorAll('.sidebar-toggle, #sidebarToggleBtn, [data-sidebar-toggle]');
+    const toggleButtons = document.querySelectorAll('.sidebar-toggle-legacy');
     const closeButtons = document.querySelectorAll('.sidebar-close-btn');
 
     // Initialize sidebar expanded state on desktop
@@ -259,8 +259,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (table.dataset.paginated === 'true') return;
             table.dataset.paginated = 'true';
 
-            // Default page size: 5 for responsive view, or from data attribute
-            let defaultSize = table.getAttribute('data-page-size') || '5';
+            // Default page size: 10 rows or from data attribute
+            let defaultSize = table.getAttribute('data-page-size') || '10';
             let pageSize = defaultSize === 'all' ? 'all' : parseInt(defaultSize, 10);
             let currentPage = 1;
 
@@ -271,9 +271,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             paginationWrapper.innerHTML = `
                 <div class="table-pagination-info">
-                    <span>Menampilkan <strong class="page-start text-dark">1</strong> - <strong class="page-end text-dark">5</strong> dari <strong class="page-total text-dark">${allRows.length}</strong> data</span>
                     <div class="table-page-size-select">
-                        <label for="pageSizeSelect_${tableIndex}" class="mb-0 text-muted">Tampilkan:</label>
+                        <label for="pageSizeSelect_${tableIndex}" class="text-muted small mb-0">Tampilkan:</label>
                         <select class="form-select form-select-sm page-size-select" id="pageSizeSelect_${tableIndex}">
                             <option value="5" ${pageSize === 5 ? 'selected' : ''}>5</option>
                             <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
@@ -282,9 +281,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             <option value="all" ${pageSize === 'all' ? 'selected' : ''}>Semua</option>
                         </select>
                     </div>
+                    <span class="text-muted small">
+                        Menampilkan <strong class="page-start text-body fw-semibold">1</strong>–<strong class="page-end text-body fw-semibold">10</strong> dari <strong class="page-total text-body fw-semibold">${allRows.length}</strong> data
+                    </span>
                 </div>
-                <nav aria-label="Navigasi Halaman Tabel">
-                    <ul class="deis-pagination pagination-nav"></ul>
+                <nav aria-label="Navigasi Halaman Tabel" class="table-pagination-nav">
+                    <ul class="pagination pagination-sm deis-pagination pagination-nav mb-0"></ul>
                 </nav>
             `;
 
@@ -300,6 +302,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const endEl = paginationWrapper.querySelector('.page-end');
             const totalEl = paginationWrapper.querySelector('.page-total');
             const selectEl = paginationWrapper.querySelector('.page-size-select');
+            const navContainer = paginationWrapper.querySelector('.table-pagination-nav');
             const navEl = paginationWrapper.querySelector('.pagination-nav');
 
             function render() {
@@ -309,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (total === 0) {
                     startEl.textContent = '0';
                     endEl.textContent = '0';
-                    navEl.innerHTML = '';
+                    if (navContainer) navContainer.style.display = 'none';
                     return;
                 }
 
@@ -327,33 +330,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Slice row visibility
                 allRows.forEach((row, idx) => {
-                    if (idx >= startIdx && idx < endIdx) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                    row.style.display = (idx >= startIdx && idx < endIdx) ? '' : 'none';
                 });
 
-                // Build pagination buttons (Always build buttons so user sees pagination is active!)
+                // If only 1 page, hide the pagination buttons for a tidy UI
+                if (totalPages <= 1) {
+                    if (navContainer) navContainer.style.display = 'none';
+                    return;
+                } else {
+                    if (navContainer) navContainer.style.display = '';
+                }
+
+                // Build pagination buttons
                 navEl.innerHTML = '';
 
-                // 1. First button
-                const firstLi = document.createElement('li');
-                firstLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-                firstLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Halaman Pertama"><i class="ti ti-chevrons-left"></i></a>`;
-                firstLi.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (currentPage !== 1) {
-                        currentPage = 1;
-                        render();
-                    }
-                });
-                navEl.appendChild(firstLi);
+                // 1. First button (Only shown if totalPages > 5)
+                if (totalPages > 5) {
+                    const firstLi = document.createElement('li');
+                    firstLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                    firstLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Halaman Pertama" aria-label="Pertama"><i class="fa-solid fa-angles-left"></i></a>`;
+                    firstLi.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (currentPage !== 1) {
+                            currentPage = 1;
+                            render();
+                        }
+                    });
+                    navEl.appendChild(firstLi);
+                }
 
                 // 2. Previous button
                 const prevLi = document.createElement('li');
                 prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-                prevLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Sebelumnya"><i class="ti ti-chevron-left"></i></a>`;
+                prevLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Sebelumnya" aria-label="Sebelumnya"><i class="fa-solid fa-chevron-left"></i></a>`;
                 prevLi.addEventListener('click', (e) => {
                     e.preventDefault();
                     if (currentPage > 1) {
@@ -384,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (startPage > 2) {
                         const dots = document.createElement('li');
                         dots.className = 'page-item disabled';
-                        dots.innerHTML = `<span class="page-link">...</span>`;
+                        dots.innerHTML = `<span class="page-link dots">…</span>`;
                         navEl.appendChild(dots);
                     }
                 }
@@ -408,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (endPage < totalPages - 1) {
                         const dots = document.createElement('li');
                         dots.className = 'page-item disabled';
-                        dots.innerHTML = `<span class="page-link">...</span>`;
+                        dots.innerHTML = `<span class="page-link dots">…</span>`;
                         navEl.appendChild(dots);
                     }
 
@@ -422,7 +431,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // 4. Next button
                 const nextLi = document.createElement('li');
                 nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-                nextLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Berikutnya"><i class="ti ti-chevron-right"></i></a>`;
+                nextLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Berikutnya" aria-label="Berikutnya"><i class="fa-solid fa-chevron-right"></i></a>`;
                 nextLi.addEventListener('click', (e) => {
                     e.preventDefault();
                     if (currentPage < totalPages) {
@@ -432,18 +441,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 navEl.appendChild(nextLi);
 
-                // 5. Last button
-                const lastLi = document.createElement('li');
-                lastLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-                lastLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Halaman Terakhir"><i class="ti ti-chevrons-right"></i></a>`;
-                lastLi.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (currentPage !== totalPages) {
-                        currentPage = totalPages;
-                        render();
-                    }
-                });
-                navEl.appendChild(lastLi);
+                // 5. Last button (Only shown if totalPages > 5)
+                if (totalPages > 5) {
+                    const lastLi = document.createElement('li');
+                    lastLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+                    lastLi.innerHTML = `<a class="page-link" href="javascript:void(0);" title="Halaman Terakhir" aria-label="Terakhir"><i class="fa-solid fa-angles-right"></i></a>`;
+                    lastLi.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (currentPage !== totalPages) {
+                            currentPage = totalPages;
+                            render();
+                        }
+                    });
+                    navEl.appendChild(lastLi);
+                }
             }
 
             selectEl.addEventListener('change', function () {

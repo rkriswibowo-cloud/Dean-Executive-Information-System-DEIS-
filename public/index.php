@@ -153,5 +153,10 @@ $app->get('/audit', 'AuditController@index');
 $app->get('/search', 'SearchController@search');
 $app->post('/ai/chat', 'AiController@chat');
 
+// 18. Notifications System
+$app->post('/notifications/mark-read', 'NotificationController@markAllRead');
+$app->post('/notifications/read-item', 'NotificationController@markItemRead');
+$app->get('/notifications/poll', 'NotificationController@poll');
+
 // Run the application
 $app->run();
