@@ -5,7 +5,16 @@ use App\Helpers\CsrfHelper;
 <div class="card card-lg shadow-sm border-0 rounded-4">
     <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h5 class="card-title fw-bold mb-0">Struktur Kurikulum & Kesiapan RPS</h5>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <?php if (!empty($obeAvailable)): ?>
+                <form action="<?= $baseUrl ?>/academic/sync-obe" method="POST" class="d-inline" onsubmit="return confirm('Sinkronkan seluruh data mata kuliah dari OBE ke DEIS?');">
+                    <?= CsrfHelper::tokenField() ?>
+                    <input type="hidden" name="return_url" value="academic/courses">
+                    <button type="submit" class="btn btn-sm btn-warning fw-bold text-dark btn-crud-sm shadow-sm">
+                        <i class="ti ti-refresh me-1"></i> Sinkronkan dari OBE
+                    </button>
+                </form>
+            <?php endif; ?>
             <a href="<?= $baseUrl ?>/academic/rps-monitoring" class="btn btn-sm btn-primary fw-semibold btn-crud-sm shadow-sm">
                 <i class="ti ti-chart-pie me-1"></i> Dashboard Analitik RPS
             </a>

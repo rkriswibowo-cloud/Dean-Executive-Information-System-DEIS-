@@ -1516,18 +1516,60 @@ html.light .content-area {
    LIGHT MODE SPECIFIC CARD & COMPONENT CONTRAST ENHANCEMENTS
    Ensures cards, KPI panels, and containers are razor-sharp in light mode
    ========================================================================== */
-[data-theme="light"] .card,
-[data-bs-theme="light"] .card,
-html.light .card {
+[data-theme="light"] .card:not(.text-white):not([class*="bg-"]):not([style*="background: linear-gradient"]):not([style*="background:linear-gradient"]),
+[data-bs-theme="light"] .card:not(.text-white):not([class*="bg-"]):not([style*="background: linear-gradient"]):not([style*="background:linear-gradient"]),
+html.light .card:not(.text-white):not([class*="bg-"]):not([style*="background: linear-gradient"]):not([style*="background:linear-gradient"]) {
     background-color: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.08), 0 1px 4px -1px rgba(15, 23, 42, 0.04) !important;
 }
 
+/* Biarkan card berlatar belakang gelap / gradien tetap mempertahankan teks putih kontras */
+[data-theme="light"] .card.text-white,
+[data-theme="light"] .card[style*="background: linear-gradient"],
+[data-bs-theme="light"] .card.text-white,
+[data-bs-theme="light"] .card[style*="background: linear-gradient"],
+html.light .card.text-white,
+html.light .card[style*="background: linear-gradient"] {
+    color: #ffffff !important;
+}
+[data-theme="light"] .card.text-white h1,
+[data-theme="light"] .card.text-white h2,
+[data-theme="light"] .card.text-white h3,
+[data-theme="light"] .card.text-white h4,
+[data-theme="light"] .card.text-white h5,
+[data-theme="light"] .card.text-white h6,
+[data-theme="light"] .card[style*="background: linear-gradient"] h1,
+[data-theme="light"] .card[style*="background: linear-gradient"] h2,
+[data-theme="light"] .card[style*="background: linear-gradient"] h3,
+[data-theme="light"] .card[style*="background: linear-gradient"] h4,
+[data-theme="light"] .card[style*="background: linear-gradient"] h5,
+[data-theme="light"] .card[style*="background: linear-gradient"] h6,
+[data-bs-theme="light"] .card.text-white h1,
+[data-bs-theme="light"] .card.text-white h2,
+[data-bs-theme="light"] .card.text-white h3,
+[data-bs-theme="light"] .card.text-white h4,
+[data-bs-theme="light"] .card.text-white h5,
+[data-bs-theme="light"] .card.text-white h6,
+[data-bs-theme="light"] .card[style*="background: linear-gradient"] h1,
+[data-bs-theme="light"] .card[style*="background: linear-gradient"] h2,
+[data-bs-theme="light"] .card[style*="background: linear-gradient"] h3,
+[data-bs-theme="light"] .card[style*="background: linear-gradient"] h4,
+[data-bs-theme="light"] .card[style*="background: linear-gradient"] h5,
+[data-bs-theme="light"] .card[style*="background: linear-gradient"] h6 {
+    color: #ffffff !important;
+}
+[data-theme="light"] .card.text-white .text-white-50,
+[data-theme="light"] .card[style*="background: linear-gradient"] .text-white-50,
+[data-bs-theme="light"] .card.text-white .text-white-50,
+[data-bs-theme="light"] .card[style*="background: linear-gradient"] .text-white-50 {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
 /* Override utility classes that might strip card borders in light mode */
-[data-theme="light"] .card.border-0,
-[data-bs-theme="light"] .card.border-0,
-html.light .card.border-0 {
+[data-theme="light"] .card.border-0:not(.text-white):not([style*="background: linear-gradient"]),
+[data-bs-theme="light"] .card.border-0:not(.text-white):not([style*="background: linear-gradient"]),
+html.light .card.border-0:not(.text-white):not([style*="background: linear-gradient"]) {
     border: 1px solid #cbd5e1 !important;
 }
 
@@ -1589,13 +1631,38 @@ html.light .kpi-card:hover {
     box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.12) !important;
 }
 
-[data-theme="light"] .kpi-title {
-    color: #64748b !important;
+[data-theme="light"] .kpi-title,
+[data-bs-theme="light"] .kpi-title,
+html.light .kpi-title {
+    color: #475569 !important;
     font-weight: 700 !important;
+    font-size: 0.815rem !important;
+    letter-spacing: 0.025em !important;
+    text-transform: uppercase !important;
 }
 
-[data-theme="light"] .kpi-value {
+[data-theme="light"] .kpi-value,
+[data-bs-theme="light"] .kpi-value,
+html.light .kpi-value {
     color: #0f172a !important;
+    font-weight: 800 !important;
+}
+
+[data-theme="light"] .kpi-value.text-primary,
+[data-bs-theme="light"] .kpi-value.text-primary {
+    color: var(--primary) !important;
+}
+[data-theme="light"] .kpi-value.text-success,
+[data-bs-theme="light"] .kpi-value.text-success {
+    color: #059669 !important;
+}
+[data-theme="light"] .kpi-value.text-danger,
+[data-bs-theme="light"] .kpi-value.text-danger {
+    color: #dc2626 !important;
+}
+[data-theme="light"] .kpi-value.text-warning,
+[data-bs-theme="light"] .kpi-value.text-warning {
+    color: #d97706 !important;
 }
 
 /* Light Mode Containers with inline var(--surface) */

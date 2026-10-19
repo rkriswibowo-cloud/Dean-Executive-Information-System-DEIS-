@@ -86,6 +86,8 @@ $app->post('/academic/meeting/update', 'AcademicController@updateMeeting');
 $app->post('/academic/meeting/delete', 'AcademicController@deleteMeeting');
 $app->get('/academic/courses', 'AcademicController@courses');
 $app->get('/academic/rps-monitoring', 'AcademicController@rpsMonitoring');
+$app->get('/academic/obe-live', 'AcademicController@obeLive');
+$app->post('/academic/sync-obe', 'AcademicController@syncObe');
 $app->get('/academic/export-lecture', 'AcademicController@exportLecture');
 $app->get('/academic/export-rps', 'AcademicController@exportRps');
 $app->get('/academic/practicum', 'AcademicController@practicum');

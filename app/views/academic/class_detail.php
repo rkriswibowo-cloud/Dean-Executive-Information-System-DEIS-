@@ -10,13 +10,13 @@ $avgAttendance = round((float)($summary['avg_attendance'] ?? $class['average_att
 
 <div class="row g-3 mb-4">
     <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-primary text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-white banner-executive-card position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%) !important;">
             <div class="position-relative z-1 d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
-                    <a href="<?= $baseUrl ?>/academic" class="btn btn-sm btn-light bg-opacity-25 text-white border-0 mb-3 px-3">
+                    <a href="<?= $baseUrl ?>/academic" class="btn btn-sm btn-light bg-opacity-25 text-white border-0 mb-3 px-3 shadow-none">
                         <i class="ti ti-arrow-left me-1"></i> Kembali ke Daftar Kelas
                     </a>
-                    <div class="d-flex align-items-center gap-2 mb-2">
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                         <span class="badge bg-white text-primary fw-bold px-3 py-1 fs-6"><?= htmlspecialchars($class['course_code'], ENT_QUOTES, 'UTF-8') ?></span>
                         <span class="badge bg-light bg-opacity-25 text-white border border-white border-opacity-25">Kelas <?= htmlspecialchars($class['class_name'], ENT_QUOTES, 'UTF-8') ?></span>
                         <span class="badge bg-light bg-opacity-25 text-white border border-white border-opacity-25"><?= $class['sks'] ?> SKS</span>
@@ -24,8 +24,8 @@ $avgAttendance = round((float)($summary['avg_attendance'] ?? $class['average_att
                             <span class="badge bg-danger text-white"><i class="ti ti-alert-triangle me-1"></i>Perlu Evaluasi Dekanat</span>
                         <?php endif; ?>
                     </div>
-                    <h3 class="fw-bold mb-1 text-white"><?= htmlspecialchars($class['course_name'], ENT_QUOTES, 'UTF-8') ?></h3>
-                    <div class="text-white-50 small">
+                    <h3 class="fw-bold mb-1 text-white" style="color: #ffffff !important;"><?= htmlspecialchars($class['course_name'], ENT_QUOTES, 'UTF-8') ?></h3>
+                    <div class="small" style="color: rgba(255, 255, 255, 0.85) !important;">
                         <i class="ti ti-user me-1"></i> Dosen: <strong class="text-white"><?= htmlspecialchars($class['lecturer_name'], ENT_QUOTES, 'UTF-8') ?></strong> (NIDN: <?= htmlspecialchars($class['lecturer_nidn'] ?? '-', ENT_QUOTES, 'UTF-8') ?>) &bull;
                         <i class="ti ti-school me-1 ms-2"></i> Prodi: <strong class="text-white"><?= htmlspecialchars($class['program_name'], ENT_QUOTES, 'UTF-8') ?></strong> &bull;
                         <i class="ti ti-door me-1 ms-2"></i> Ruang: <strong class="text-white"><?= htmlspecialchars($class['room'] ?? 'Lab/Kelas', ENT_QUOTES, 'UTF-8') ?></strong>

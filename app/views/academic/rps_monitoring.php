@@ -15,18 +15,30 @@ $caseMethodPct = $totalCourses > 0 ? round(($caseMethodCount / $totalCourses) * 
 <!-- Header & Navigasi -->
 <div class="row g-3 mb-4">
     <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-white banner-executive-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%) !important;">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
-                    <div class="badge bg-primary-subtle text-primary fw-bold mb-2 px-3 py-1">
+                    <div class="badge bg-primary text-white fw-bold mb-2 px-3 py-1 shadow-sm">
                         <i class="ti ti-shield-check me-1"></i> Penjaminan Mutu Pembelajaran & IKU-7
                     </div>
-                    <h3 class="fw-bold mb-1 text-white">Monitoring Kesiapan RPS & Kurikulum OBE</h3>
-                    <div class="text-white-50 small">
+                    <h3 class="fw-bold mb-1 text-white" style="color: #ffffff !important;">Monitoring Kesiapan RPS & Kurikulum OBE</h3>
+                    <div class="small" style="color: rgba(255, 255, 255, 0.85) !important;">
                         Pusat kendali audit dekanat untuk keselarasan Capaian Pembelajaran Lulusan (CPL), dokumen RPS, dan metode pembelajaran partisipatif (Case Method / Project-Based).
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <?php if (!empty($obeAvailable)): ?>
+                        <form action="<?= $baseUrl ?>/academic/sync-obe" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menyinkronkan seluruh mata kuliah dan status RPS dari sistem OBE ke DEIS?');">
+                            <?= CsrfHelper::tokenField() ?>
+                            <input type="hidden" name="return_url" value="academic/rps-monitoring">
+                            <button type="submit" class="btn btn-warning btn-sm fw-bold text-dark shadow-sm">
+                                <i class="ti ti-refresh me-1"></i> Sinkronkan dari OBE
+                            </button>
+                        </form>
+                        <a href="<?= $baseUrl ?>/academic/obe-live" class="btn btn-light btn-sm fw-semibold text-primary shadow-sm">
+                            <i class="ti ti-database-search me-1"></i> Data Realtime OBE
+                        </a>
+                    <?php endif; ?>
                     <a href="<?= $baseUrl ?>/academic/export-rps?format=csv" class="btn btn-outline-light btn-sm">
                         <i class="ti ti-download me-1"></i> Ekspor CSV
                     </a>

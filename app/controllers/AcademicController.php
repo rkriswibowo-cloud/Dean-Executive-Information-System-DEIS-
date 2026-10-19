@@ -238,6 +238,9 @@ class AcademicController extends Controller {
         $summary = $courseModel->getRpsSummary();
         $prodiStats = $courseModel->getRpsByProdi();
 
+        $obeService = new \App\Services\ObeSyncService();
+        $obeAvailable = $obeService->isObeAvailable();
+
         $this->render('academic/rps_monitoring', [
             'title'             => 'Dashboard Analitik & Monitoring Kesiapan RPS Dekanat',
             'courses'           => $courses,
@@ -246,8 +249,56 @@ class AcademicController extends Controller {
             'filterStatus'      => $filterStatus,
             'filterCaseMethod'  => $filterCaseMethod,
             'summary'           => $summary,
-            'prodiStats'        => $prodiStats
+            'prodiStats'        => $prodiStats,
+            'obeAvailable'      => $obeAvailable
         ]);
+    }
+
+    /**
+     * Tampilan Realtime Data Langsung dari Sistem OBE (Opsi 1)
+     */
+    public function obeLive(): void {
+        $this->requireAuth();
+
+        $obeService = new \App\Services\ObeSyncService();
+        if (!$obeService->isObeAvailable()) {
+            $this->redirect('academic/rps-monitoring', ['danger' => 'Database OBE (obe_cpl) tidak terdeteksi di server lokal.']);
+        }
+
+        $filterProdi = (int)$this->getQuery('prodi_id', 0);
+        $obeCourses = $obeService->getRealtimeObeCourses($filterProdi ?: null);
+
+        $programModel = new StudyProgram();
+        $programs = $programModel->all();
+
+        $this->render('academic/obe_live', [
+            'title'       => 'Data Realtime Mata Kuliah & RPS Langsung dari Sistem OBE',
+            'obeCourses'  => $obeCourses,
+            'programs'    => $programs,
+            'filterProdi' => $filterProdi
+        ]);
+    }
+
+    /**
+     * Eksekusi Sinkronisasi Data Mata Kuliah & RPS dari OBE ke DEIS (Opsi 2)
+     */
+    public function syncObe(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $returnUrl = $this->getPost('return_url', 'academic/rps-monitoring');
+
+        try {
+            $obeService = new \App\Services\ObeSyncService();
+            $result = $obeService->syncCoursesFromObe();
+
+            AuditService::log('SYNC_OBE_COURSES', 'courses', null, null, $result);
+
+            $msg = "Sinkronisasi berhasil! Sebanyak {$result['total']} mata kuliah dari sistem OBE telah disinkronkan (Baru: {$result['inserted']}, Diperbarui: {$result['updated']}).";
+            $this->redirect($returnUrl, ['success' => $msg]);
+        } catch (\Exception $e) {
+            $this->redirect($returnUrl, ['danger' => 'Gagal menyinkronkan data dari OBE: ' . $e->getMessage()]);
+        }
     }
 
     public function courses(): void {
@@ -259,11 +310,15 @@ class AcademicController extends Controller {
         $courses = $courseModel->allWithLecturerAndProgram($filterProgram ?: null);
         $programs = $programModel->all();
 
+        $obeService = new \App\Services\ObeSyncService();
+        $obeAvailable = $obeService->isObeAvailable();
+
         $this->render('academic/courses', [
             'title'         => 'Data Kurikulum & Mata Kuliah',
             'courses'       => $courses,
             'programs'      => $programs,
-            'filterProgram' => $filterProgram
+            'filterProgram' => $filterProgram,
+            'obeAvailable'  => $obeAvailable
         ]);
     }
 
