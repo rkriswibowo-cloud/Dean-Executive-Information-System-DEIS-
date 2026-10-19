@@ -61,15 +61,15 @@ html.dark {
   --bs-body-bg-rgb: 0, 0, 0;
 }
 
-/* LIGHT MODE (Pure Crisp White & Deep Black High-Contrast Theme) */
+/* LIGHT MODE (Pure Crisp White & Deep Slate High-Contrast Theme) */
 [data-theme="light"],
 [data-bs-theme="light"],
 html.light {
-  --background: #ffffff;
+  --background: #f1f5f9;
   --surface: #ffffff;
-  --surface-hover: #f4f4f5;
-  --border: #e4e4e7;
-  --border-subtle: #f4f4f5;
+  --surface-hover: #f1f5f9;
+  --border: #cbd5e1;
+  --border-subtle: #e2e8f0;
   
   --primary: #0284c7;
   --primary-hover: #0369a1;
@@ -81,15 +81,15 @@ html.light {
   --danger: #dc2626;
   --info: #0284c7;
   
-  --text-main: #000000;
-  --text-muted: #52525b;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
   --text-inverse: #ffffff;
   
   --card-bg: #ffffff;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 18px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.1), 0 2px 6px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+  --shadow-card: 0 2px 8px -1px rgba(15, 23, 42, 0.08), 0 1px 4px -1px rgba(15, 23, 42, 0.05);
   
   --input-bg: #ffffff;
   --input-border: #cbd5e1;
@@ -97,20 +97,20 @@ html.light {
   --sidebar-bg: #ffffff;
   --sidebar-active: #f1f5f9;
   --table-header-bg: #f8fafc;
-  --table-hover-bg: #f8fafc;
+  --table-hover-bg: #f1f5f9;
 
   /* Bootstrap 5 Overrides */
   --bs-body-bg: var(--background);
   --bs-body-color: var(--text-main);
-  --bs-card-bg: var(--surface);
-  --bs-card-border-color: var(--border);
-  --bs-border-color: var(--border);
+  --bs-card-bg: #ffffff;
+  --bs-card-border-color: #cbd5e1;
+  --bs-border-color: #cbd5e1;
   --bs-primary: var(--primary);
   --bs-primary-rgb: var(--primary-rgb);
   --bs-secondary-bg: var(--surface-hover);
   --bs-tertiary-bg: var(--surface-hover);
-  --bs-body-color-rgb: 0, 0, 0;
-  --bs-body-bg-rgb: 255, 255, 255;
+  --bs-body-color-rgb: 15, 23, 42;
+  --bs-body-bg-rgb: 241, 245, 249;
 }
 
 /* ==========================================================================
@@ -1360,6 +1360,14 @@ a:hover {
     flex-direction: column;
 }
 
+[data-theme="light"] .content-area,
+[data-bs-theme="light"] .content-area,
+html.light .content-area {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06) !important;
+}
+
 .content-body {
     flex: 1;
 }
@@ -1502,6 +1510,120 @@ a:hover {
     font-size: 1.25rem;
     background: rgba(var(--primary-rgb), 0.12);
     color: var(--primary);
+}
+
+/* ==========================================================================
+   LIGHT MODE SPECIFIC CARD & COMPONENT CONTRAST ENHANCEMENTS
+   Ensures cards, KPI panels, and containers are razor-sharp in light mode
+   ========================================================================== */
+[data-theme="light"] .card,
+[data-bs-theme="light"] .card,
+html.light .card {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.08), 0 1px 4px -1px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Override utility classes that might strip card borders in light mode */
+[data-theme="light"] .card.border-0,
+[data-bs-theme="light"] .card.border-0,
+html.light .card.border-0 {
+    border: 1px solid #cbd5e1 !important;
+}
+
+[data-theme="light"] .card-header,
+[data-bs-theme="light"] .card-header,
+html.light .card-header {
+    background-color: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .card-title,
+[data-theme="light"] .card-header .card-title,
+[data-theme="light"] .card-header h4,
+[data-theme="light"] .card-header h5,
+[data-theme="light"] .card-header h6 {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="light"] .card-subtitle {
+    color: #64748b !important;
+}
+
+[data-theme="light"] .card-body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .card-footer,
+[data-bs-theme="light"] .card-footer,
+html.light .card-footer {
+    background-color: #f8fafc !important;
+    border-top: 1px solid #e2e8f0 !important;
+    color: #64748b !important;
+}
+
+[data-theme="light"] .card.card-hover:hover,
+[data-bs-theme="light"] .card.card-hover:hover,
+html.light .card.card-hover:hover {
+    border-color: var(--primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.12), 0 4px 8px -2px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Light Mode KPI Summary Cards */
+[data-theme="light"] .kpi-card,
+[data-bs-theme="light"] .kpi-card,
+html.light .kpi-card {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.08), 0 1px 4px -1px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme="light"] .kpi-card:hover,
+[data-bs-theme="light"] .kpi-card:hover,
+html.light .kpi-card:hover {
+    border-color: var(--primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.12) !important;
+}
+
+[data-theme="light"] .kpi-title {
+    color: #64748b !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="light"] .kpi-value {
+    color: #0f172a !important;
+}
+
+/* Light Mode Containers with inline var(--surface) */
+[data-theme="light"] div[style*="background: var(--surface)"],
+[data-theme="light"] div[style*="background:var(--surface)"] {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.08), 0 1px 4px -1px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme="light"] div[style*="border-bottom: 1px solid var(--border)"],
+[data-theme="light"] div[style*="border-bottom:1px solid var(--border)"] {
+    background-color: #f8fafc !important;
+    border-bottom-color: #e2e8f0 !important;
+}
+
+/* Inside cards: list items & action boxes */
+[data-theme="light"] a[style*="background: var(--surface-hover)"],
+[data-theme="light"] a[style*="background:var(--surface-hover)"],
+[data-theme="light"] div[style*="background: var(--surface-hover)"],
+[data-theme="light"] div[style*="background:var(--surface-hover)"] {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+[data-theme="light"] a[style*="background: var(--surface-hover)"]:hover,
+[data-theme="light"] a[style*="background:var(--surface-hover)"]:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
 }
 
 /* --- Buttons --- */

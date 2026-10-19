@@ -13,6 +13,12 @@ spl_autoload_register(function ($class) {
     if (strncmp($prefix, $class, $len) !== 0) return;
     $relativeClass = substr($class, $len);
     $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
+    if (!file_exists($file)) {
+        $parts = explode('\\', $relativeClass);
+        $className = array_pop($parts);
+        $dir = strtolower(implode('/', $parts));
+        $file = $baseDir . ($dir ? $dir . '/' : '') . $className . '.php';
+    }
     if (file_exists($file)) require $file;
 });
 
