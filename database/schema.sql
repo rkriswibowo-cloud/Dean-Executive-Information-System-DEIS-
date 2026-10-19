@@ -186,6 +186,11 @@ CREATE TABLE `courses` (
     `kurikulum_year` VARCHAR(10) DEFAULT '2024',
     `lecturer_id` INT NULL,
     `rps_status` ENUM('Lengkap', 'Belum Lengkap', 'Revisi') DEFAULT 'Lengkap',
+    `cpl_status` VARCHAR(100) DEFAULT 'Terpenuhi',
+    `case_method_flag` TINYINT(1) DEFAULT 0,
+    `rps_document_url` VARCHAR(255) NULL,
+    `rps_updated_at` DATE NULL,
+    `rps_notes` TEXT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (`study_program_id`) REFERENCES `study_programs`(`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -207,6 +212,27 @@ CREATE TABLE `classes` (
     FOREIGN KEY (`course_id`) REFERENCES `courses`(`id`) ON DELETE CASCADE,
     FOREIGN KEY (`academic_year_id`) REFERENCES `academic_years`(`id`) ON DELETE CASCADE,
     FOREIGN KEY (`lecturer_id`) REFERENCES `lecturers`(`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 11b. Class Meetings (Jurnal Pertemuan Perkuliahan)
+CREATE TABLE `class_meetings` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `class_id` INT NOT NULL,
+    `meeting_no` INT NOT NULL,
+    `meeting_date` DATE NOT NULL,
+    `start_time` TIME NULL,
+    `end_time` TIME NULL,
+    `room` VARCHAR(50) NULL,
+    `topic` VARCHAR(255) NOT NULL,
+    `subtopic` TEXT NULL,
+    `delivery_method` ENUM('Tatap Muka', 'Daring', 'Hybrid', 'Praktikum / Lab') DEFAULT 'Tatap Muka',
+    `student_present` INT NOT NULL DEFAULT 0,
+    `student_total` INT NOT NULL DEFAULT 0,
+    `attendance_percentage` DECIMAL(5,2) DEFAULT 0,
+    `status` ENUM('Terlaksana', 'Direncanakan', 'Pengganti / Reschedule', 'Batal') DEFAULT 'Terlaksana',
+    `lecturer_notes` TEXT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`class_id`) REFERENCES `classes`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 12. Guidances (DPA, Skripsi, Magang, MBKM)

@@ -6,6 +6,9 @@ use App\Helpers\CsrfHelper;
     <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h5 class="card-title fw-bold mb-0">Struktur Kurikulum & Kesiapan RPS</h5>
         <div class="d-flex align-items-center gap-2">
+            <a href="<?= $baseUrl ?>/academic/rps-monitoring" class="btn btn-sm btn-primary fw-semibold btn-crud-sm shadow-sm">
+                <i class="ti ti-chart-pie me-1"></i> Dashboard Analitik RPS
+            </a>
             <select class="form-select form-select-sm" onchange="location.href='<?= $baseUrl ?>/academic/courses?program_id=' + this.value">
                 <option value="">Semua Program Studi</option>
                 <?php foreach ($programs as $p): ?>
@@ -57,6 +60,7 @@ use App\Helpers\CsrfHelper;
                                             <form action="<?= $baseUrl ?>/academic/action-rps" method="POST">
                                                 <?= CsrfHelper::tokenField() ?>
                                                 <input type="hidden" name="course_id" value="<?= $c['id'] ?>">
+                                                <input type="hidden" name="return_url" value="academic/courses">
                                                 <div class="modal-body p-4">
                                                     <div class="bg-body-tertiary p-3 rounded-3 mb-3">
                                                         <div class="fw-bold text-dark"><?= htmlspecialchars($c['code'], ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($c['name'], ENT_QUOTES, 'UTF-8') ?> (<?= $c['sks'] ?> SKS)</div>

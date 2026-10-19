@@ -72,7 +72,14 @@ $app->post('/master/academic-years', 'MasterController@academicYears');
 
 // 5. Akademik & Perkuliahan
 $app->get('/academic', 'AcademicController@index');
+$app->get('/academic/class-detail', 'AcademicController@classDetail');
+$app->post('/academic/meeting/create', 'AcademicController@createMeeting');
+$app->post('/academic/meeting/update', 'AcademicController@updateMeeting');
+$app->post('/academic/meeting/delete', 'AcademicController@deleteMeeting');
 $app->get('/academic/courses', 'AcademicController@courses');
+$app->get('/academic/rps-monitoring', 'AcademicController@rpsMonitoring');
+$app->get('/academic/export-lecture', 'AcademicController@exportLecture');
+$app->get('/academic/export-rps', 'AcademicController@exportRps');
 $app->get('/academic/practicum', 'AcademicController@practicum');
 $app->post('/academic/practicum/confirm', 'AcademicController@confirmPracticum');
 $app->post('/academic/practicum/update', 'AcademicController@updatePracticum');

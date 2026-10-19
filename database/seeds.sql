@@ -113,15 +113,15 @@ INSERT INTO `students` (`id`, `study_program_id`, `nim`, `name`, `batch_year`, `
 (12, 1, '240101003', 'Raffi Ahmadinejad', 2024, 2, 3.55, 20, 94.00, 'Aktif', 'Normal', NULL, NULL, 'Anggota Robotika');
 
 -- 9. Courses
-INSERT INTO `courses` (`id`, `study_program_id`, `code`, `name`, `sks`, `semester`, `kurikulum_year`, `lecturer_id`, `rps_status`) VALUES
-(1, 1, 'TIF301', 'Kecerdasan Buatan & Machine Learning', 3, 5, '2024', 4, 'Lengkap'),
-(2, 1, 'TIF204', 'Rekayasa Perangkat Lunak Terdistribusi', 3, 4, '2024', 2, 'Lengkap'),
-(3, 1, 'TIF102', 'Struktur Data & Algoritma Lanjut', 4, 2, '2024', 7, 'Lengkap'),
-(4, 1, 'TIF405', 'Keamanan Siber & Forensik Digital', 3, 6, '2024', 8, 'Belum Lengkap'), -- Problematic RPS
-(5, 2, 'SIF302', 'Enterprise Resource Planning (ERP)', 3, 5, '2024', 3, 'Lengkap'),
-(6, 2, 'SIF205', 'Manajemen Proses Bisnis Digital', 3, 4, '2024', 9, 'Lengkap'),
-(7, 3, 'DSF201', 'Analisis Multivariat Terapan', 3, 3, '2024', 6, 'Lengkap'),
-(8, 3, 'DSF303', 'Big Data Engineering & Cloud Data Lake', 3, 5, '2024', 10, 'Lengkap');
+INSERT INTO `courses` (`id`, `study_program_id`, `code`, `name`, `sks`, `semester`, `kurikulum_year`, `lecturer_id`, `rps_status`, `cpl_status`, `case_method_flag`, `rps_document_url`, `rps_updated_at`, `rps_notes`) VALUES
+(1, 1, 'TIF301', 'Kecerdasan Buatan & Machine Learning', 3, 5, '2024', 4, 'Lengkap', 'Memenuhi Standar OBE', 1, 'https://drive.google.com/file/d/rps-ai-2024', '2026-01-15', 'RPS terintegrasi Case Method dan project computer vision'),
+(2, 1, 'TIF204', 'Rekayasa Perangkat Lunak Terdistribusi', 3, 4, '2024', 2, 'Lengkap', 'Memenuhi Standar OBE', 1, 'https://drive.google.com/file/d/rps-rpl-2024', '2026-01-18', 'Sesuai CPL perancangan sistem terdistribusi & arsitektur mikroservis'),
+(3, 1, 'TIF102', 'Struktur Data & Algoritma Lanjut', 4, 2, '2024', 7, 'Lengkap', 'Memenuhi Standar OBE', 0, 'https://drive.google.com/file/d/rps-sda-2024', '2026-01-10', 'Silabus fundamental struktur data dan kompleksitas algoritma'),
+(4, 1, 'TIF405', 'Keamanan Siber & Forensik Digital', 3, 6, '2024', 8, 'Belum Lengkap', 'Revisi Rubrik Penilaian', 1, NULL, '2025-08-20', 'Belum menyertakan instrumen penilaian portofolio dan pustaka acuan terkini'),
+(5, 2, 'SIF302', 'Enterprise Resource Planning (ERP)', 3, 5, '2024', 3, 'Lengkap', 'Memenuhi Standar OBE', 1, 'https://drive.google.com/file/d/rps-erp-2024', '2026-01-22', 'Integrasi studi kasus SAP/Odoo modul finansial dan supply chain'),
+(6, 2, 'SIF205', 'Manajemen Proses Bisnis Digital', 3, 4, '2024', 9, 'Revisi', 'Perbaikan Pemetaan CPL', 1, 'https://drive.google.com/file/d/rps-mpbd-2024', '2026-02-02', 'Diminta Dekanat merevisi bobot evaluasi case study agar mencapai 50%'),
+(7, 3, 'DSF201', 'Analisis Multivariat Terapan', 3, 3, '2024', 6, 'Lengkap', 'Memenuhi Standar OBE', 0, 'https://drive.google.com/file/d/rps-amt-2024', '2026-01-12', 'Model regresi multivariat dan uji hipotesis data spasial'),
+(8, 3, 'DSF303', 'Big Data Engineering & Cloud Data Lake', 3, 5, '2024', 10, 'Lengkap', 'Memenuhi Standar OBE', 1, 'https://drive.google.com/file/d/rps-bde-2024', '2026-01-25', 'Praktikum pipeline ETL dengan Apache Spark dan GCP BigQuery');
 
 -- 10. Classes & Perkuliahan Monitoring
 INSERT INTO `classes` (`id`, `course_id`, `academic_year_id`, `lecturer_id`, `class_name`, `room`, `total_planned_meetings`, `total_held_meetings`, `average_attendance`, `problem_flag`, `problem_notes`) VALUES
@@ -137,6 +137,34 @@ INSERT INTO `classes` (`id`, `course_id`, `academic_year_id`, `lecturer_id`, `cl
 (10, 2, 1, 2, 'TI-4B', 'Ruang 205', 16, 12, 95.50, 0, NULL),
 (11, 5, 1, 3, 'SI-5B', 'Ruang 306', 16, 11, 89.00, 0, NULL),
 (12, 4, 1, 8, 'TI-6B', 'Lab Jaringan 202', 16, 7, 71.50, 1, 'Keterlambatan silabus & absensi mahasiswa di bawah 75%');
+
+-- 10b. Class Meetings (Jurnal Perkuliahan Terperinci)
+INSERT INTO `class_meetings` (`class_id`, `meeting_no`, `meeting_date`, `start_time`, `end_time`, `room`, `topic`, `subtopic`, `delivery_method`, `student_present`, `student_total`, `attendance_percentage`, `status`, `lecturer_notes`) VALUES
+(1, 1, '2026-02-16', '08:00:00', '10:30:00', 'Lab AI 301', 'Pengantar AI & Machine Learning Pipeline', 'Orientasi silabus, arsitektur AI modern, instalasi environment Python', 'Tatap Muka', 35, 35, 100.00, 'Terlaksana', 'Perkuliahan perdana berjalan sangat aktif'),
+(1, 2, '2026-02-23', '08:00:00', '10:30:00', 'Lab AI 301', 'Supervised Learning: Regresi Linear & Logistik', 'Gradien descent, cost function, evaluasi akurasi', 'Tatap Muka', 34, 35, 97.14, 'Terlaksana', 'Latihan hands-on scikit-learn selesai 100%'),
+(1, 3, '2026-03-02', '08:00:00', '10:30:00', 'Lab AI 301', 'Decision Trees, Random Forest & Ensembles', 'Entropy, information gain, hyperparameter tuning', 'Tatap Muka', 33, 35, 94.29, 'Terlaksana', 'Diskusi studi kasus klasifikasi nasabah kredit'),
+(1, 4, '2026-03-09', '08:00:00', '10:30:00', 'Lab AI 301', 'Support Vector Machines (SVM) & Kernel Tricks', 'Linear & non-linear boundaries, soft-margin formulation', 'Tatap Muka', 32, 35, 91.43, 'Terlaksana', 'Materi tuntas, tugas mandiri dataset MNIST'),
+(1, 5, '2026-03-16', '08:00:00', '10:30:00', 'Lab AI 301', 'Unsupervised Learning: K-Means & Hierarchical', 'Elbow method, silhouette analysis, reduksi dimensi PCA', 'Tatap Muka', 34, 35, 97.14, 'Terlaksana', 'Praktikum clustering data e-commerce'),
+(1, 6, '2026-03-23', '08:00:00', '10:30:00', 'Lab AI 301', 'Studi Kasus 1 (Case Method): Deteksi Anomali Jaringan', 'Pembedahan dataset serangan DDoS dan perancangan model', 'Hybrid', 33, 35, 94.29, 'Terlaksana', 'Pemenuhan IKU-7: Mahasiswa presentasi kelompok analitis'),
+(1, 7, '2026-03-30', '08:00:00', '10:30:00', 'Lab AI 301', 'Neural Network Fundamentals (MLP & Backpropagation)', 'Activation functions, loss optimization, epoch training', 'Tatap Muka', 32, 35, 91.43, 'Terlaksana', 'Simulasi feedforward manual dan PyTorch'),
+(1, 8, '2026-04-06', '08:00:00', '10:30:00', 'Lab AI 301', 'Ujian Tengah Semester (UTS)', 'Evaluasi teori dan implementasi kode model machine learning', 'Tatap Muka', 35, 35, 100.00, 'Terlaksana', 'Nilai rata-rata kelas: 82.4'),
+(1, 9, '2026-04-13', '08:00:00', '10:30:00', 'Lab AI 301', 'Convolutional Neural Networks (CNN)', 'Konvolusi, pooling, feature maps, arsitektur ResNet', 'Tatap Muka', 33, 35, 94.29, 'Terlaksana', 'Klasifikasi citra medis demo live'),
+(1, 10, '2026-04-20', '08:00:00', '10:30:00', 'Lab AI 301', 'Transfer Learning & Data Augmentation', 'Pretrained model ImageNet, fine-tuning strategi', 'Tatap Muka', 34, 35, 97.14, 'Terlaksana', 'Eksperimen model deteksi objek pertanian'),
+(1, 11, '2026-04-27', '08:00:00', '10:30:00', 'Lab AI 301', 'Natural Language Processing: Embeddings & RNN', 'Word2Vec, Tokenisasi, LSTM dasar', 'Tatap Muka', 31, 35, 88.57, 'Terlaksana', 'Analisis sentimen Twitter/X real data'),
+(1, 12, '2026-05-04', '08:00:00', '10:30:00', 'Lab AI 301', 'Project-Based Learning: Review Milestone Proyek Akhir', 'Konsultasi arsitektur model dan deployment API FastAPI', 'Hybrid', 33, 35, 94.29, 'Terlaksana', 'Setiap tim menunjukkan progres prototype minimal 70%'),
+(1, 13, '2026-05-11', '08:00:00', '10:30:00', 'Lab AI 301', 'Model Deployment, MLOps & Monitoring', 'Container Docker, latency profiling, drift detection', 'Tatap Muka', 0, 35, 0.00, 'Direncanakan', 'Terjadwal pekan depan'),
+(1, 14, '2026-05-18', '08:00:00', '10:30:00', 'Lab AI 301', 'Ekspo & Presentasi Akhir Proyek Mahasiswa', 'Demoday di hadapan dosen penguji dan mitra industri', 'Tatap Muka', 0, 35, 0.00, 'Direncanakan', 'Terjadwal pekan ke-14'),
+(1, 15, '2026-05-25', '08:00:00', '10:30:00', 'Lab AI 301', 'Refleksi CPL, Review Komprehensif & Portofolio', 'Evaluasi rubrik CPL lulusan dan submit laporan lengkap', 'Tatap Muka', 0, 35, 0.00, 'Direncanakan', 'Terjadwal pekan ke-15'),
+(1, 16, '2026-06-01', '08:00:00', '10:30:00', 'Lab AI 301', 'Ujian Akhir Semester (UAS)', 'Penilaian portofolio dan wawancara teknis individu', 'Tatap Muka', 0, 35, 0.00, 'Direncanakan', 'Terjadwal pekan ke-16'),
+(4, 1, '2026-02-17', '10:30:00', '13:00:00', 'Lab Jaringan 201', 'Pengantar Cyber Security & Threat Landscape', 'Konsep CIA Triad, vektor serangan modern, regulasi PDP', 'Tatap Muka', 28, 35, 80.00, 'Terlaksana', 'Kuliah perdana dimulai'),
+(4, 2, '2026-02-24', '10:30:00', '13:00:00', 'Lab Jaringan 201', 'Kriptografi Simetris & Asimetris', 'AES, RSA, hashing SHA-256, digital certificate', 'Tatap Muka', 25, 35, 71.43, 'Terlaksana', 'Sebagian mahasiswa terlambat'),
+(4, 3, '2026-03-03', '10:30:00', '13:00:00', 'Lab Jaringan 201', 'Network Security & Packet Inspection', 'Wireshark, TCP dump, analisis firewall rule', 'Tatap Muka', 22, 35, 62.86, 'Terlaksana', 'Praktikum jaringan lokal'),
+(4, 4, '2026-03-10', '10:30:00', '13:00:00', 'Lab Jaringan 201', 'Web Application Vulnerability (OWASP Top 10)', 'SQL Injection, XSS, CSRF exploitation demo', 'Tatap Muka', 24, 35, 68.57, 'Terlaksana', 'Lab simulasi DVWA'),
+(4, 5, '2026-03-17', '10:30:00', '13:00:00', 'Lab Jaringan 201', 'Pertemuan Dibatalkan', 'Dosen pengampu sakit mendadak tanpa konfirmasi pengganti', 'Tatap Muka', 0, 35, 0.00, 'Batal', 'Dibatalkan tanpa kelas pengganti'),
+(4, 6, '2026-03-24', '10:30:00', '13:00:00', 'Lab Jaringan 201', 'Sistem Deteksi Intrusi (IDS/IPS Snort)', 'Rule signature, alert correlation, konfigurasi agent', 'Tatap Muka', 23, 35, 65.71, 'Terlaksana', 'Materi tertinggal dari silabus'),
+(4, 7, '2026-03-31', '10:30:00', '13:00:00', 'Lab Jaringan 201', 'Digital Forensics Acquisition & Chain of Custody', 'Imaging disk, hash verification, write blocker', 'Tatap Muka', 26, 35, 74.29, 'Terlaksana', 'Pertemuan realisasi terakhir ke-6'),
+(4, 8, '2026-04-07', '10:30:00', '13:00:00', 'Lab Jaringan 201', 'UTS Tertunda', 'Belum diselenggarakan karena materi belum mencukupi batas minimal', 'Tatap Muka', 0, 35, 0.00, 'Batal', 'Tertunda');
+
 
 -- 11. Guidances
 INSERT INTO `guidances` (`id`, `lecturer_id`, `student_id`, `type`, `title`, `progress_percentage`, `status`, `last_guidance_date`) VALUES

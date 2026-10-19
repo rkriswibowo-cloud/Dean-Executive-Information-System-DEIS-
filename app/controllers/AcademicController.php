@@ -10,6 +10,7 @@ use App\Models\AcademicYear;
 
 use App\Models\PracticumModule;
 use App\Models\Approval;
+use App\Models\ClassMeeting;
 use App\Services\AuditService;
 
 class AcademicController extends Controller {
@@ -46,6 +47,209 @@ class AcademicController extends Controller {
         ]);
     }
 
+    /**
+     * Halaman Detail Jurnal Pertemuan Perkuliahan per Kelas
+     */
+    public function classDetail(): void {
+        $this->requireAuth();
+
+        $classId = (int)$this->getQuery('id', 0);
+        if ($classId <= 0) {
+            $this->redirect('academic', ['danger' => 'Kelas tidak ditemukan.']);
+        }
+
+        $classModel = new ClassModel();
+        $class = $classModel->findWithDetails($classId);
+        if (!$class) {
+            $this->redirect('academic', ['danger' => 'Data kelas perkuliahan tidak valid.']);
+        }
+
+        $meetingModel = new ClassMeeting();
+        $meetings = $meetingModel->byClass($classId);
+        $summary = $meetingModel->getSummaryByClass($classId);
+
+        $this->render('academic/class_detail', [
+            'title'    => 'Log & Jurnal Pertemuan: ' . $class['course_name'] . ' (' . $class['class_name'] . ')',
+            'class'    => $class,
+            'meetings' => $meetings,
+            'summary'  => $summary
+        ]);
+    }
+
+    /**
+     * Simpan / Tambah Log Pertemuan Baru
+     */
+    public function createMeeting(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $classId = (int)$this->getPost('class_id', 0);
+        $meetingNo = (int)$this->getPost('meeting_no', 1);
+        $meetingDate = $this->getPost('meeting_date', date('Y-m-d'));
+        $startTime = $this->getPost('start_time', '08:00');
+        $endTime = $this->getPost('end_time', '10:30');
+        $room = trim($this->getPost('room', ''));
+        $topic = trim($this->getPost('topic', ''));
+        $subtopic = trim($this->getPost('subtopic', ''));
+        $deliveryMethod = $this->getPost('delivery_method', 'Tatap Muka');
+        $present = (int)$this->getPost('student_present', 0);
+        $total = (int)$this->getPost('student_total', 35);
+        $status = $this->getPost('status', 'Terlaksana');
+        $notes = trim($this->getPost('lecturer_notes', ''));
+
+        if ($classId <= 0 || empty($topic)) {
+            $this->redirect('academic/class-detail?id=' . $classId, ['danger' => 'Topik perkuliahan wajib diisi.']);
+        }
+
+        $pct = $total > 0 ? round(($present / $total) * 100, 2) : 0;
+
+        $meetingModel = new ClassMeeting();
+        $meetingModel->create([
+            'class_id' => $classId,
+            'meeting_no' => $meetingNo,
+            'meeting_date' => $meetingDate,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'room' => $room,
+            'topic' => $topic,
+            'subtopic' => $subtopic,
+            'delivery_method' => $deliveryMethod,
+            'student_present' => $present,
+            'student_total' => $total,
+            'attendance_percentage' => $pct,
+            'status' => $status,
+            'lecturer_notes' => $notes
+        ]);
+
+        $this->syncClassStats($classId);
+        AuditService::log('CREATE_MEETING', 'class_meetings', (string)$classId, null, ['meeting_no' => $meetingNo, 'topic' => $topic]);
+        $this->redirect('academic/class-detail?id=' . $classId, ['success' => "Pertemuan ke-{$meetingNo} berhasil dicatat dalam log perkuliahan."]);
+    }
+
+    /**
+     * Update Log Pertemuan
+     */
+    public function updateMeeting(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $meetingId = (int)$this->getPost('meeting_id', 0);
+        $classId = (int)$this->getPost('class_id', 0);
+
+        if ($meetingId <= 0 || $classId <= 0) {
+            $this->redirect('academic', ['danger' => 'Data pertemuan tidak valid.']);
+        }
+
+        $present = (int)$this->getPost('student_present', 0);
+        $total = (int)$this->getPost('student_total', 35);
+        $pct = $total > 0 ? round(($present / $total) * 100, 2) : 0;
+
+        $meetingModel = new ClassMeeting();
+        $meetingModel->update($meetingId, [
+            'meeting_date' => $this->getPost('meeting_date', date('Y-m-d')),
+            'start_time' => $this->getPost('start_time', '08:00'),
+            'end_time' => $this->getPost('end_time', '10:30'),
+            'room' => trim($this->getPost('room', '')),
+            'topic' => trim($this->getPost('topic', '')),
+            'subtopic' => trim($this->getPost('subtopic', '')),
+            'delivery_method' => $this->getPost('delivery_method', 'Tatap Muka'),
+            'student_present' => $present,
+            'student_total' => $total,
+            'attendance_percentage' => $pct,
+            'status' => $this->getPost('status', 'Terlaksana'),
+            'lecturer_notes' => trim($this->getPost('lecturer_notes', ''))
+        ]);
+
+        $this->syncClassStats($classId);
+        AuditService::log('UPDATE_MEETING', 'class_meetings', (string)$meetingId, null, ['class_id' => $classId]);
+        $this->redirect('academic/class-detail?id=' . $classId, ['success' => 'Perubahan log pertemuan berhasil disimpan.']);
+    }
+
+    /**
+     * Hapus Log Pertemuan
+     */
+    public function deleteMeeting(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+
+        $meetingId = (int)$this->getPost('meeting_id', 0);
+        $classId = (int)$this->getPost('class_id', 0);
+
+        $meetingModel = new ClassMeeting();
+        $meetingModel->delete($meetingId);
+
+        $this->syncClassStats($classId);
+        AuditService::log('DELETE_MEETING', 'class_meetings', (string)$meetingId, null, ['class_id' => $classId]);
+        $this->redirect('academic/class-detail?id=' . $classId, ['warning' => 'Log pertemuan telah dihapus.']);
+    }
+
+    /**
+     * Hitung Ulang Total Realisasi Pertemuan dan Rata-rata Kehadiran Kelas
+     */
+    private function syncClassStats(int $classId): void {
+        $meetingModel = new ClassMeeting();
+        $summary = $meetingModel->getSummaryByClass($classId);
+        $held = (int)($summary['held_count'] ?? 0);
+        $avgAtt = round((float)($summary['avg_attendance'] ?? 0), 2);
+
+        $classModel = new ClassModel();
+        $classInfo = $classModel->find($classId);
+        $planned = (int)($classInfo['total_planned_meetings'] ?? 16);
+
+        // Otomatis cek problem flag jika realisasi < 50% atau rata presensi < 75%
+        $isProblem = ($held < ($planned * 0.5) || ($held > 0 && $avgAtt < 75.0)) ? 1 : 0;
+        $problemNotes = $classInfo['problem_notes'];
+        if ($isProblem && empty($problemNotes)) {
+            $problemNotes = 'Perkuliahan terdeteksi di bawah target minimum (Realisasi: ' . $held . '/' . $planned . ', Presensi: ' . $avgAtt . '%)';
+        }
+
+        $classModel->update($classId, [
+            'total_held_meetings' => $held,
+            'average_attendance'  => $avgAtt,
+            'problem_flag'        => $isProblem,
+            'problem_notes'       => $problemNotes
+        ]);
+    }
+
+    /**
+     * Dashboard Analitik & Monitoring Kesiapan RPS
+     */
+    public function rpsMonitoring(): void {
+        $this->requireAuth();
+
+        $courseModel = new Course();
+        $programModel = new StudyProgram();
+
+        $filterProgram = (int)$this->getQuery('program_id', 0);
+        $filterStatus = trim($this->getQuery('status', ''));
+        $filterCaseMethod = $this->getQuery('case_method', '');
+
+        $courses = $courseModel->allWithLecturerAndProgram($filterProgram ?: null);
+
+        // Filter status / case method
+        if (!empty($filterStatus)) {
+            $courses = array_filter($courses, fn($c) => $c['rps_status'] === $filterStatus);
+        }
+        if ($filterCaseMethod !== '') {
+            $courses = array_filter($courses, fn($c) => (int)($c['case_method_flag'] ?? 0) === (int)$filterCaseMethod);
+        }
+
+        $programs = $programModel->all();
+        $summary = $courseModel->getRpsSummary();
+        $prodiStats = $courseModel->getRpsByProdi();
+
+        $this->render('academic/rps_monitoring', [
+            'title'             => 'Dashboard Analitik & Monitoring Kesiapan RPS Dekanat',
+            'courses'           => $courses,
+            'programs'          => $programs,
+            'filterProgram'     => $filterProgram,
+            'filterStatus'      => $filterStatus,
+            'filterCaseMethod'  => $filterCaseMethod,
+            'summary'           => $summary,
+            'prodiStats'        => $prodiStats
+        ]);
+    }
+
     public function courses(): void {
         $this->requireAuth();
         $courseModel = new Course();
@@ -61,6 +265,97 @@ class AcademicController extends Controller {
             'programs'      => $programs,
             'filterProgram' => $filterProgram
         ]);
+    }
+
+    /**
+     * Ekspor Laporan Monitoring Pertemuan Perkuliahan (CSV / Cetak)
+     */
+    public function exportLecture(): void {
+        $this->requireAuth();
+        $format = $this->getQuery('format', 'csv');
+
+        $classModel = new ClassModel();
+        $ayModel = new AcademicYear();
+        $activeAy = $ayModel->getActive();
+        $classes = $classModel->allWithDetails($activeAy ? (int)$activeAy['id'] : null);
+
+        AuditService::log('EXPORT_LECTURE', 'classes', null, null, ['format' => $format]);
+
+        if ($format === 'csv') {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=monitoring_pertemuan_perkuliahan_' . date('Ymd_His') . '.csv');
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Kode MK', 'Nama Mata Kuliah', 'SKS', 'Kelas', 'Dosen Pengampu', 'Program Studi', 'Realisasi Pertemuan', 'Target Pertemuan', 'Rata-rata Presensi (%)', 'Status Problem', 'Catatan Dekanat']);
+            foreach ($classes as $c) {
+                fputcsv($out, [
+                    $c['course_code'],
+                    $c['course_name'],
+                    $c['sks'],
+                    $c['class_name'],
+                    $c['lecturer_name'],
+                    $c['program_name'],
+                    $c['total_held_meetings'],
+                    $c['total_planned_meetings'],
+                    $c['average_attendance'],
+                    $c['problem_flag'] ? 'Bermasalah / Perlu Evaluasi' : 'Normal',
+                    $c['problem_notes'] ?? '-'
+                ]);
+            }
+            fclose($out);
+            exit;
+        }
+
+        // Print preview
+        $this->render('academic/print_lecture', [
+            'title'    => 'Laporan Monitoring Tatap Muka & Presensi Perkuliahan',
+            'classes'  => $classes,
+            'activeAy' => $activeAy
+        ], 'layouts/print');
+    }
+
+    /**
+     * Ekspor Laporan Kesiapan RPS & Kurikulum OBE (CSV / Cetak)
+     */
+    public function exportRps(): void {
+        $this->requireAuth();
+        $format = $this->getQuery('format', 'csv');
+
+        $courseModel = new Course();
+        $courses = $courseModel->allWithLecturerAndProgram();
+        $summary = $courseModel->getRpsSummary();
+
+        AuditService::log('EXPORT_RPS', 'courses', null, null, ['format' => $format]);
+
+        if ($format === 'csv') {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=monitoring_kesiapan_rps_' . date('Ymd_His') . '.csv');
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Kode MK', 'Nama Mata Kuliah', 'SKS', 'Semester', 'Program Studi', 'Dosen Koordinator', 'Status RPS', 'Kesesuaian CPL', 'Metode Case Method (IKU-7)', 'Link Dokumen RPS', 'Catatan / Review Dekanat']);
+            foreach ($courses as $c) {
+                fputcsv($out, [
+                    $c['code'],
+                    $c['name'],
+                    $c['sks'],
+                    $c['semester'],
+                    $c['program_name'],
+                    $c['lecturer_name'] ?? '-',
+                    $c['rps_status'],
+                    $c['cpl_status'] ?? 'Terpenuhi',
+                    !empty($c['case_method_flag']) ? 'Ya (Case Method)' : 'Reguler',
+                    $c['rps_document_url'] ?? '-',
+                    $c['rps_notes'] ?? '-'
+                ]);
+            }
+            fclose($out);
+            exit;
+        }
+
+        // Print preview
+        $this->render('academic/print_rps', [
+            'title'   => 'Laporan Audit Kesiapan RPS & Kurikulum OBE',
+            'courses' => $courses,
+            'summary' => $summary
+        ], 'layouts/print');
     }
 
     public function guidance(): void {
@@ -292,19 +587,34 @@ class AcademicController extends Controller {
 
         $courseId = (int)$this->getPost('course_id', 0);
         $status = $this->getPost('status', 'Lengkap'); // 'Lengkap', 'Revisi', 'Belum Lengkap'
+        $cplStatus = trim($this->getPost('cpl_status', 'Memenuhi Standar OBE'));
+        $caseMethod = (int)$this->getPost('case_method_flag', 0);
+        $docUrl = trim($this->getPost('rps_document_url', ''));
         $notes = trim($this->getPost('notes', ''));
+        $returnUrl = $this->getPost('return_url', 'academic/rps-monitoring');
 
         if ($courseId <= 0) {
-            $this->redirect('academic/courses', ['danger' => 'ID Mata Kuliah tidak valid.']);
+            $this->redirect('academic/rps-monitoring', ['danger' => 'ID Mata Kuliah tidak valid.']);
         }
 
         $courseModel = new Course();
         $courseModel->update($courseId, [
-            'rps_status' => $status
+            'rps_status'       => $status,
+            'cpl_status'       => $cplStatus,
+            'case_method_flag' => $caseMethod,
+            'rps_document_url' => !empty($docUrl) ? $docUrl : null,
+            'rps_updated_at'   => date('Y-m-d'),
+            'rps_notes'        => $notes
         ]);
 
-        AuditService::log('APPROVE_RPS', 'courses', (string)$courseId, null, ['status' => $status, 'notes' => $notes]);
-        $this->redirect('academic/courses', ['success' => "Status RPS berhasil diperbarui menjadi '{$status}' oleh Dekanat."]);
+        AuditService::log('APPROVE_RPS', 'courses', (string)$courseId, null, [
+            'status'      => $status,
+            'cpl_status'  => $cplStatus,
+            'case_method' => $caseMethod,
+            'notes'       => $notes
+        ]);
+
+        $this->redirect($returnUrl, ['success' => "Status RPS dan validasi kurikulum berhasil diperbarui menjadi '{$status}'."]);
     }
 
     public function actionGuidance(): void {

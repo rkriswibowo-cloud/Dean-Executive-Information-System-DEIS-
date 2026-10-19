@@ -187,16 +187,22 @@ try {
                 </button>
                 <div class="sidebar-group-content">
                     <ul class="sidebar-nav">
-                        <li class="sidebar-nav-item <?= isNavActive('academic', $currentPath) && !isNavActive('academic/courses', $currentPath) && !isNavActive('academic/practicum', $currentPath) && !isNavActive('academic/guidance', $currentPath) ? 'active' : '' ?>">
+                        <li class="sidebar-nav-item <?= isNavActive('academic', $currentPath) && !isNavActive('academic/courses', $currentPath) && !isNavActive('academic/rps-monitoring', $currentPath) && !isNavActive('academic/class-detail', $currentPath) && !isNavActive('academic/practicum', $currentPath) && !isNavActive('academic/guidance', $currentPath) ? 'active' : '' ?>">
                             <a href="<?= $baseUrl ?>/academic" class="sidebar-link">
                                 <i class="fa-solid fa-chalkboard-user"></i>
                                 <span>Perkuliahan & Kelas</span>
                             </a>
                         </li>
+                        <li class="sidebar-nav-item <?= isNavActive('academic/rps-monitoring', $currentPath) ?>">
+                            <a href="<?= $baseUrl ?>/academic/rps-monitoring" class="sidebar-link">
+                                <i class="fa-solid fa-chart-pie"></i>
+                                <span>Monitoring RPS & CPL</span>
+                            </a>
+                        </li>
                         <li class="sidebar-nav-item <?= isNavActive('academic/courses', $currentPath) ?>">
                             <a href="<?= $baseUrl ?>/academic/courses" class="sidebar-link">
                                 <i class="fa-solid fa-book-bookmark"></i>
-                                <span>Kurikulum & Kesiapan RPS</span>
+                                <span>Kurikulum & RPS</span>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('academic/practicum', $currentPath) ?>">

@@ -1,0 +1,338 @@
+<?php
+use App\Helpers\FormatHelper;
+use App\Helpers\CsrfHelper;
+
+$totalCourses = (int)($summary['total_courses'] ?? count($courses));
+$completeCount = (int)($summary['complete_count'] ?? 0);
+$revisionCount = (int)($summary['revision_count'] ?? 0);
+$incompleteCount = (int)($summary['incomplete_count'] ?? 0);
+$caseMethodCount = (int)($summary['case_method_count'] ?? 0);
+
+$completePct = $totalCourses > 0 ? round(($completeCount / $totalCourses) * 100, 1) : 0;
+$caseMethodPct = $totalCourses > 0 ? round(($caseMethodCount / $totalCourses) * 100, 1) : 0;
+?>
+
+<!-- Header & Navigasi -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <div class="badge bg-primary-subtle text-primary fw-bold mb-2 px-3 py-1">
+                        <i class="ti ti-shield-check me-1"></i> Penjaminan Mutu Pembelajaran & IKU-7
+                    </div>
+                    <h3 class="fw-bold mb-1 text-white">Monitoring Kesiapan RPS & Kurikulum OBE</h3>
+                    <div class="text-white-50 small">
+                        Pusat kendali audit dekanat untuk keselarasan Capaian Pembelajaran Lulusan (CPL), dokumen RPS, dan metode pembelajaran partisipatif (Case Method / Project-Based).
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="<?= $baseUrl ?>/academic/export-rps?format=csv" class="btn btn-outline-light btn-sm">
+                        <i class="ti ti-download me-1"></i> Ekspor CSV
+                    </a>
+                    <a href="<?= $baseUrl ?>/academic/export-rps?format=print" target="_blank" class="btn btn-primary btn-sm fw-semibold shadow-sm">
+                        <i class="ti ti-printer me-1"></i> Cetak Dokumen Audit PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards RPS -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Total Mata Kuliah</div>
+                <div class="kpi-value text-dark"><?= $totalCourses ?></div>
+                <div class="text-muted small mt-1">Kurikulum Aktif 2024</div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(15, 23, 42, 0.08); color: #0f172a;">
+                <i class="ti ti-book fs-3"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">RPS Sah / Lengkap</div>
+                <div class="kpi-value text-success"><?= $completeCount ?> <span class="fs-6 text-muted">(<?= $completePct ?>%)</span></div>
+                <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar bg-success" style="width: <?= $completePct ?>%"></div>
+                </div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                <i class="ti ti-circle-check fs-3"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Perlu Revisi / Belum Lengkap</div>
+                <div class="kpi-value text-<?= ($revisionCount + $incompleteCount) > 0 ? 'danger' : 'muted' ?>">
+                    <?= $revisionCount + $incompleteCount ?>
+                </div>
+                <div class="text-muted small mt-1">Revisi: <?= $revisionCount ?> | Belum: <?= $incompleteCount ?></div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+                <i class="ti ti-alert-triangle fs-3"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div>
+                <div class="kpi-title">Capaian IKU-7 (Case Method)</div>
+                <div class="kpi-value text-primary"><?= $caseMethodCount ?> MK <span class="fs-6 text-muted">(<?= $caseMethodPct ?>%)</span></div>
+                <div class="text-muted small mt-1">Target Dikti: Min. 50% Rombel</div>
+            </div>
+            <div class="kpi-icon-wrap" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+                <i class="ti ti-users-group fs-3"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Komparasi Kesiapan RPS per Program Studi -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-body border-bottom py-3">
+                <h6 class="card-title fw-bold mb-0">Tingkat Kesiapan RPS & Kepatuhan CPL per Program Studi</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-body-tertiary text-muted small text-uppercase">
+                            <tr>
+                                <th class="ps-4">Program Studi</th>
+                                <th width="120" class="text-center">Total MK</th>
+                                <th width="150">RPS Lengkap</th>
+                                <th width="130">Revisi</th>
+                                <th width="130">Belum Lengkap</th>
+                                <th width="170">Capaian IKU-7 (Case)</th>
+                                <th width="180" class="pe-4">Progres Kesiapan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($prodiStats as $ps): 
+                                $pTotal = (int)$ps['total_courses'];
+                                $pComp = (int)$ps['complete_count'];
+                                $pRate = $pTotal > 0 ? round(($pComp / $pTotal) * 100, 1) : 0;
+                            ?>
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">
+                                        <?= htmlspecialchars($ps['program_name'], ENT_QUOTES, 'UTF-8') ?>
+                                        <span class="badge bg-secondary-subtle text-secondary ms-1"><?= $ps['degree'] ?></span>
+                                    </td>
+                                    <td class="text-center fw-semibold"><?= $pTotal ?></td>
+                                    <td><span class="badge bg-success-subtle text-success"><?= $ps['complete_count'] ?> MK</span></td>
+                                    <td><span class="badge bg-warning-subtle text-warning"><?= $ps['revision_count'] ?> MK</span></td>
+                                    <td><span class="badge bg-danger-subtle text-danger"><?= $ps['incomplete_count'] ?> MK</span></td>
+                                    <td>
+                                        <span class="badge bg-primary-subtle text-primary">
+                                            <i class="ti ti-check me-1"></i><?= $ps['case_method_count'] ?> MK
+                                        </span>
+                                    </td>
+                                    <td class="pe-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 6px;">
+                                                <div class="progress-bar bg-<?= $pRate >= 80 ? 'success' : ($pRate >= 50 ? 'warning' : 'danger') ?>" style="width: <?= $pRate ?>%"></div>
+                                            </div>
+                                            <span class="small fw-bold text-dark"><?= $pRate ?>%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter & Tabel Rinci Mata Kuliah & Dokumen RPS -->
+<div class="card card-lg shadow-sm border-0 rounded-4">
+    <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h5 class="card-title fw-bold mb-0">Daftar Mata Kuliah, Dokumen RPS & Validasi Dekanat</h5>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <select class="form-select form-select-sm" onchange="filterRps(this.value, 'program_id')">
+                <option value="">Semua Program Studi</option>
+                <?php foreach ($programs as $p): ?>
+                    <option value="<?= $p['id'] ?>" <?= $filterProgram == $p['id'] ? 'selected' : '' ?>><?= $p['name'] ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select class="form-select form-select-sm" onchange="filterRps(this.value, 'status')">
+                <option value="">Semua Status RPS</option>
+                <option value="Lengkap" <?= $filterStatus === 'Lengkap' ? 'selected' : '' ?>>Lengkap</option>
+                <option value="Revisi" <?= $filterStatus === 'Revisi' ? 'selected' : '' ?>>Revisi</option>
+                <option value="Belum Lengkap" <?= $filterStatus === 'Belum Lengkap' ? 'selected' : '' ?>>Belum Lengkap</option>
+            </select>
+            <select class="form-select form-select-sm" onchange="filterRps(this.value, 'case_method')">
+                <option value="">Semua Metode</option>
+                <option value="1" <?= $filterCaseMethod === '1' ? 'selected' : '' ?>>Hanya Case Method (IKU-7)</option>
+                <option value="0" <?= $filterCaseMethod === '0' ? 'selected' : '' ?>>Reguler Non-Case Method</option>
+            </select>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-body-tertiary text-muted small text-uppercase">
+                    <tr>
+                        <th class="ps-4">Kode & Mata Kuliah</th>
+                        <th>Semester / SKS</th>
+                        <th>Dosen Koordinator</th>
+                        <th>Status RPS</th>
+                        <th>Kesesuaian CPL</th>
+                        <th>Metode IKU-7</th>
+                        <th>Dokumen RPS</th>
+                        <th class="text-end pe-4">Aksi Pengesahan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($courses)): ?>
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                Tidak ada data mata kuliah yang sesuai filter.
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($courses as $c): ?>
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="badge bg-light text-dark border mb-1"><?= htmlspecialchars($c['code'], ENT_QUOTES, 'UTF-8') ?></span>
+                                    <div class="fw-bold text-dark"><?= htmlspecialchars($c['name'], ENT_QUOTES, 'UTF-8') ?></div>
+                                    <div class="small text-muted"><?= htmlspecialchars($c['program_name'], ENT_QUOTES, 'UTF-8') ?> &bull; Kurikulum <?= $c['kurikulum_year'] ?></div>
+                                </td>
+                                <td>
+                                    <div>Semester <?= $c['semester'] ?></div>
+                                    <div class="badge bg-secondary-subtle text-secondary"><?= $c['sks'] ?> SKS</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark"><?= htmlspecialchars($c['lecturer_name'] ?? 'Belum Ditugaskan', ENT_QUOTES, 'UTF-8') ?></div>
+                                </td>
+                                <td><?= FormatHelper::statusBadge($c['rps_status']) ?></td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                        <?= htmlspecialchars($c['cpl_status'] ?? 'Terpenuhi', ENT_QUOTES, 'UTF-8') ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php if (!empty($c['case_method_flag'])): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="ti ti-check me-1"></i>Case Method
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-muted border">Reguler</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (!empty($c['rps_document_url'])): ?>
+                                        <a href="<?= htmlspecialchars($c['rps_document_url'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="btn btn-sm btn-outline-primary btn-crud-sm">
+                                            <i class="ti ti-file-text me-1"></i> Buka RPS
+                                        </a>
+                                        <?php if (!empty($c['rps_updated_at'])): ?>
+                                            <div class="text-muted small mt-1" style="font-size: 7.5pt;"><?= date('d/m/Y', strtotime($c['rps_updated_at'])) ?></div>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="badge bg-danger-subtle text-danger"><i class="ti ti-x me-1"></i>Belum Unggah</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end pe-4 text-nowrap">
+                                    <button type="button" class="btn btn-sm btn-outline-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalAuditRps<?= $c['id'] ?>">
+                                        <i class="ti ti-certificate me-1"></i> Validasi Dekanat
+                                    </button>
+
+                                    <!-- Modal Validasi RPS Dekanat -->
+                                    <div class="modal fade" id="modalAuditRps<?= $c['id'] ?>" tabindex="-1" aria-hidden="true" style="text-align: left;">
+                                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                                            <div class="modal-content border-0 shadow-lg rounded-4">
+                                                <div class="modal-header bg-body border-bottom py-3">
+                                                    <h6 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                                        <i class="ti ti-certificate text-primary"></i> Pengesahan & Audit Dokumen RPS Dekanat
+                                                    </h6>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form action="<?= $baseUrl ?>/academic/action-rps" method="POST">
+                                                    <?= CsrfHelper::tokenField() ?>
+                                                    <input type="hidden" name="course_id" value="<?= $c['id'] ?>">
+                                                    <input type="hidden" name="return_url" value="academic/rps-monitoring">
+                                                    <div class="modal-body p-4">
+                                                        <div class="bg-body-tertiary p-3 rounded-3 mb-3">
+                                                            <div class="fw-bold text-dark"><?= htmlspecialchars($c['code'], ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($c['name'], ENT_QUOTES, 'UTF-8') ?> (<?= $c['sks'] ?> SKS)</div>
+                                                            <div class="small text-muted">Koordinator: <?= htmlspecialchars($c['lecturer_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?> &bull; Prodi: <?= htmlspecialchars($c['program_name'], ENT_QUOTES, 'UTF-8') ?></div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold small text-muted">Keputusan Status Pengesahan RPS</label>
+                                                                <select name="status" class="form-select" required>
+                                                                    <option value="Lengkap" <?= $c['rps_status'] === 'Lengkap' ? 'selected' : '' ?>>✅ Sahkan & Setujui (Lengkap)</option>
+                                                                    <option value="Revisi" <?= $c['rps_status'] === 'Revisi' ? 'selected' : '' ?>>⚠️ Minta Perbaikan / Revisi RPS</option>
+                                                                    <option value="Belum Lengkap" <?= $c['rps_status'] === 'Belum Lengkap' ? 'selected' : '' ?>>❌ Belum Lengkap / Dokumen Kurang</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold small text-muted">Kesesuaian CPL Kurikulum OBE</label>
+                                                                <select name="cpl_status" class="form-select">
+                                                                    <option value="Memenuhi Standar OBE" <?= ($c['cpl_status'] ?? '') === 'Memenuhi Standar OBE' ? 'selected' : '' ?>>Memenuhi Standar OBE</option>
+                                                                    <option value="Revisi Rubrik Penilaian" <?= ($c['cpl_status'] ?? '') === 'Revisi Rubrik Penilaian' ? 'selected' : '' ?>>Revisi Rubrik Penilaian</option>
+                                                                    <option value="Perbaikan Pemetaan CPL" <?= ($c['cpl_status'] ?? '') === 'Perbaikan Pemetaan CPL' ? 'selected' : '' ?>>Perbaikan Pemetaan CPL</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold small text-muted">Klasifikasi IKU-7 (Metode Pembelajaran)</label>
+                                                                <select name="case_method_flag" class="form-select">
+                                                                    <option value="1" <?= !empty($c['case_method_flag']) ? 'selected' : '' ?>>Ya - Case Method / Project-Based (IKU-7)</option>
+                                                                    <option value="0" <?= empty($c['case_method_flag']) ? 'selected' : '' ?>>Reguler Non-Case Method</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold small text-muted">Link / URL Berkas Dokumen RPS</label>
+                                                                <input type="url" name="rps_document_url" class="form-control" value="<?= htmlspecialchars($c['rps_document_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" placeholder="https://drive.google.com/...">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold small text-muted">Catatan Evaluasi / Rekomendasi Dekanat</label>
+                                                            <textarea name="notes" class="form-control" rows="3" placeholder="Masukkan arahan penyesuaian materi atau rubrik evaluasi..."><?= htmlspecialchars($c['rps_notes'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer bg-body border-top py-2">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                        <button type="submit" class="btn btn-sm btn-primary fw-semibold">
+                                                            <i class="ti ti-check me-1"></i> Simpan Hasil Validasi
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterRps(val, param) {
+    const url = new URL(window.location.href);
+    if (val) {
+        url.searchParams.set(param, val);
+    } else {
+        url.searchParams.delete(param);
+    }
+    window.location.href = url.toString();
+}
+</script>

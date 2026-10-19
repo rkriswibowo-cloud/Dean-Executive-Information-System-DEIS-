@@ -60,9 +60,15 @@ use App\Helpers\CsrfHelper;
             <h5 class="card-title fw-bold mb-0">Monitoring Perkuliahan & Presensi</h5>
             <div class="card-subtitle">Pengawasan langsung perkuliahan, jurnal mengajar, dan tingkat kehadiran kelas</div>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="<?= $baseUrl ?>/academic/rps-monitoring" class="btn btn-sm btn-primary fw-semibold btn-crud-sm shadow-sm">
+                <i class="ti ti-chart-dots me-1"></i> Monitoring RPS & CPL
+            </a>
             <a href="<?= $baseUrl ?>/academic/courses" class="btn btn-sm btn-outline-secondary btn-crud-sm">
                 <i class="fa-solid fa-book"></i> Kurikulum & RPS
+            </a>
+            <a href="<?= $baseUrl ?>/academic/export-lecture?format=csv" class="btn btn-sm btn-outline-secondary btn-crud-sm">
+                <i class="ti ti-download me-1"></i> Ekspor CSV
             </a>
             <a href="<?= $baseUrl ?>/academic/guidance" class="btn btn-sm btn-soft-primary btn-crud-sm">
                 <i class="fa-solid fa-users-rectangle"></i> Bimbingan
@@ -112,6 +118,9 @@ use App\Helpers\CsrfHelper;
                                 <?php endif; ?>
                             </td>
                             <td class="text-end pe-4 text-nowrap">
+                                <a href="<?= $baseUrl ?>/academic/class-detail?id=<?= $c['id'] ?>" class="btn btn-sm btn-outline-info btn-crud-sm me-1" title="Lihat Jurnal & Log Pertemuan (1-16)">
+                                    <i class="ti ti-list-details me-1"></i> Jurnal Pertemuan
+                                </a>
                                 <button type="button" class="btn btn-sm <?= $c['problem_flag'] ? 'btn-danger' : 'btn-outline-primary' ?> btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalClassAction<?= $c['id'] ?>">
                                     <i class="ti ti-shield-check me-1"></i> Aksi Dekan
                                 </button>
