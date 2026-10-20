@@ -5,12 +5,13 @@ use App\Core\Controller;
 use App\Models\Faculty;
 use App\Models\StudyProgram;
 use App\Models\Lecturer;
-use App\Models\Student;
 use App\Models\Meeting;
 use App\Models\Indicator;
 use App\Models\Finance;
 use App\Models\Accreditation;
 use App\Services\CommandCenterService;
+use App\Services\Obe\ObeReadConnection;
+use App\Services\Obe\StudentRepository as ObeStudentRepository;
 
 class DashboardController extends Controller {
     public function index(): void {
@@ -18,7 +19,6 @@ class DashboardController extends Controller {
 
         $studyProgramModel = new StudyProgram();
         $lecturerModel = new Lecturer();
-        $studentModel = new Student();
         $meetingModel = new Meeting();
         $indicatorModel = new Indicator();
         $financeModel = new Finance();
@@ -26,7 +26,14 @@ class DashboardController extends Controller {
 
         // 1. Executive Key Stats
         $programs = $studyProgramModel->allWithFaculty();
-        $totalStudents = $studentModel->count(['status' => 'Aktif']);
+        $obeError = null;
+        try {
+            $totalStudents = count((new ObeStudentRepository(new ObeReadConnection()))->all());
+        } catch (\Throwable $e) {
+            // Master identitas tidak boleh diam-diam kembali ke data lokal lama.
+            $totalStudents = 0;
+            $obeError = $e->getMessage();
+        }
         $totalLecturers = $lecturerModel->count(['status' => 'Aktif']);
         
         $db = $lecturerModel->getDb();
@@ -85,7 +92,8 @@ class DashboardController extends Controller {
             'criticalAlerts'      => $criticalAlerts,
             'upcomingMeetings'    => $upcomingMeetings,
             'indicators'          => $indicators,
-            'accreditations'      => $accreditations
+            'accreditations'      => $accreditations,
+            'obeError'            => $obeError
         ]);
     }
 
@@ -101,14 +109,22 @@ class DashboardController extends Controller {
         $this->requireAuth();
         $db = (new StudyProgram())->getDb();
 
-        // Student Trend by Study Program
-        $stmt = $db->query("
-            SELECT sp.code, sp.name, COUNT(s.id) as count 
-            FROM study_programs sp 
-            LEFT JOIN students s ON sp.id = s.study_program_id AND s.status = 'Aktif'
-            GROUP BY sp.id
-        ");
-        $studentDist = $stmt->fetchAll();
+        // Distribusi identitas mahasiswa selalu dihitung realtime dari OBE.
+        try {
+            $obeStudents = (new ObeStudentRepository(new ObeReadConnection()))->all();
+            $studentDistIndex = [];
+            foreach ($obeStudents as $student) {
+                $name = $student['study_program_name'] ?: $student['homebase'] ?: 'Tanpa Program Studi';
+                $key = (string)($student['study_program_id'] ?? $name);
+                if (!isset($studentDistIndex[$key])) {
+                    $studentDistIndex[$key] = ['code' => $key, 'name' => $name, 'count' => 0];
+                }
+                $studentDistIndex[$key]['count']++;
+            }
+            $studentDist = array_values($studentDistIndex);
+        } catch (\Throwable $e) {
+            $studentDist = [];
+        }
 
         // Lecturer Academic Rank Dist
         $stmt = $db->query("

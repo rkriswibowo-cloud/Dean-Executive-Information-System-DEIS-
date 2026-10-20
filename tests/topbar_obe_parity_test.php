@@ -21,8 +21,12 @@ $assert(!str_contains($topbar, 'topbar-divider-slash'), 'Pemisah slash lama masi
 $assert(str_contains($css, 'height: 64px;'), 'Tinggi topbar belum sama dengan OBE.');
 $assert(str_contains($css, '.brand-text-wrapper'), 'CSS brand OBE belum diterapkan.');
 $assert(str_contains($css, '.obe-topbar-clock'), 'CSS jam OBE belum diterapkan.');
-$assert(str_contains($css, 'color: #ffffff !important;'), 'Teks brand belum dikunci berwarna putih.');
+$assert(str_contains($css, 'background-color: var(--topbar-bg);'), 'Warna topbar belum mengikuti tema aktif.');
+$assert(!str_contains($css, 'background-color: #000000 !important;'), 'Topbar masih dipaksa hitam pada mode light.');
+$assert(str_contains($css, 'color: var(--text-main);'), 'Judul brand belum mengikuti warna tema aktif.');
 $assert(str_contains($css, 'flex-direction: column !important;'), 'Teks brand belum dikunci menjadi tiga baris vertikal.');
+$assert(str_contains($css, 'border-right: 1px solid var(--border);'), 'Garis pemisah brand belum mengikuti struktur OBE.');
+$assert(str_contains($css, 'padding-right: 12px;'), 'Jarak garis pemisah brand belum mengikuti OBE.');
 
 if ($failures !== []) {
     fwrite(STDERR, "FAILED ({$checks} checks)\n- " . implode("\n- ", $failures) . "\n");

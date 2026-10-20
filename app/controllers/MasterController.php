@@ -44,22 +44,81 @@ class MasterController extends Controller {
         $health = (new ObeHealthService())->check();
         $records = [];
         $counts = array_fill_keys($allowedSections, null);
+        $studyPrograms = [];
+        $curricula = [];
+
+        $filterProdiId = $this->getQuery('prodi_id');
+        $filterProdiId = ($filterProdiId !== null && $filterProdiId !== '') ? (int)$filterProdiId : null;
+
+        $filterCurriculumId = $this->getQuery('kurikulum_id');
+        $filterCurriculumId = ($filterCurriculumId !== null && $filterCurriculumId !== '') ? (int)$filterCurriculumId : null;
+
+        $searchQuery = trim((string)$this->getQuery('q', ''));
+
         if ($health['available']) {
             $reference = new AcademicReferenceRepository();
+            $studyPrograms = (new ObeStudyProgramRepository())->all(false);
+            $curricula = (new ObeCurriculumRepository())->all(null, false);
+
             $records = match ($section) {
                 'academic-years' => (new ObeAcademicYearRepository())->all(),
                 'lecturers' => (new ObeLecturerRepository())->all(),
                 'students' => (new ObeStudentRepository())->all(),
-                'study-programs' => (new ObeStudyProgramRepository())->all(false),
-                'curricula' => (new ObeCurriculumRepository())->all(),
+                'study-programs' => $studyPrograms,
+                'curricula' => (new ObeCurriculumRepository())->all($filterProdiId, false),
                 'curriculum-rules' => $reference->curriculumRules(),
                 'graduate-profiles' => $reference->graduateProfiles(),
                 'learning-outcomes' => $reference->learningOutcomes(),
-                'courses' => (new ObeCourseRepository())->all(null, null, false),
+                'courses' => (new ObeCourseRepository())->all($filterProdiId, $filterCurriculumId, false),
                 'rubrics' => $reference->rubrics(),
                 default => [],
             };
             $counts = $reference->counts();
+
+            // Client-side/memory filtering for common fields (prodi, curriculum, search query)
+            if ($filterProdiId !== null && !in_array($section, ['curricula', 'courses'], true)) {
+                $records = array_values(array_filter($records, static function (array $row) use ($filterProdiId): bool {
+                    if (isset($row['study_program_id'])) {
+                        return (int)$row['study_program_id'] === $filterProdiId;
+                    }
+                    if (isset($row['prodi_id'])) {
+                        return (int)$row['prodi_id'] === $filterProdiId;
+                    }
+                    if (isset($row['obe_id']) && isset($row['code']) && isset($row['degree'])) {
+                        // Untuk section study-programs jika difilter
+                        return (int)$row['obe_id'] === $filterProdiId;
+                    }
+                    return true;
+                }));
+            }
+
+            if ($filterCurriculumId !== null && $section !== 'courses') {
+                $records = array_values(array_filter($records, static function (array $row) use ($filterCurriculumId): bool {
+                    if (isset($row['curriculum_id'])) {
+                        return (int)$row['curriculum_id'] === $filterCurriculumId;
+                    }
+                    if (isset($row['kurikulum_id'])) {
+                        return (int)$row['kurikulum_id'] === $filterCurriculumId;
+                    }
+                    if (isset($row['obe_id']) && isset($row['start_year'])) {
+                        // Untuk section curricula
+                        return (int)$row['obe_id'] === $filterCurriculumId;
+                    }
+                    return true;
+                }));
+            }
+
+            if ($searchQuery !== '') {
+                $qLower = mb_strtolower($searchQuery, 'UTF-8');
+                $records = array_values(array_filter($records, static function (array $row) use ($qLower): bool {
+                    foreach ($row as $val) {
+                        if (is_scalar($val) && str_contains(mb_strtolower((string)$val, 'UTF-8'), $qLower)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }));
+            }
         }
 
         try {
@@ -76,6 +135,11 @@ class MasterController extends Controller {
             'counts' => $counts,
             'health' => $health,
             'mappingSummary' => $mappingSummary,
+            'studyPrograms' => $studyPrograms,
+            'curricula' => $curricula,
+            'filterProdiId' => $filterProdiId,
+            'filterCurriculumId' => $filterCurriculumId,
+            'searchQuery' => $searchQuery,
         ]);
     }
 

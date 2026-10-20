@@ -21,6 +21,9 @@ use App\Helpers\CsrfHelper;
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="<?= $baseUrl ?>/master/obe?section=courses<?= $filterProdi ? '&prodi_id=' . $filterProdi : '' ?>" class="btn btn-light bg-opacity-25 text-white border-0 fw-semibold shadow-none">
+                        <i class="ti ti-layout-grid me-1"></i> Master Data OBE
+                    </a>
                     <form action="<?= $baseUrl ?>/academic/obe-snapshot" method="POST" onsubmit="return confirm('Simpan kondisi master OBE saat ini sebagai snapshot historis di DEIS?');">
                         <?= CsrfHelper::tokenField() ?>
                         <button type="submit" class="btn btn-light fw-bold text-success shadow-sm">
@@ -114,21 +117,11 @@ use App\Helpers\CsrfHelper;
                                                 &middot; <?= htmlspecialchars($m['pjmk_tahun_akademik'], ENT_QUOTES, 'UTF-8') ?>
                                             <?php endif; ?>
                                         </div>
-                                        <?php if (!empty($m['deis_lecturer_id'])): ?>
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">
-                                                <i class="ti ti-link me-1"></i>Cocok di DEIS
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle mt-1">
-                                                <i class="ti ti-unlink me-1"></i>Belum cocok di DEIS
-                                            </span>
-                                        <?php endif; ?>
                                     <?php elseif (!empty($m['rps_dosen_pengampu'])): ?>
                                         <div class="small fw-semibold text-dark" style="white-space: pre-line;"><?= htmlspecialchars($m['rps_dosen_pengampu'], ENT_QUOTES, 'UTF-8') ?></div>
                                         <span class="badge bg-info-subtle text-info border border-info-subtle mt-1">
-                                            <i class="ti ti-file-text me-1"></i>Dari dokumen RPS
+                                            <i class="ti ti-file-text me-1"></i>Dokumen RPS
                                         </span>
-                                        <div class="small text-muted mt-1">Belum ada penugasan PJMK aktif yang dapat dicocokkan via NIDN.</div>
                                     <?php else: ?>
                                         <span class="badge bg-light text-muted border">Belum ditetapkan</span>
                                     <?php endif; ?>

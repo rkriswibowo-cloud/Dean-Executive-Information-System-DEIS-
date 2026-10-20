@@ -551,7 +551,7 @@ foreach ($modules as $m) {
     </div>
 </div>
 
-<!-- ================= MODAL 3: TAMBAH MATAKULIAH PRAKTIKUM BARU ================= -->
+<!-- ================= MODAL 3: TAMBAH MATAKULIAH PRAKTIKUM DARI PROYEK OBE ================= -->
 <div class="modal fade" id="createPracticumModal" tabindex="-1" aria-labelledby="createPracticumModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
@@ -566,42 +566,72 @@ foreach ($modules as $m) {
                 </div>
 
                 <div class="modal-body p-4">
+                    <div class="alert alert-info py-2 px-3 small d-flex align-items-center gap-2 mb-3">
+                        <i class="ti ti-database-check fs-5"></i>
+                        <div>
+                            <strong>Tersinkronisasi dengan OBE:</strong> Pilih Mata Kuliah dari kurikulum aktif proyek OBE untuk memuat Kode, Nama, Semester, dan Dosen PJMK/Koordinator secara otomatis.
+                        </div>
+                    </div>
+
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold text-dark small">Program Studi:</label>
-                            <select name="study_program_id" class="form-select form-select-sm" required>
+                            <select name="study_program_id" id="create_prodi" class="form-select form-select-sm" required>
+                                <option value="">-- Pilih Program Studi --</option>
                                 <?php foreach ($programs as $p): ?>
                                     <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?> (<?= htmlspecialchars($p['degree']) ?>)</option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold text-dark small">Kurikulum OBE:</label>
+                            <select id="create_kurikulum" class="form-select form-select-sm">
+                                <option value="">-- Semua Kurikulum --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-dark small d-flex justify-content-between align-items-center">
+                                <span>Pilih Mata Kuliah (Proyek OBE):</span>
+                                <span class="badge bg-light text-muted border fw-normal" id="course_count_badge">0 MK Tersedia</span>
+                            </label>
+                            <select id="create_course_select" class="form-select form-select-sm" required>
+                                <option value="">-- Pilih Program Studi terlebih dahulu --</option>
+                            </select>
+                            <div class="form-text small" style="font-size: 0.73rem;">
+                                Pilih mata kuliah untuk melengkapi data kode, nama, dan dosen pengampu secara otomatis.
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold text-dark small">Kode Matakuliah:</label>
+                            <input type="text" name="course_code" id="create_course_code" class="form-control form-control-sm font-monospace fw-bold" placeholder="Contoh: TI101" required readonly style="background-color: var(--bs-tertiary-bg, #f8f9fa);">
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label fw-semibold text-dark small">Nama Matakuliah Praktikum:</label>
+                            <input type="text" name="course_name" id="create_course_name" class="form-control form-control-sm fw-semibold" placeholder="Nama mata kuliah praktikum" required>
+                        </div>
+                        <div class="col-12 col-md-3">
                             <label class="form-label fw-semibold text-dark small">Semester:</label>
-                            <select name="semester" class="form-select form-select-sm" required>
+                            <select name="semester" id="create_semester" class="form-select form-select-sm" required>
                                 <?php for ($s = 1; $s <= 8; $s++): ?>
                                     <option value="<?= $s ?>">Semester <?= $s ?></option>
                                 <?php endfor; ?>
                             </select>
                         </div>
-                        <div class="col-12 col-md-4">
-                            <label class="form-label fw-semibold text-dark small">Kode Matakuliah:</label>
-                            <input type="text" name="course_code" class="form-control form-control-sm" placeholder="Contoh: TI101" required>
-                        </div>
-                        <div class="col-12 col-md-8">
-                            <label class="form-label fw-semibold text-dark small">Nama Matakuliah Praktikum:</label>
-                            <input type="text" name="course_name" class="form-control form-control-sm" placeholder="Contoh: Pemrograman Berorientasi Objek Lab" required>
-                        </div>
+
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold text-dark small">Laboratorium:</label>
-                            <input type="text" name="lab_name" class="form-control form-control-sm" placeholder="Contoh: Lab Rekayasa Perangkat Lunak" required>
+                            <input type="text" name="lab_name" id="create_lab_name" class="form-control form-control-sm" placeholder="Contoh: Lab Rekayasa Perangkat Lunak / Lab Komputer" required>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold text-dark small">Dosen Pengampu:</label>
-                            <input type="text" name="lecturer_name" class="form-control form-control-sm" placeholder="Nama lengkap Dosen" required>
+                            <label class="form-label fw-semibold text-dark small">Dosen Pengampu / PJMK:</label>
+                            <input type="text" name="lecturer_name" id="create_lecturer_name" class="form-control form-control-sm" placeholder="Nama lengkap Dosen PJMK" required>
                         </div>
+
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold text-dark small">Asisten Lab / Laboran:</label>
-                            <input type="text" name="assistant_name" class="form-control form-control-sm" placeholder="Nama Aslab pendamping">
+                            <label class="form-label fw-semibold text-dark small">Asisten Lab / Laboran (Opsional):</label>
+                            <input type="text" name="assistant_name" class="form-control form-control-sm" placeholder="Nama Aslab pendamping jika ada">
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold text-dark small">Ketersediaan Dokumen Modul:</label>
@@ -610,6 +640,7 @@ foreach ($modules as $m) {
                                 <option value="0">Belum Ada / Draft (0/1 Modul)</option>
                             </select>
                         </div>
+
                         <div class="col-12">
                             <label class="form-label fw-semibold text-dark small">Catatan Dekan Awal (Opsional):</label>
                             <textarea name="dekan_notes" class="form-control form-control-sm" rows="2" placeholder="Catatan instruksi atau arahan pemantauan dekan..."></textarea>
@@ -673,6 +704,139 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit_status').value = btn.getAttribute('data-status');
             document.getElementById('edit_dekan_notes').value = btn.getAttribute('data-notes');
             document.getElementById('edit_feedback').value = btn.getAttribute('data-feedback');
+        });
+    }
+
+    // 3. OBE Realtime Dynamic Course Selection
+    const obeCourses = <?= json_encode($obeCourses ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    const obeCurricula = <?= json_encode($obeCurricula ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+
+    const prodiSelect = document.getElementById('create_prodi');
+    const kurikulumSelect = document.getElementById('create_kurikulum');
+    const courseSelect = document.getElementById('create_course_select');
+    const courseCountBadge = document.getElementById('course_count_badge');
+    const courseCodeInput = document.getElementById('create_course_code');
+    const courseNameInput = document.getElementById('create_course_name');
+    const semesterSelect = document.getElementById('create_semester');
+    const lecturerInput = document.getElementById('create_lecturer_name');
+    const labInput = document.getElementById('create_lab_name');
+
+    function populateCourses() {
+        if (!prodiSelect || !courseSelect) return;
+
+        const selectedProdiId = parseInt(prodiSelect.value, 10);
+        const selectedKurikulumId = kurikulumSelect ? parseInt(kurikulumSelect.value, 10) : 0;
+
+        courseSelect.innerHTML = '';
+        courseCodeInput.value = '';
+        courseNameInput.value = '';
+
+        if (!selectedProdiId) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = '-- Pilih Program Studi terlebih dahulu --';
+            courseSelect.appendChild(opt);
+            if (courseCountBadge) courseCountBadge.textContent = '0 MK Tersedia';
+            return;
+        }
+
+        // Filter mata kuliah berdasarkan prodi DEIS (atau mapping obe_prodi_id) dan kurikulum
+        const filtered = obeCourses.filter(c => {
+            const matchProdi = (c.deis_prodi_id && c.deis_prodi_id === selectedProdiId) ||
+                               (c.obe_prodi_id && c.obe_prodi_id === selectedProdiId);
+            if (!matchProdi) return false;
+            if (selectedKurikulumId && selectedKurikulumId > 0) {
+                return c.kurikulum_id === selectedKurikulumId;
+            }
+            return true;
+        });
+
+        if (courseCountBadge) {
+            courseCountBadge.textContent = filtered.length + ' MK Tersedia (OBE)';
+        }
+
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = filtered.length > 0 ? '-- Pilih Mata Kuliah (' + filtered.length + ' MK) --' : '-- Tidak ada mata kuliah di kurikulum ini --';
+        courseSelect.appendChild(placeholder);
+
+        filtered.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.obe_mk_id;
+            opt.textContent = '[' + c.course_code + '] ' + c.course_name + ' (Sem. ' + c.semester + ' - ' + c.sks_total + ' SKS) · ' + c.kurikulum_nama;
+            opt.dataset.code = c.course_code;
+            opt.dataset.name = c.course_name;
+            opt.dataset.semester = c.semester;
+            opt.dataset.lecturer = c.lecturer_name || '';
+            opt.dataset.sks = c.sks_total;
+            opt.dataset.sksP = c.sks_praktek;
+            courseSelect.appendChild(opt);
+        });
+    }
+
+    function updateKurikulumOptions() {
+        if (!prodiSelect || !kurikulumSelect) return;
+        const selectedProdiId = parseInt(prodiSelect.value, 10);
+        kurikulumSelect.innerHTML = '<option value="">-- Semua Kurikulum --</option>';
+
+        if (selectedProdiId && obeCurricula[selectedProdiId]) {
+            const currs = obeCurricula[selectedProdiId];
+            for (const [kId, kName] of Object.entries(currs)) {
+                const opt = document.createElement('option');
+                opt.value = kId;
+                opt.textContent = kName;
+                kurikulumSelect.appendChild(opt);
+            }
+        }
+    }
+
+    if (prodiSelect) {
+        prodiSelect.addEventListener('change', function() {
+            updateKurikulumOptions();
+            populateCourses();
+        });
+    }
+
+    if (kurikulumSelect) {
+        kurikulumSelect.addEventListener('change', function() {
+            populateCourses();
+        });
+    }
+
+    if (courseSelect) {
+        courseSelect.addEventListener('change', function() {
+            const selectedOpt = courseSelect.options[courseSelect.selectedIndex];
+            if (!selectedOpt || !selectedOpt.value) {
+                courseCodeInput.value = '';
+                courseNameInput.value = '';
+                return;
+            }
+
+            const code = selectedOpt.dataset.code || '';
+            const name = selectedOpt.dataset.name || '';
+            const sem = selectedOpt.dataset.semester || '1';
+            const lecturer = selectedOpt.dataset.lecturer || '';
+
+            courseCodeInput.value = code;
+            courseNameInput.value = name;
+            if (semesterSelect) semesterSelect.value = sem;
+            if (lecturerInput && lecturer) {
+                lecturerInput.value = lecturer;
+            }
+
+            // Tebak laboratorium berdasarkan nama mata kuliah jika belum diisi
+            if (labInput && (!labInput.value || labInput.value === 'Lab Komputer')) {
+                const lowerName = name.toLowerCase();
+                if (lowerName.includes('perangkat lunak') || lowerName.includes('web') || lowerName.includes('program') || lowerName.includes('data')) {
+                    labInput.value = 'Lab Rekayasa Perangkat Lunak';
+                } else if (lowerName.includes('jaringan') || lowerName.includes('sistem') || lowerName.includes('komputer')) {
+                    labInput.value = 'Lab Jaringan & Sistem Komputer';
+                } else if (lowerName.includes('bisnis') || lowerName.includes('manajemen') || lowerName.includes('digital') || lowerName.includes('wirausaha')) {
+                    labInput.value = 'Lab Bisnis Digital & Inkubasi';
+                } else {
+                    labInput.value = 'Lab Komputer Terpadu';
+                }
+            }
         });
     }
 });

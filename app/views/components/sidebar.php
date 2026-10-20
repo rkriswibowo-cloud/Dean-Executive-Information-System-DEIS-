@@ -108,6 +108,14 @@ try {
         </div>
     </div>
 
+    <!-- Quick Action: Toggle Collapse All Menu Groups -->
+    <div class="sidebar-action-bar">
+        <button type="button" class="sidebar-mini-action" id="toggleAllGroupsBtn" onclick="window.toggleAllSidebarGroups()" title="Ciutkan atau bentangkan semua kelompok menu">
+            <i class="fa-solid fa-arrows-up-down"></i>
+            <span id="toggleAllGroupsText">Ciutkan Semua</span>
+        </button>
+    </div>
+
     <!-- Scrollable Navigation Area -->
     <div class="sidebar-scrollable" id="sidebarScrollable">
 
@@ -115,7 +123,7 @@ try {
             <!-- ================= 1. DEKAN (EXECUTIVE LEADERSHIP) ================= -->
             
             <!-- Group 1: Pusat Kendali Dekan -->
-            <?php $grpExec = isGroupActive(['dashboard', 'command-center', 'strategic'], $currentPath); ?>
+            <?php $grpExec = isGroupActive(['dashboard', 'strategic'], $currentPath); ?>
             <div class="sidebar-group <?= $grpExec ? 'expanded' : '' ?>">
                 <button type="button" class="sidebar-group-header" onclick="window.toggleSidebarGroup(this)">
                     <span class="sidebar-section-title">
@@ -123,7 +131,7 @@ try {
                         <span>Pusat Kendali Dekan</span>
                     </span>
                     <div class="sidebar-group-meta">
-                        <span class="sidebar-group-badge">5</span>
+                        <span class="sidebar-group-badge">3</span>
                         <i class="fa-solid fa-chevron-down group-chevron"></i>
                     </div>
                 </button>
@@ -133,24 +141,6 @@ try {
                             <a href="<?= $baseUrl ?>/dashboard" class="sidebar-link">
                                 <i class="fa-solid fa-chart-line"></i>
                                 <span>Dashboard Eksekutif</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-nav-item <?= isNavActive('command-center', $currentPath) && !isNavActive('command-center/approvals', $currentPath) ? 'active' : '' ?>">
-                            <a href="<?= $baseUrl ?>/command-center" class="sidebar-link">
-                                <i class="fa-solid fa-tower-broadcast"></i>
-                                <span>Command Center & Radar</span>
-                                <?php if (!empty($attention['total'])): ?>
-                                    <span class="badge bg-danger rounded-pill ms-auto px-1.5" style="font-size: 0.65rem;"><?= $attention['total'] ?></span>
-                                <?php endif; ?>
-                            </a>
-                        </li>
-                        <li class="sidebar-nav-item <?= isNavActive('command-center/approvals', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/command-center/approvals" class="sidebar-link">
-                                <i class="fa-solid fa-stamp"></i>
-                                <span>Persetujuan Dekan</span>
-                                <?php if (!empty($attention['pending_approvals'])): ?>
-                                    <span class="badge bg-warning text-dark rounded-pill ms-auto px-1.5" style="font-size: 0.65rem;"><?= $attention['pending_approvals'] ?></span>
-                                <?php endif; ?>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('strategic', $currentPath) && !isNavActive('strategic/indicators', $currentPath) ? 'active' : '' ?>">
@@ -170,7 +160,7 @@ try {
             </div>
 
             <!-- Group 2: Akademik & Mahasiswa -->
-            <?php $grpAcad = isGroupActive(['academic', 'students'], $currentPath); ?>
+            <?php $grpAcad = isGroupActive(['academic', 'students', 'master/obe'], $currentPath); ?>
             <div class="sidebar-group <?= $grpAcad ? 'expanded' : '' ?>">
                 <button type="button" class="sidebar-group-header" onclick="window.toggleSidebarGroup(this)">
                     <span class="sidebar-section-title">
@@ -178,7 +168,7 @@ try {
                         <span>Akademik & Mahasiswa</span>
                     </span>
                     <div class="sidebar-group-meta">
-                        <span class="sidebar-group-badge">5</span>
+                        <span class="sidebar-group-badge">6</span>
                         <i class="fa-solid fa-chevron-down group-chevron"></i>
                     </div>
                 </button>
@@ -188,6 +178,12 @@ try {
                             <a href="<?= $baseUrl ?>/academic" class="sidebar-link">
                                 <i class="fa-solid fa-chalkboard-user"></i>
                                 <span>Perkuliahan & Kelas</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-nav-item <?= isNavActive('master/obe', $currentPath) ?>">
+                            <a href="<?= $baseUrl ?>/master/obe?section=courses" class="sidebar-link">
+                                <i class="fa-solid fa-database"></i>
+                                <span>Master Data Akademik OBE</span>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('academic/rps-monitoring', $currentPath) ?>">
@@ -691,9 +687,9 @@ try {
 
     <!-- Sidebar Footer (Collapse Sidebar Trigger) -->
     <div class="sidebar-footer">
-        <button type="button" class="sidebar-footer-collapse-btn" onclick="window.toggleSidebarCollapse()" title="Ciutkan Sidebar (Ctrl+B)">
+        <button type="button" class="sidebar-footer-collapse-btn" id="sidebarFooterCollapseBtn" onclick="window.toggleSidebarCollapse()" title="Ciutkan / Buka Sidebar (Ctrl+B)">
             <i class="fa-solid fa-angles-left collapse-icon" id="sidebarCollapseIcon"></i>
-            <span class="collapse-label">Ciutkan Sidebar</span>
+            <span class="collapse-label" id="sidebarFooterLabel">Ciutkan Sidebar</span>
         </button>
     </div>
 </aside>

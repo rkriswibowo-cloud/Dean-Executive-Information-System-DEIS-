@@ -14,6 +14,9 @@ use App\Models\ClassMeeting;
 use App\Services\AuditService;
 use App\Helpers\AuthHelper;
 use App\Services\Obe\ObeSnapshotService;
+use App\Services\Obe\ObeReadConnection;
+use App\Services\Obe\StudentRepository as ObeStudentRepository;
+use App\Services\Obe\LecturerRepository as ObeLecturerRepository;
 
 class AcademicController extends Controller {
     public function index(): void {
@@ -408,13 +411,150 @@ class AcademicController extends Controller {
         $guidanceModel = new Guidance();
 
         $filterType = $this->getQuery('type', '');
-        $guidances = $guidanceModel->allWithDetails($filterType ?: null);
+        $obeError = null;
+        try {
+            $obe = new ObeReadConnection();
+            $students = (new ObeStudentRepository($obe))->all();
+            $lecturers = (new ObeLecturerRepository($obe))->all();
+            $studentIndex = array_column($students, null, 'obe_id');
+            $lecturerIndex = array_column($lecturers, null, 'obe_id');
+            $guidances = $guidanceModel->allObeCases($filterType ?: null);
+            foreach ($guidances as &$guidance) {
+                $guidance['students'] = array_values(array_filter(array_map(static fn(int $id) => $studentIndex[$id] ?? null, $guidance['student_ids'])));
+                $guidance['lecturers'] = array_values(array_filter(array_map(static fn(int $id) => $lecturerIndex[$id] ?? null, $guidance['lecturer_ids'])));
+            }
+            unset($guidance);
+        } catch (\Throwable $e) {
+            $guidances = $students = $lecturers = [];
+            $obeError = $e->getMessage();
+        }
 
         $this->render('academic/guidance', [
-            'title'      => 'Monitoring Bimbingan (DPA / Skripsi / MBKM)',
+            'title'      => 'Bimbingan Skripsi, KKN & PKL',
             'guidances'  => $guidances,
-            'filterType' => $filterType
+            'students'   => $students,
+            'lecturers'  => $lecturers,
+            'filterType' => $filterType,
+            'obeError'   => $obeError
         ]);
+    }
+
+    public function createGuidance(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+        [$data, $students, $lecturers, $error] = $this->validatedGuidancePayload();
+        if ($error) $this->redirect('academic/guidance', ['error' => $error]);
+        $id = (new Guidance())->createObeCase($data, $students, $lecturers);
+        AuditService::log('CREATE_GUIDANCE', 'guidance_cases', (string)$id, null, ['type' => $data['type'], 'students' => $students, 'lecturers' => $lecturers]);
+        $this->redirect('academic/guidance', ['success' => 'Data bimbingan berhasil ditambahkan.']);
+    }
+
+    public function guidanceDetail(): void {
+        $this->requireAuth();
+        $id = (int)$this->getQuery('id', 0);
+        $model = new Guidance();
+        $case = $model->findObeCase($id);
+        if (!$case) $this->redirect('academic/guidance', ['error' => 'Data bimbingan tidak ditemukan.']);
+        try {
+            $obe = new ObeReadConnection();
+            $studentIndex = array_column((new ObeStudentRepository($obe))->all(), null, 'obe_id');
+            $lecturerIndex = array_column((new ObeLecturerRepository($obe))->all(), null, 'obe_id');
+            $case['students'] = array_values(array_filter(array_map(static fn(int $studentId) => $studentIndex[$studentId] ?? null, $case['student_ids'])));
+            $case['lecturers'] = array_values(array_filter(array_map(static fn(int $lecturerId) => $lecturerIndex[$lecturerId] ?? null, $case['lecturer_ids'])));
+            $sessions = $model->sessions($id);
+            $counts = array_fill_keys($case['student_ids'], 0);
+            foreach ($sessions as &$session) {
+                $session['students'] = array_values(array_filter(array_map(static fn(int $studentId) => $studentIndex[$studentId] ?? null, $session['student_ids'])));
+                foreach ($session['student_ids'] as $studentId) if (isset($counts[$studentId])) $counts[$studentId]++;
+            }
+            unset($session);
+        } catch (\Throwable $e) {
+            $this->redirect('academic/guidance', ['error' => 'Data OBE tidak dapat dibaca: ' . $e->getMessage()]);
+        }
+        $this->render('academic/guidance_detail', ['title'=>'Detail Bimbingan', 'case'=>$case, 'sessions'=>$sessions, 'guidanceCounts'=>$counts]);
+    }
+
+    public function createGuidanceSession(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+        $caseId = (int)$this->getPost('guidance_case_id', 0);
+        $model = new Guidance();
+        $case = $model->findObeCase($caseId);
+        if (!$case) $this->redirect('academic/guidance', ['error'=>'Aktivitas bimbingan tidak ditemukan.']);
+        $studentIds = array_values(array_unique(array_filter(array_map('intval', (array)($_POST['student_ids'] ?? [])))));
+        if (!$studentIds || array_diff($studentIds, $case['student_ids'])) {
+            $this->redirect('academic/guidance/detail?id='.$caseId, ['error'=>'Pilih minimal satu mahasiswa anggota aktivitas ini.']);
+        }
+        $date = trim($this->getPost('guidance_date', ''));
+        $topic = trim($this->getPost('topic', ''));
+        if ($date === '' || $topic === '') $this->redirect('academic/guidance/detail?id='.$caseId, ['error'=>'Tanggal dan topik bimbingan wajib diisi.']);
+        $progressRaw = trim((string)$this->getPost('progress_after', ''));
+        $progress = $progressRaw === '' ? null : min(100, max(0, (float)$progressRaw));
+        $sessionId = $model->createSession($caseId, ['guidance_date'=>$date,'topic'=>$topic,'notes'=>trim($this->getPost('notes','')) ?: null,'progress_after'=>$progress], $studentIds);
+        AuditService::log('CREATE_GUIDANCE_SESSION', 'guidance_sessions', (string)$sessionId, null, ['case_id'=>$caseId,'students'=>$studentIds]);
+        $this->redirect('academic/guidance/detail?id='.$caseId, ['success'=>'Sesi bimbingan berhasil dicatat.']);
+    }
+
+    public function deleteGuidanceSession(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+        $caseId = (int)$this->getPost('guidance_case_id', 0);
+        $sessionId = (int)$this->getPost('session_id', 0);
+        (new Guidance())->deleteSession($sessionId, $caseId);
+        AuditService::log('DELETE_GUIDANCE_SESSION', 'guidance_sessions', (string)$sessionId, null, ['case_id'=>$caseId]);
+        $this->redirect('academic/guidance/detail?id='.$caseId, ['success'=>'Riwayat sesi bimbingan berhasil dihapus.']);
+    }
+
+    public function updateGuidance(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+        $id = (int)$this->getPost('guidance_id', 0);
+        if ($id <= 0) $this->redirect('academic/guidance', ['error' => 'ID bimbingan tidak valid.']);
+        [$data, $students, $lecturers, $error] = $this->validatedGuidancePayload();
+        if ($error) $this->redirect('academic/guidance', ['error' => $error]);
+        (new Guidance())->updateObeCase($id, $data, $students, $lecturers);
+        AuditService::log('UPDATE_GUIDANCE', 'guidance_cases', (string)$id, null, ['type' => $data['type'], 'students' => $students, 'lecturers' => $lecturers]);
+        $this->redirect('academic/guidance', ['success' => 'Data bimbingan berhasil diperbarui.']);
+    }
+
+    public function deleteGuidance(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
+        $id = (int)$this->getPost('guidance_id', 0);
+        if ($id <= 0) $this->redirect('academic/guidance', ['error' => 'ID bimbingan tidak valid.']);
+        (new Guidance())->deleteObeCase($id);
+        AuditService::log('DELETE_GUIDANCE', 'guidance_cases', (string)$id);
+        $this->redirect('academic/guidance', ['success' => 'Data bimbingan berhasil dihapus.']);
+    }
+
+    private function validatedGuidancePayload(): array {
+        $type = trim($this->getPost('type', ''));
+        $studentIds = array_values(array_unique(array_filter(array_map('intval', (array)($_POST['student_ids'] ?? [])))));
+        $lecturerIds = array_values(array_unique(array_filter(array_map('intval', (array)($_POST['lecturer_ids'] ?? [])))));
+        if (!in_array($type, ['Skripsi', 'KKN', 'PKL'], true)) return [[], [], [], 'Jenis bimbingan tidak valid.'];
+        if ($type === 'Skripsi' && count($studentIds) !== 1) return [[], [], [], 'Skripsi harus memiliki tepat 1 mahasiswa.'];
+        if ($type === 'Skripsi' && count($lecturerIds) !== 2) return [[], [], [], 'Skripsi harus memiliki tepat 2 dosen pembimbing.'];
+        if (in_array($type, ['KKN', 'PKL'], true) && count($studentIds) < 1) return [[], [], [], "{$type} harus memiliki minimal 1 mahasiswa."];
+        if (count($lecturerIds) < 1 || count($lecturerIds) > 2) return [[], [], [], 'Pilih 1 sampai 2 dosen pembimbing.'];
+        try {
+            $obe = new ObeReadConnection();
+            $validStudents = array_column((new ObeStudentRepository($obe))->all(), 'obe_id');
+            $validLecturers = array_column((new ObeLecturerRepository($obe))->all(), 'obe_id');
+            if (array_diff($studentIds, $validStudents)) return [[], [], [], 'Terdapat mahasiswa yang tidak valid di OBE.'];
+            if (array_diff($lecturerIds, $validLecturers)) return [[], [], [], 'Terdapat dosen yang tidak valid di OBE.'];
+        } catch (\Throwable $e) {
+            return [[], [], [], 'Data OBE tidak dapat diverifikasi: ' . $e->getMessage()];
+        }
+        $title = trim($this->getPost('title', ''));
+        if ($title === '') return [[], [], [], 'Judul atau nama kegiatan wajib diisi.'];
+        $date = trim($this->getPost('last_guidance_date', ''));
+        return [[
+            'type' => $type, 'title' => $title,
+            'progress' => min(100, max(0, (float)$this->getPost('progress_percentage', 0))),
+            'status' => in_array($this->getPost('status', ''), ['Aktif','Selesai','Bermasalah','Terlambat'], true) ? $this->getPost('status') : 'Aktif',
+            'last_date' => $date !== '' ? $date : null,
+            'notes' => trim($this->getPost('notes', '')) ?: null,
+        ], $studentIds, $lecturerIds, null];
     }
 
     /**
@@ -441,6 +581,86 @@ class AcademicController extends Controller {
         $prodiTotals = $practicumModel->getProdiTotals();
         $stats = $practicumModel->getOverallStats();
 
+        // Ambil data mata kuliah OBE secara realtime untuk pemilihan di modal tambah praktikum
+        $obeCourses = [];
+        $obeCurricula = [];
+        try {
+            $obeService = new \App\Services\Obe\ObeReadConnection();
+            $obeRows = $obeService->fetchAll("
+                SELECT 
+                    m.id as obe_mk_id,
+                    m.kode as course_code,
+                    m.nama as course_name,
+                    m.sks_teori,
+                    m.sks_praktek,
+                    (m.sks_teori + m.sks_praktek) as sks_total,
+                    m.semester,
+                    m.sifat,
+                    k.id as kurikulum_id,
+                    k.nama as kurikulum_nama,
+                    p.id as obe_prodi_id,
+                    p.nama as prodi_nama,
+                    r.dosen_pengampu as rps_dosen,
+                    u.nama_lengkap as pjmk_nama
+                FROM mata_kuliah m
+                JOIN kurikulum k ON m.kurikulum_id = k.id
+                JOIN program_studi p ON k.prodi_id = p.id
+                LEFT JOIN rps r ON r.mata_kuliah_id = m.id
+                LEFT JOIN mata_kuliah_pengampu pm ON pm.mata_kuliah_id = m.id AND pm.status = 'ACTIVE'
+                LEFT JOIN users u ON u.id = pm.pjmk_user_id
+                WHERE m.status = 'ACTIVE'
+                ORDER BY p.id ASC, k.id ASC, m.semester ASC, m.kode ASC
+            ");
+
+            // Mapping prodi OBE -> DEIS prodi ID
+            $db = \App\Core\Database::getConnection();
+            $mappings = $db->query("SELECT obe_id, deis_id FROM obe_entity_mappings WHERE entity_type='study_program' AND match_status='MAPPED'")->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+            foreach ($obeRows as $row) {
+                $deisProdiId = $mappings[(int)$row['obe_prodi_id']] ?? null;
+                // Fallback pencocokan nama prodi jika mapping belum ada
+                if (!$deisProdiId) {
+                    foreach ($programs as $prog) {
+                        if (strcasecmp($prog['name'], $row['prodi_nama']) === 0) {
+                            $deisProdiId = (int)$prog['id'];
+                            break;
+                        }
+                    }
+                }
+
+                $lecturer = trim((string)($row['pjmk_nama'] ?? ''));
+                if ($lecturer === '') {
+                    $rpsDosen = trim(strtok((string)($row['rps_dosen'] ?? ''), "\r\n"));
+                    $rpsDosen = preg_replace('/^\s*\d+\.\s*/u', '', $rpsDosen);
+                    $lecturer = trim((string)preg_replace('/\s*\(PJMK\).*$/iu', '', $rpsDosen));
+                }
+
+                $courseItem = [
+                    'obe_mk_id'       => (int)$row['obe_mk_id'],
+                    'course_code'     => $row['course_code'],
+                    'course_name'     => $row['course_name'],
+                    'sks_teori'       => (int)$row['sks_teori'],
+                    'sks_praktek'     => (int)$row['sks_praktek'],
+                    'sks_total'       => (int)$row['sks_total'],
+                    'semester'        => (int)$row['semester'],
+                    'kurikulum_id'    => (int)$row['kurikulum_id'],
+                    'kurikulum_nama'  => $row['kurikulum_nama'],
+                    'obe_prodi_id'    => (int)$row['obe_prodi_id'],
+                    'deis_prodi_id'   => $deisProdiId,
+                    'prodi_nama'      => $row['prodi_nama'],
+                    'lecturer_name'   => $lecturer
+                ];
+
+                $obeCourses[] = $courseItem;
+                if ($deisProdiId) {
+                    $obeCurricula[$deisProdiId][$row['kurikulum_id']] = $row['kurikulum_nama'];
+                }
+            }
+        } catch (\Throwable $e) {
+            $obeCourses = [];
+            $obeCurricula = [];
+        }
+
         $this->render('academic/practicum', [
             'title'          => 'Cek & Verifikasi Modul Praktikum Laboratorium',
             'modules'        => $modules,
@@ -450,7 +670,9 @@ class AcademicController extends Controller {
             'stats'          => $stats,
             'filterProgram'  => $filterProgram,
             'filterSemester' => $filterSemester,
-            'filterStatus'   => $filterStatus
+            'filterStatus'   => $filterStatus,
+            'obeCourses'     => $obeCourses,
+            'obeCurricula'   => $obeCurricula
         ]);
     }
 

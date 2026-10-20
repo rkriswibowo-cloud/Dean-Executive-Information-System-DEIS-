@@ -1,114 +1,117 @@
-<?php 
-use App\Helpers\FormatHelper; 
+<?php
 use App\Helpers\CsrfHelper;
+use App\Helpers\FormatHelper;
+
+$renderParticipantChoices = static function (array $items, string $name, array $selected, string $identityKey): void {
+    foreach ($items as $item):
+        $id = (int)$item['obe_id']; ?>
+        <label class="d-flex gap-2 align-items-start border rounded-3 p-2 mb-2 participant-choice">
+            <input class="form-check-input mt-1" type="checkbox" name="<?= $name ?>[]" value="<?= $id ?>" <?= in_array($id, $selected, true) ? 'checked' : '' ?>>
+            <span><strong><?= htmlspecialchars($item['name'], ENT_QUOTES, 'UTF-8') ?></strong><br><small class="text-muted"><?= htmlspecialchars((string)($item[$identityKey] ?: $item['username']), ENT_QUOTES, 'UTF-8') ?> · <?= htmlspecialchars((string)($item['study_program_name'] ?? '-'), ENT_QUOTES, 'UTF-8') ?></small></span>
+        </label>
+    <?php endforeach;
+};
 ?>
-<div class="card card-lg shadow-sm border-0 rounded-4">
-    <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h5 class="card-title fw-bold mb-0">Monitoring Bimbingan (DPA / Skripsi / Magang / MBKM)</h5>
-        <div class="d-flex align-items-center gap-2">
-            <select class="form-select form-select-sm" onchange="location.href='<?= $baseUrl ?>/academic/guidance?type=' + this.value">
-                <option value="">Semua Jenis Bimbingan</option>
-                <option value="Skripsi" <?= $filterType === 'Skripsi' ? 'selected' : '' ?>>Skripsi / Tugas Akhir</option>
-                <option value="MBKM" <?= $filterType === 'MBKM' ? 'selected' : '' ?>>MBKM / MSIB</option>
-                <option value="Magang" <?= $filterType === 'Magang' ? 'selected' : '' ?>>Magang Industri</option>
-                <option value="DPA" <?= $filterType === 'DPA' ? 'selected' : '' ?>>Dosen Pembimbing Akademik</option>
-            </select>
-        </div>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="fa-solid fa-users-rectangle text-primary me-2"></i>Bimbingan Skripsi, KKN & PKL</h3>
+        <div class="text-muted small">Mahasiswa dan dosen dibaca langsung dari OBE. Data kegiatan dan progres disimpan di DEIS.</div>
+    </div>
+    <button type="button" class="btn btn-primary guidance-add-btn" data-bs-toggle="modal" data-bs-target="#modalCreateGuidance"><i class="fa-solid fa-plus me-1"></i>Tambah Bimbingan</button>
+</div>
+
+<?php if ($obeError): ?><div class="alert alert-danger">Data OBE tidak dapat dibaca: <?= htmlspecialchars($obeError, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+
+<div class="card card-lg shadow-sm rounded-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="card-title mb-0">Daftar Bimbingan</h5>
+        <select class="form-select form-select-sm" style="width:auto" onchange="location.href='<?= $baseUrl ?>/academic/guidance?type='+this.value">
+            <option value="">Semua Jenis</option>
+            <?php foreach (['Skripsi','KKN','PKL'] as $type): ?><option value="<?= $type ?>" <?= $filterType === $type ? 'selected' : '' ?>><?= $type ?></option><?php endforeach; ?>
+        </select>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="bg-body-tertiary text-muted small text-uppercase">
-                    <tr>
-                        <th class="ps-4">Jenis</th>
-                        <th>Mahasiswa</th>
-                        <th>Judul / Topik Bimbingan</th>
-                        <th>Dosen Pembimbing</th>
-                        <th>Progres</th>
-                        <th>Status</th>
-                        <th class="text-end pe-4">Aksi Monitoring</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="ps-4">Jenis & Topik</th><th>Mahasiswa OBE</th><th>Dosen Pembimbing OBE</th><th>Progres</th><th>Status</th><th class="text-end pe-4">Aksi</th></tr></thead>
                 <tbody>
-                    <?php foreach ($guidances as $g): ?>
-                        <tr class="<?= $g['status'] === 'Terlambat' || $g['status'] === 'Bermasalah' ? 'table-danger' : '' ?>">
-                            <td class="ps-4">
-                                <span class="badge bg-light text-dark border"><?= $g['type'] ?></span>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($g['student_name'], ENT_QUOTES, 'UTF-8') ?></div>
-                                <small class="text-muted"><?= $g['nim'] ?> • <?= $g['program_name'] ?></small>
-                            </td>
-                            <td style="max-width: 280px;">
-                                <div class="small fw-semibold text-dark"><?= htmlspecialchars($g['title'] ?? '-', ENT_QUOTES, 'UTF-8') ?></div>
-                            </td>
-                            <td class="fw-semibold text-dark"><?= htmlspecialchars($g['lecturer_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td>
-                                <strong><?= $g['progress_percentage'] ?>%</strong>
-                                <div class="progress mt-1" style="height: 4px;">
-                                    <div class="progress-bar bg-<?= $g['status'] === 'Terlambat' || $g['status'] === 'Bermasalah' ? 'danger' : 'primary' ?>" style="width: <?= $g['progress_percentage'] ?>%"></div>
-                                </div>
-                            </td>
-                            <td><?= FormatHelper::statusBadge($g['status']) ?></td>
-                            <td class="text-end pe-4 text-nowrap">
-                                <button type="button" class="btn btn-sm btn-outline-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalGuidanceAction<?= $g['id'] ?>">
-                                    <i class="ti ti-edit me-1"></i> Aksi Dekanat
-                                </button>
+                <?php if (!$guidances): ?><tr><td colspan="6" class="text-center text-muted py-5">Belum ada data bimbingan.</td></tr><?php endif; ?>
+                <?php foreach ($guidances as $g): ?>
+                    <tr class="<?= in_array($g['status'], ['Terlambat','Bermasalah'], true) ? 'table-danger' : '' ?>">
+                        <td class="ps-4"><span class="badge bg-primary-subtle text-primary mb-1"><?= $g['type'] ?></span><div class="fw-semibold"><?= htmlspecialchars($g['title'], ENT_QUOTES, 'UTF-8') ?></div><small class="text-muted"><?= $g['last_guidance_date'] ?: 'Belum ada tanggal bimbingan' ?></small></td>
+                        <td><?php foreach ($g['students'] as $student): ?><div class="mb-1"><strong><?= htmlspecialchars($student['name'], ENT_QUOTES, 'UTF-8') ?></strong><br><small class="text-muted"><?= htmlspecialchars($student['username'], ENT_QUOTES, 'UTF-8') ?> · <?= htmlspecialchars((string)$student['study_program_name'], ENT_QUOTES, 'UTF-8') ?></small></div><?php endforeach; ?></td>
+                        <td><?php foreach ($g['lecturers'] as $i => $lecturer): ?><div class="mb-1"><span class="badge bg-light text-dark border me-1"><?= $i + 1 ?></span><?= htmlspecialchars($lecturer['name'], ENT_QUOTES, 'UTF-8') ?></div><?php endforeach; ?></td>
+                        <td><strong><?= number_format((float)$g['progress_percentage'], 0) ?>%</strong><div class="progress mt-1" style="height:5px"><div class="progress-bar" style="width:<?= min(100, (float)$g['progress_percentage']) ?>%"></div></div></td>
+                        <td><?= FormatHelper::statusBadge($g['status']) ?></td>
+                        <td class="text-end pe-4 text-nowrap">
+                            <a href="<?= $baseUrl ?>/academic/guidance/detail?id=<?= $g['id'] ?>" class="btn btn-sm btn-outline-info" title="Detail dan riwayat bimbingan"><i class="fa-solid fa-eye"></i> Detail</a>
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditGuidance<?= $g['id'] ?>"><i class="fa-solid fa-pen"></i></button>
+                            <form action="<?= $baseUrl ?>/academic/guidance/delete" method="POST" class="d-inline" onsubmit="return confirm('Hapus data bimbingan ini?')"><?= CsrfHelper::tokenField() ?><input type="hidden" name="guidance_id" value="<?= $g['id'] ?>"><button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button></form>
+                        </td>
+                    </tr>
 
-                                <!-- Modal Intervensi Bimbingan -->
-                                <div class="modal fade" id="modalGuidanceAction<?= $g['id'] ?>" tabindex="-1" aria-hidden="true" style="text-align: left;">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content border-0 shadow-lg rounded-4">
-                                            <div class="modal-header bg-body border-bottom py-3">
-                                                <h6 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                                                    <i class="ti ti-user-check text-primary"></i> Intervensi Bimbingan Dekanat
-                                                </h6>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <form action="<?= $baseUrl ?>/academic/action-guidance" method="POST">
-                                                <?= CsrfHelper::tokenField() ?>
-                                                <input type="hidden" name="guidance_id" value="<?= $g['id'] ?>">
-                                                <div class="modal-body p-4">
-                                                    <div class="bg-body-tertiary p-3 rounded-3 mb-3">
-                                                        <div class="fw-bold text-dark"><?= htmlspecialchars($g['student_name'], ENT_QUOTES, 'UTF-8') ?> (<?= $g['nim'] ?>)</div>
-                                                        <div class="small text-muted">Pembimbing: <?= htmlspecialchars($g['lecturer_name'], ENT_QUOTES, 'UTF-8') ?> | Jenis: <?= $g['type'] ?></div>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-semibold small text-muted">Status Bimbingan</label>
-                                                        <select name="status" class="form-select" required>
-                                                            <option value="Aktif" <?= $g['status'] === 'Aktif' ? 'selected' : '' ?>>🔵 Aktif (Dalam Proses)</option>
-                                                            <option value="Selesai" <?= $g['status'] === 'Selesai' ? 'selected' : '' ?>>✅ Selesai / Siap Sidang</option>
-                                                            <option value="Terlambat" <?= $g['status'] === 'Terlambat' ? 'selected' : '' ?>>⚠️ Terlambat (Perlu Surat Peringatan)</option>
-                                                            <option value="Bermasalah" <?= $g['status'] === 'Bermasalah' ? 'selected' : '' ?>>❌ Bermasalah (Ganti Pembimbing / Kasus)</option>
-                                                        </select>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-semibold small text-muted">Persentase Progres (%)</label>
-                                                        <input type="number" name="progress_percentage" class="form-control" min="0" max="100" value="<?= $g['progress_percentage'] ?>" required>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-semibold small text-muted">Catatan Tindakan / Intervensi Dekan</label>
-                                                        <textarea name="notes" class="form-control" rows="3" placeholder="Contoh: Terbitkan instruksi penjadwalan ujian proposal / pemanggilan bimbingan intensif..."></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer bg-body border-top py-2">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                                                    <button type="submit" class="btn btn-sm btn-primary fw-semibold">
-                                                        <i class="ti ti-device-floppy me-1"></i> Simpan Tindakan
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<?php foreach ($guidances as $g): ?>
+<div class="modal fade" id="modalEditGuidance<?= $g['id'] ?>" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content"><form action="<?= $baseUrl ?>/academic/guidance/update" method="POST">
+    <?= CsrfHelper::tokenField() ?><input type="hidden" name="guidance_id" value="<?= $g['id'] ?>">
+    <div class="modal-header"><h5 class="modal-title">Edit Bimbingan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><?php include __DIR__ . '/guidance_form_fields.php'; ?></div>
+    <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary">Simpan Perubahan</button></div>
+</form></div></div></div>
+<?php endforeach; ?>
+
+<div class="modal fade" id="modalCreateGuidance" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content"><form action="<?= $baseUrl ?>/academic/guidance/create" method="POST">
+    <?= CsrfHelper::tokenField() ?>
+    <div class="modal-header"><h5 class="modal-title">Tambah Bimbingan dari Data OBE</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+        <?php $g = ['type'=>'Skripsi','title'=>'','progress_percentage'=>0,'status'=>'Aktif','last_guidance_date'=>'','notes'=>'','student_ids'=>[],'lecturer_ids'=>[]]; include __DIR__ . '/guidance_form_fields.php'; ?>
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top guidance-create-actions">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary guidance-save-btn"><i class="fa-solid fa-floppy-disk me-1"></i>Simpan</button>
+        </div>
+    </div>
+</form></div></div></div>
+
+<script>
+document.querySelectorAll('.guidance-type-select').forEach(select => {
+    const updateHint = () => {
+        const form = select.closest('form');
+        const hint = form.querySelector('.guidance-rule-hint');
+        hint.textContent = select.value === 'Skripsi'
+            ? 'Skripsi: pilih tepat 1 mahasiswa dan tepat 2 dosen pembimbing.'
+            : `${select.value}: pilih minimal 1 mahasiswa (boleh kelompok) dan 1–2 dosen pembimbing.`;
+    };
+    select.addEventListener('change', updateHint);
+    updateHint();
+});
+</script>
+
+<style>
+.guidance-add-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.guidance-save-btn {
+    display: inline-flex !important;
+    align-items: center;
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+    visibility: visible !important;
+}
+</style>

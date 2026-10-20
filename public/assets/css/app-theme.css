@@ -353,12 +353,6 @@ a:hover {
     flex-shrink: 0;
 }
 
-/* Identitas header DEIS mengikuti contoh OBE: kanvas hitam, teks putih. */
-.topbar {
-    background-color: #000000 !important;
-    border-bottom-color: #27272a !important;
-}
-
 .obe-topbar-clock > i {
     color: var(--primary);
     font-size: 0.76rem;
@@ -489,7 +483,7 @@ a:hover {
     font-size: 0.92rem;
     font-weight: 800;
     letter-spacing: -0.01em;
-    color: #ffffff !important;
+    color: var(--text-main);
     display: block !important;
     align-items: center;
     white-space: nowrap;
@@ -499,7 +493,7 @@ a:hover {
 
 .brand-subtitle-line {
     display: block !important;
-    color: #ffffff !important;
+    color: var(--text-muted);
     font-size: 0.61rem;
     font-weight: 500;
     line-height: 1.12;
@@ -508,7 +502,7 @@ a:hover {
 
 .brand-squircle-link:hover .brand-title,
 .brand-squircle-link:hover .brand-subtitle-line {
-    color: #ffffff !important;
+    color: var(--primary);
 }
 
 @media (max-width: 1180px) {
@@ -2382,6 +2376,106 @@ label {
     background-color: var(--input-bg) !important;
     border: 1px solid var(--input-border) !important;
     cursor: pointer;
+}
+
+.sidebar-action-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 6px;
+    padding: 0 4px;
+    flex-shrink: 0;
+}
+
+/* Master Akademik OBE: pertahankan kontras card pada kedua tema. */
+.obe-master-hero .obe-master-hero-body {
+    background: linear-gradient(135deg, #312e81, #4f46e5, #2563eb) !important;
+    color: #ffffff !important;
+}
+
+.obe-master-hero .obe-master-hero-body h3 {
+    color: #ffffff !important;
+}
+
+.obe-master-hero .obe-master-hero-body .text-white-50 {
+    color: rgba(255, 255, 255, 0.88) !important;
+}
+
+[data-theme="light"] .obe-master-hero .obe-master-hero-body,
+[data-bs-theme="light"] .obe-master-hero .obe-master-hero-body,
+html.light .obe-master-hero .obe-master-hero-body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .obe-master-hero .obe-master-hero-body h3,
+[data-bs-theme="light"] .obe-master-hero .obe-master-hero-body h3,
+html.light .obe-master-hero .obe-master-hero-body h3 {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .obe-master-hero .obe-master-hero-body .text-white-50,
+[data-bs-theme="light"] .obe-master-hero .obe-master-hero-body .text-white-50,
+html.light .obe-master-hero .obe-master-hero-body .text-white-50 {
+    color: #475569 !important;
+}
+
+[data-theme="light"] .obe-master-tabs .btn-outline-secondary,
+[data-bs-theme="light"] .obe-master-tabs .btn-outline-secondary,
+html.light .obe-master-tabs .btn-outline-secondary {
+    color: #334155 !important;
+    border-color: #94a3b8 !important;
+}
+
+[data-theme="light"] .obe-master-tabs,
+[data-theme="light"] .obe-master-content,
+[data-bs-theme="light"] .obe-master-tabs,
+[data-bs-theme="light"] .obe-master-content,
+html.light .obe-master-tabs,
+html.light .obe-master-content {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .obe-master-content .card-header h5,
+[data-bs-theme="light"] .obe-master-content .card-header h5,
+html.light .obe-master-content .card-header h5 {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .obe-master-content tbody td,
+[data-bs-theme="light"] .obe-master-content tbody td,
+html.light .obe-master-content tbody td {
+    color: #1e293b !important;
+}
+
+[data-theme="light"] .obe-master-content thead th,
+[data-bs-theme="light"] .obe-master-content thead th,
+html.light .obe-master-content thead th,
+[data-theme="light"] .obe-master-content .text-muted,
+[data-bs-theme="light"] .obe-master-content .text-muted,
+html.light .obe-master-content .text-muted {
+    color: #475569 !important;
+}
+
+.sidebar-mini-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.sidebar-mini-action:hover {
+    color: var(--primary);
+    background: var(--surface-hover);
 }
 
 .form-check-input:checked {

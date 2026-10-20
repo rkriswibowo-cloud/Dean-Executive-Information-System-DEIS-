@@ -16,22 +16,22 @@ $obePaths = [
     'rubrics' => 'rubrik', 'imports' => 'import'
 ];
 $columns = match ($section) {
-    'academic-years' => ['obe_id'=>'ID OBE','name'=>'Tahun Akademik','is_active'=>'Status Aktif'],
-    'lecturers' => ['obe_id'=>'ID OBE','name'=>'Nama Dosen','nidn'=>'NIDN','study_program_name'=>'Program Studi','email'=>'Email'],
-    'students' => ['obe_id'=>'ID OBE','username'=>'NIM/Username','name'=>'Nama Mahasiswa','study_program_name'=>'Program Studi','email'=>'Email'],
-    'study-programs' => ['obe_id'=>'ID OBE','code'=>'Kode','name'=>'Program Studi','degree'=>'Jenjang','head_name'=>'Kaprodi','status'=>'Status'],
-    'curricula' => ['obe_id'=>'ID OBE','code'=>'Kode','name'=>'Kurikulum','study_program_name'=>'Program Studi','start_year'=>'Mulai','version'=>'Versi','status'=>'Status'],
-    'curriculum-rules' => ['id'=>'ID OBE','prodi_nama'=>'Program Studi','kurikulum_nama'=>'Kurikulum','angkatan_mulai'=>'Angkatan Mulai','angkatan_selesai'=>'Angkatan Selesai','keterangan'=>'Keterangan'],
-    'graduate-profiles' => ['id'=>'ID OBE','kode'=>'Kode','nama'=>'Profil Lulusan','prodi_nama'=>'Program Studi','kurikulum_nama'=>'Kurikulum','deskripsi'=>'Deskripsi'],
-    'learning-outcomes' => ['id'=>'ID OBE','kode'=>'Kode','rumusan'=>'Rumusan CPL','kategori'=>'Kategori','prodi_nama'=>'Program Studi','target_capaian'=>'Target'],
-    'courses' => ['obe_id'=>'ID OBE','code'=>'Kode','name'=>'Mata Kuliah','study_program_name'=>'Program Studi','curriculum_name'=>'Kurikulum','credits'=>'SKS','semester'=>'Semester','status'=>'Status'],
-    'rubrics' => ['id'=>'ID OBE','kode_jenis'=>'Kode','nama'=>'Rubrik','jenis'=>'Jenis','criteria_count'=>'Kriteria','level_count'=>'Level','status'=>'Status'],
+    'academic-years' => ['name'=>'Tahun Akademik','is_active'=>'Status Aktif'],
+    'lecturers' => ['name'=>'Nama Dosen','nidn'=>'NIDN','study_program_name'=>'Program Studi','email'=>'Email'],
+    'students' => ['username'=>'NIM/Username','name'=>'Nama Mahasiswa','study_program_name'=>'Program Studi','email'=>'Email'],
+    'study-programs' => ['code'=>'Kode','name'=>'Program Studi','degree'=>'Jenjang','head_name'=>'Kaprodi','status'=>'Status'],
+    'curricula' => ['code'=>'Kode','name'=>'Kurikulum','study_program_name'=>'Program Studi','start_year'=>'Mulai','version'=>'Versi','status'=>'Status'],
+    'curriculum-rules' => ['prodi_nama'=>'Program Studi','kurikulum_nama'=>'Kurikulum','angkatan_mulai'=>'Angkatan Mulai','angkatan_selesai'=>'Angkatan Selesai','keterangan'=>'Keterangan'],
+    'graduate-profiles' => ['kode'=>'Kode','nama'=>'Profil Lulusan','prodi_nama'=>'Program Studi','kurikulum_nama'=>'Kurikulum','deskripsi'=>'Deskripsi'],
+    'learning-outcomes' => ['kode'=>'Kode','rumusan'=>'Rumusan CPL','kategori'=>'Kategori','prodi_nama'=>'Program Studi','target_capaian'=>'Target'],
+    'courses' => ['code'=>'Kode','name'=>'Mata Kuliah','study_program_name'=>'Program Studi','curriculum_name'=>'Kurikulum','credits'=>'SKS','semester'=>'Semester','status'=>'Status'],
+    'rubrics' => ['kode_jenis'=>'Kode','nama'=>'Rubrik','jenis'=>'Jenis','criteria_count'=>'Kriteria','level_count'=>'Level','status'=>'Status'],
     default => []
 };
 ?>
 
-<div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
-    <div class="card-body p-4 text-white" style="background:linear-gradient(135deg,#312e81,#4f46e5,#2563eb)">
+<div class="card obe-master-hero border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+    <div class="card-body obe-master-hero-body p-4 text-white">
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
             <div>
                 <span class="badge bg-white text-primary mb-2"><i class="fa-solid fa-lock me-1"></i>READ-ONLY DARI OBE</span>
@@ -49,7 +49,7 @@ $columns = match ($section) {
     </div>
 </div>
 
-<div class="card border-0 shadow-sm rounded-4 mb-4">
+<div class="card obe-master-tabs border-0 shadow-sm rounded-4 mb-4">
     <div class="card-body p-3 d-flex gap-2 flex-wrap">
         <?php foreach ($sections as $item): ?>
             <a href="<?= $baseUrl ?>/master/obe?section=<?= urlencode($item) ?>" class="btn btn-sm <?= $section === $item ? 'btn-primary' : 'btn-outline-secondary' ?> rounded-pill">
@@ -60,7 +60,7 @@ $columns = match ($section) {
     </div>
 </div>
 
-<div class="card border-0 shadow-sm rounded-4">
+<div class="card obe-master-content border-0 shadow-sm rounded-4">
     <div class="card-header bg-transparent py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h5 class="fw-bold mb-1"><?= htmlspecialchars($labels[$section]) ?></h5>
@@ -83,6 +83,101 @@ $columns = match ($section) {
             </a>
         </div>
     </div>
+
+    <!-- Toolbar Filter & Pencarian Hierarki OBE -->
+    <?php if ($section !== 'imports' && !empty($health['available'])): ?>
+        <div class="px-4 py-3 bg-body-tertiary bg-opacity-50 border-bottom">
+            <form method="GET" action="<?= $baseUrl ?>/master/obe" id="obeFilterForm" class="row g-2 align-items-center">
+                <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
+
+                <!-- Filter Program Studi -->
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label small fw-semibold text-muted mb-1 d-flex align-items-center gap-1">
+                        <i class="fa-solid fa-graduation-cap text-primary"></i> Program Studi
+                    </label>
+                    <select name="prodi_id" class="form-select form-select-sm shadow-sm" onchange="document.getElementById('obeFilterForm').submit()">
+                        <option value="">-- Semua Program Studi --</option>
+                        <?php foreach ($studyPrograms as $sp): ?>
+                            <option value="<?= (int)$sp['obe_id'] ?>" <?= ($filterProdiId === (int)$sp['obe_id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($sp['degree'] . ' ' . $sp['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <!-- Filter Kurikulum (Hanya kurikulum prodi terpilih jika prodi difilter) -->
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label small fw-semibold text-muted mb-1 d-flex align-items-center gap-1">
+                        <i class="fa-solid fa-book-bookmark text-primary"></i> Kurikulum
+                    </label>
+                    <select name="kurikulum_id" class="form-select form-select-sm shadow-sm" onchange="document.getElementById('obeFilterForm').submit()">
+                        <option value="">-- Semua Kurikulum --</option>
+                        <?php 
+                        foreach ($curricula as $cur): 
+                            if ($filterProdiId !== null && (int)$cur['study_program_id'] !== $filterProdiId) {
+                                continue;
+                            }
+                        ?>
+                            <option value="<?= (int)$cur['obe_id'] ?>" <?= ($filterCurriculumId === (int)$cur['obe_id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($cur['name'] . ' (' . $cur['code'] . ')') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <!-- Search Box -->
+                <div class="col-12 col-md-4 col-lg-4">
+                    <label class="form-label small fw-semibold text-muted mb-1 d-flex align-items-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-primary"></i> Cari Data
+                    </label>
+                    <div class="input-group input-group-sm shadow-sm">
+                        <input type="text" name="q" value="<?= htmlspecialchars($searchQuery ?? '') ?>" class="form-control" placeholder="Cari nama, kode, dll...">
+                        <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                </div>
+
+                <!-- Reset Filter Button -->
+                <?php if ($filterProdiId !== null || $filterCurriculumId !== null || !empty($searchQuery)): ?>
+                    <div class="col-12 col-lg-2 d-flex align-items-end pt-lg-4">
+                        <a href="<?= $baseUrl ?>/master/obe?section=<?= urlencode($section) ?>" class="btn btn-sm btn-outline-secondary w-100 shadow-sm" title="Reset Filter & Pencarian">
+                            <i class="fa-solid fa-rotate-left me-1"></i>Reset
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </form>
+
+            <?php if ($filterProdiId !== null || $filterCurriculumId !== null || !empty($searchQuery)): ?>
+                <div class="d-flex align-items-center gap-2 mt-2 flex-wrap small">
+                    <span class="text-muted">Filter aktif:</span>
+                    <?php if ($filterProdiId !== null): ?>
+                        <?php 
+                        $foundP = null;
+                        foreach ($studyPrograms as $sp) { if ((int)$sp['obe_id'] === $filterProdiId) { $foundP = $sp; break; } }
+                        ?>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                            Prodi: <?= htmlspecialchars($foundP ? ($foundP['degree'] . ' ' . $foundP['name']) : (string)$filterProdiId) ?>
+                        </span>
+                    <?php endif; ?>
+                    <?php if ($filterCurriculumId !== null): ?>
+                        <?php 
+                        $foundC = null;
+                        foreach ($curricula as $cur) { if ((int)$cur['obe_id'] === $filterCurriculumId) { $foundC = $cur; break; } }
+                        ?>
+                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                            Kurikulum: <?= htmlspecialchars($foundC ? $foundC['name'] : (string)$filterCurriculumId) ?>
+                        </span>
+                    <?php endif; ?>
+                    <?php if (!empty($searchQuery)): ?>
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                            Cari: "<?= htmlspecialchars($searchQuery) ?>"
+                        </span>
+                    <?php endif; ?>
+                    <span class="text-muted ms-auto">Menampilkan <strong><?= count($records) ?></strong> data</span>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
     <div class="card-body p-0">
         <?php if ($section === 'imports'): ?>
             <div class="p-5 text-center">
@@ -102,10 +197,12 @@ $columns = match ($section) {
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" data-auto-paginate="15">
                     <thead class="bg-body-tertiary text-muted small text-uppercase"><tr>
+                        <th class="ps-4" style="width: 60px;">No</th>
                         <?php foreach ($columns as $label): ?><th><?= htmlspecialchars($label) ?></th><?php endforeach; ?>
                     </tr></thead>
                     <tbody>
-                    <?php foreach ($records as $record): ?><tr>
+                    <?php $no = 1; foreach ($records as $record): ?><tr>
+                        <td class="ps-4 text-muted fw-semibold"><?= $no++ ?></td>
                         <?php foreach ($columns as $key => $label): ?>
                             <?php $value = $record[$key] ?? null; ?>
                             <td>

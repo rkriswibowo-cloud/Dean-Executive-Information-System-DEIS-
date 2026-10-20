@@ -19,6 +19,10 @@ use App\Helpers\CsrfHelper;
     </div>
 </div>
 
+<?php if (!empty($obeError)): ?>
+<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Data dosen OBE tidak dapat dibaca: <?= htmlspecialchars($obeError, ENT_QUOTES, 'UTF-8') ?></div>
+<?php endif; ?>
+
 <!-- Statistics Cards -->
 <div class="row g-3 mb-4">
     <div class="col-md-3">
@@ -122,12 +126,16 @@ use App\Helpers\CsrfHelper;
                             </td>
                             <td class="text-end pe-4 text-nowrap">
                                 <div class="table-actions">
-                                    <button type="button" class="btn btn-sm btn-outline-warning btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalBkdAction<?= $l['id'] ?>" title="Pengesahan BKD Dekanat">
+                                    <?php if ($l['is_mapped']): ?>
+                                    <button type="button" class="btn btn-sm btn-outline-warning btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalBkdAction<?= $l['local_id'] ?>" title="Pengesahan BKD Dekanat">
                                         <i class="ti ti-gavel"></i> Aksi BKD
                                     </button>
-                                    <a href="<?= $baseUrl ?>/lecturers/detail?id=<?= $l['id'] ?>" class="btn btn-sm btn-outline-info btn-crud-sm" title="Lihat Profil Dosen">
+                                    <a href="<?= $baseUrl ?>/lecturers/detail?id=<?= $l['local_id'] ?>" class="btn btn-sm btn-outline-info btn-crud-sm" title="Lihat Profil Dosen">
                                         <i class="ti ti-eye"></i> Detail
                                     </a>
+                                    <?php else: ?>
+                                    <span class="badge bg-warning-subtle text-warning" title="Belum ada pasangan data monitoring di DEIS">Belum dipetakan</span>
+                                    <?php endif; ?>
                                     <?php if (empty($masterReadOnly)): ?><button type="button" class="btn btn-sm btn-outline-primary btn-icon-square" data-bs-toggle="modal" data-bs-target="#modalEditLecturer<?= $l['id'] ?>" title="Edit Data Dosen">
                                         <i class="ti ti-edit"></i>
                                     </button>
@@ -142,7 +150,8 @@ use App\Helpers\CsrfHelper;
                                 </div>
 
                                 <!-- Modal Aksi BKD Dekanat -->
-                                <div class="modal fade" id="modalBkdAction<?= $l['id'] ?>" tabindex="-1" aria-hidden="true">
+                                <?php if ($l['is_mapped']): ?>
+                                <div class="modal fade" id="modalBkdAction<?= $l['local_id'] ?>" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered text-start">
                                         <div class="modal-content border-0 shadow-lg rounded-4">
                                             <div class="modal-header bg-body border-bottom py-3">
@@ -153,7 +162,7 @@ use App\Helpers\CsrfHelper;
                                             </div>
                                             <form action="<?= $baseUrl ?>/lecturers/action-bkd" method="POST">
                                                 <?= CsrfHelper::tokenField() ?>
-                                                <input type="hidden" name="lecturer_id" value="<?= $l['id'] ?>">
+                                                <input type="hidden" name="lecturer_id" value="<?= $l['local_id'] ?>">
                                                 <div class="modal-body p-4">
                                                     <div class="bg-body-tertiary p-3 rounded-3 mb-3">
                                                         <div class="fw-bold text-dark"><?= htmlspecialchars($l['name'], ENT_QUOTES, 'UTF-8') ?></div>
@@ -184,6 +193,7 @@ use App\Helpers\CsrfHelper;
                                         </div>
                                     </div>
                                 </div>
+                                <?php endif; ?>
 
                                 <!-- Modal Edit Dosen -->
                                 <?php if (empty($masterReadOnly)): ?>

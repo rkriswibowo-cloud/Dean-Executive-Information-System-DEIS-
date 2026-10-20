@@ -389,8 +389,49 @@ if ($currentRole === 'dekan') {
             const group = headerBtn.closest('.sidebar-group');
             if (group) {
                 group.classList.toggle('expanded');
+                saveSidebarGroupStates();
+                updateToggleAllGroupsLabel();
             }
         };
+
+        window.toggleAllSidebarGroups = function() {
+            const groups = Array.from(document.querySelectorAll('#sidebarScrollable .sidebar-group'));
+            const anyExpanded = groups.some(group => group.classList.contains('expanded'));
+            groups.forEach(group => group.classList.toggle('expanded', !anyExpanded));
+            saveSidebarGroupStates();
+            updateToggleAllGroupsLabel();
+        };
+
+        function updateToggleAllGroupsLabel() {
+            const groups = Array.from(document.querySelectorAll('#sidebarScrollable .sidebar-group'));
+            const anyExpanded = groups.some(group => group.classList.contains('expanded'));
+            const label = document.getElementById('toggleAllGroupsText');
+            if (label) label.textContent = anyExpanded ? 'Ciutkan Semua' : 'Bentangkan Semua';
+        }
+
+        function saveSidebarGroupStates() {
+            try {
+                const states = Array.from(document.querySelectorAll('#sidebarScrollable .sidebar-group'))
+                    .map(group => group.classList.contains('expanded'));
+                localStorage.setItem('deis_sidebar_group_states_<?= htmlspecialchars($currentRole, ENT_QUOTES, 'UTF-8') ?>', JSON.stringify(states));
+            } catch (e) {}
+        }
+
+        function restoreSidebarGroupStates() {
+            try {
+                const saved = localStorage.getItem('deis_sidebar_group_states_<?= htmlspecialchars($currentRole, ENT_QUOTES, 'UTF-8') ?>');
+                if (!saved) return;
+                const states = JSON.parse(saved);
+                document.querySelectorAll('#sidebarScrollable .sidebar-group').forEach((group, index) => {
+                    if (typeof states[index] === 'boolean') group.classList.toggle('expanded', states[index]);
+                });
+            } catch (e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            restoreSidebarGroupStates();
+            updateToggleAllGroupsLabel();
+        });
 
         // User Pill Profile Dropdown
         window.toggleUserDropdown = function(e) {

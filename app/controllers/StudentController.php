@@ -5,23 +5,31 @@ use App\Core\Controller;
 use App\Models\Student;
 use App\Models\StudyProgram;
 use App\Models\Survey;
+use App\Services\Obe\AcademicPersonProjectionService;
+use App\Services\Obe\ObeReadConnection;
+use App\Services\Obe\StudyProgramRepository as ObeStudyProgramRepository;
 
 class StudentController extends Controller {
     public function index(): void {
         $this->requireAuth();
 
-        $studentModel = new Student();
-        $programModel = new StudyProgram();
-
         $filterProgram = (int)$this->getQuery('program_id', 0);
         $filterStatus = $this->getQuery('status', 'Aktif');
-
-        $students = $studentModel->allWithProgram($filterProgram ?: null);
+        $obeError = null;
+        try {
+            $obe = new ObeReadConnection();
+            $students = (new AcademicPersonProjectionService($obe))->students($filterProgram ?: null);
+            $programs = array_map(static fn(array $program): array => [
+                'id' => $program['obe_id'], 'name' => $program['name'], 'code' => $program['code'],
+            ], (new ObeStudyProgramRepository($obe))->all());
+        } catch (\Throwable $e) {
+            $students = [];
+            $programs = [];
+            $obeError = $e->getMessage();
+        }
         if ($filterStatus) {
             $students = array_filter($students, fn($s) => $s['status'] === $filterStatus);
         }
-
-        $programs = $programModel->all();
 
         // Statistics
         $totalStudents = count($students);
@@ -38,7 +46,8 @@ class StudentController extends Controller {
             'totalStudents'    => $totalStudents,
             'criticalCount'    => $criticalCount,
             'warningCount'     => $warningCount,
-            'scholarshipCount' => $scholarshipCount
+            'scholarshipCount' => $scholarshipCount,
+            'obeError'         => $obeError
         ]);
     }
 

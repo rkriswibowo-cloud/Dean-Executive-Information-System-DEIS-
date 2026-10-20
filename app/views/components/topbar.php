@@ -116,14 +116,6 @@ if ($currentRole === 'dekan') {
                     <i class="fa-solid fa-building-columns"></i> Pengaturan Fakultas
                 </a>
                 <?php endif; ?>
-                <?php if ($currentRole === 'super_admin' || $currentRole === 'developer'): ?>
-                <a href="<?= $baseUrl ?>/users" class="user-pill-menu-item">
-                    <i class="fa-solid fa-users-gear"></i> Manajemen User & RBAC
-                </a>
-                <a href="<?= $baseUrl ?>/audit" class="user-pill-menu-item">
-                    <i class="fa-solid fa-shield-halved"></i> Audit Trail & Log Keamanan
-                </a>
-                <?php endif; ?>
                 <div class="user-pill-menu-divider"></div>
                 <?php if (!empty($_SESSION['impersonator_id'])): ?>
                     <form action="<?= $baseUrl ?>/impersonate/leave" method="POST" style="margin: 0;">

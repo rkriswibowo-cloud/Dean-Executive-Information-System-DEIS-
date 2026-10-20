@@ -27,7 +27,7 @@
                     <label for="username">Username / ID Pengguna</label>
                     <div class="deis-glass-input">
                         <i class="fa-regular fa-user"></i>
-                        <input type="text" id="username" name="username" value="<?= htmlspecialchars($oldUsername ?? '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Contoh: dekan atau kaprodi.ti" autocomplete="username" required autofocus>
+                        <input type="text" id="username" name="username" value="<?= htmlspecialchars($oldUsername ?? '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Masukkan username dekan" autocomplete="username" required autofocus>
                     </div>
                 </div>
 
@@ -43,22 +43,26 @@
                 </div>
 
                 <div class="deis-form-meta deis-reveal d6">
-                    <span><i class="fa-solid fa-shield-halved"></i> Akses berbasis peran (RBAC)</span>
+                    <span><i class="fa-solid fa-shield-halved text-primary"></i> Portal Dekan & Super Admin</span>
                     <button type="button" onclick="showDeisLoginHelp()">Bantuan login</button>
                 </div>
 
                 <button type="submit" class="deis-submit deis-reveal d7">
-                    <span>Masuk ke Dashboard</span><i class="fa-solid fa-arrow-right"></i>
+                    <span>Masuk ke Sistem DEIS</span><i class="fa-solid fa-arrow-right"></i>
                 </button>
             </form>
 
             <div class="deis-demo deis-reveal d8">
-                <div class="deis-demo-head"><span>Akses cepat demo</span><small>Klik untuk mengisi akun</small></div>
-                <div class="deis-demo-grid">
-                    <button type="button" onclick="setDemoCredentials('admin', 'password')"><i class="fa-solid fa-shield-halved"></i><span><strong>Super Admin</strong><small>Akses penuh</small></span></button>
-                    <button type="button" onclick="setDemoCredentials('dekan', 'password')"><i class="fa-solid fa-crown"></i><span><strong>Dekan</strong><small>Eksekutif</small></span></button>
-                    <button type="button" onclick="setDemoCredentials('kaprodi.ti', 'password')"><i class="fa-solid fa-graduation-cap"></i><span><strong>Kaprodi TI</strong><small>Program studi</small></span></button>
-                    <button type="button" onclick="setDemoCredentials('spmi', 'password')"><i class="fa-solid fa-certificate"></i><span><strong>SPMI</strong><small>Mutu & AMI</small></span></button>
+                <div class="deis-demo-head"><span>Kredensial Akses Cepat</span><small>Klik untuk mengisi otomatis</small></div>
+                <div class="deis-demo-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;">
+                    <button type="button" onclick="setDemoCredentials('dekan', 'password')" class="w-100 text-start">
+                        <i class="fa-solid fa-crown text-warning"></i>
+                        <span><strong>Dekan (Eksekutif)</strong><small>Username: dekan · Pass: password</small></span>
+                    </button>
+                    <button type="button" onclick="setDemoCredentials('admin', 'password')" class="w-100 text-start">
+                        <i class="fa-solid fa-user-shield text-primary"></i>
+                        <span><strong>Super Admin (Sistem)</strong><small>Username: admin · Pass: password</small></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -113,7 +117,7 @@ function setDemoCredentials(username, password) {
 }
 
 function showDeisLoginHelp() {
-    alert('Gunakan username yang diberikan administrator. Jika akun terkunci atau lupa password, hubungi Super Admin DEIS.');
+    alert('Sistem DEIS dapat diakses menggunakan akun Dekan (Username: dekan) atau Super Admin (Username: admin). Masukkan kata sandi atau klik tombol kredensial akses cepat.');
 }
 
 document.addEventListener('DOMContentLoaded', function () {

@@ -30,6 +30,22 @@ class AuthController extends Controller {
                     return;
                 }
 
+                // DEIS mengizinkan akses untuk Dekan dan Super Admin
+                $allowedRoles = ['dekan', 'super_admin', 'developer'];
+                $userRole = $user['role_slug'] ?? '';
+                if (!in_array($userRole, $allowedRoles, true) && $user['username'] !== 'dekan' && $user['username'] !== 'admin') {
+                    AuditService::log('LOGIN_REJECTED_ROLE', 'auth', (string)$user['id'], null, [
+                        'username' => $username,
+                        'role' => $userRole,
+                        'reason' => 'DEIS khusus Dekan dan Super Admin'
+                    ]);
+                    $this->render('auth/login', [
+                        'error' => 'Akses ditolak: DEIS hanya dapat diakses oleh Dekan dan Super Admin.',
+                        'oldUsername' => $username
+                    ], 'layouts/auth');
+                    return;
+                }
+
                 AuthHelper::login($user);
                 AuditService::log('LOGIN', 'auth', (string)$user['id'], null, ['username' => $username, 'status' => 'success']);
                 $this->redirect('dashboard', ['success' => 'Selamat datang kembali, ' . $user['name']]);

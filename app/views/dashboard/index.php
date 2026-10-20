@@ -12,6 +12,10 @@ $attention = $attention ?? ['total' => 0, 'pending_approvals' => 0, 'overdue_rtl
 
 <div style="display: flex; flex-direction: column; gap: 24px;">
 
+    <?php if (!empty($obeError)): ?>
+    <div class="alert alert-danger mb-0"><i class="fa-solid fa-triangle-exclamation me-2"></i>Total mahasiswa OBE tidak dapat dibaca: <?= htmlspecialchars($obeError, ENT_QUOTES, 'UTF-8') ?></div>
+    <?php endif; ?>
+
     <!-- 1. Welcome & Executive Action Header (Pola OBE) -->
     <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
         <div>
@@ -69,7 +73,7 @@ $attention = $attention ?? ['total' => 0, 'pending_approvals' => 0, 'overdue_rtl
                     <?= number_format($totalStudents) ?>
                 </div>
                 <div style="color: var(--success); font-size: 0.78rem; margin-top: 6px; display: flex; align-items: center; gap: 4px;">
-                    <i class="fa-solid fa-arrow-trend-up"></i> +4.2% vs semester lalu
+                    <i class="fa-solid fa-database"></i> Realtime dari OBE
                 </div>
             </div>
             <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(var(--primary-rgb), 0.12); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.3rem;">
@@ -142,89 +146,21 @@ $attention = $attention ?? ['total' => 0, 'pending_approvals' => 0, 'overdue_rtl
         </div>
     </div>
 
-    <!-- 4. Main Two-Column Layout: Attention Radar & Strategic Chart -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
-        
-        <!-- Kolom Kiri: Capaian IKU 1-8 Chart Card -->
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
-            <div style="padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <h4 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-main);">
-                        <i class="fa-solid fa-chart-column" style="color: var(--primary); margin-right: 8px;"></i>Capaian Indikator Kinerja Utama (IKU 1 - 8)
-                    </h4>
-                    <span style="font-size: 0.8rem; color: var(--text-muted);">Monitoring target strategis fakultas tahun berjalan</span>
-                </div>
-                <a href="<?= $baseUrl ?>/strategic" class="btn btn-secondary btn-sm">
-                    Detail IKU <i class="fa-solid fa-arrow-right ms-1"></i>
-                </a>
+    <!-- 4. Strategic IKU 1-8 Chart -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
+        <div style="padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h4 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-main);">
+                    <i class="fa-solid fa-chart-column" style="color: var(--primary); margin-right: 8px;"></i>Capaian Indikator Kinerja Utama (IKU 1 - 8)
+                </h4>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Monitoring target strategis fakultas tahun berjalan</span>
             </div>
-            <div style="padding: 20px; flex: 1;">
-                <div id="ikuChart" style="min-height: 320px;"></div>
-            </div>
+            <a href="<?= $baseUrl ?>/strategic" class="btn btn-secondary btn-sm">
+                Detail IKU <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
         </div>
-
-        <!-- Kolom Kanan: My Attention & Radar Prioritas Dekan -->
-        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
-            <div style="padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(239, 68, 68, 0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">
-                        <i class="fa-solid fa-bell"></i>
-                    </div>
-                    <h4 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-main);">My Attention Dekan</h4>
-                </div>
-                <span class="badge bg-danger rounded-pill px-3 py-1"><?= $attention['total'] ?> Item</span>
-            </div>
-            <div style="padding: 20px; display: flex; flex-direction: column; gap: 10px; flex: 1;">
-                <p style="margin: 0 0 6px 0; font-size: 0.82rem; color: var(--text-muted);">
-                    Item prioritas yang memerlukan intervensi langsung dekanat saat ini:
-                </p>
-
-                <!-- Pending Approvals -->
-                <a href="<?= $baseUrl ?>/command-center/approvals" style="display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-radius: 10px; background: var(--surface-hover); border: 1px solid var(--border-subtle); color: var(--text-main); text-decoration: none; transition: all 0.15s ease;">
-                    <span style="font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-stamp" style="color: #f59e0b;"></i> Persetujuan Menunggu (Approvals)
-                    </span>
-                    <span class="badge bg-warning text-dark fw-bold"><?= $attention['pending_approvals'] ?></span>
-                </a>
-
-                <!-- Overdue RTL -->
-                <a href="<?= $baseUrl ?>/meetings/rtl" style="display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-radius: 10px; background: var(--surface-hover); border: 1px solid var(--border-subtle); color: var(--text-main); text-decoration: none; transition: all 0.15s ease;">
-                    <span style="font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Tindak Lanjut Rapat (RTL) Terlambat
-                    </span>
-                    <span class="badge bg-danger fw-bold"><?= $attention['overdue_rtl'] ?></span>
-                </a>
-
-                <!-- Problematic Lecturers -->
-                <a href="<?= $baseUrl ?>/lecturers?bkd_status=Belum+Memenuhi" style="display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-radius: 10px; background: var(--surface-hover); border: 1px solid var(--border-subtle); color: var(--text-main); text-decoration: none; transition: all 0.15s ease;">
-                    <span style="font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-user-xmark" style="color: #f59e0b;"></i> Dosen Perlu Pembinaan BKD
-                    </span>
-                    <span class="badge bg-warning text-dark fw-bold"><?= $attention['problematic_lecturers'] ?></span>
-                </a>
-
-                <!-- Students At Risk -->
-                <a href="<?= $baseUrl ?>/students" style="display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-radius: 10px; background: var(--surface-hover); border: 1px solid var(--border-subtle); color: var(--text-main); text-decoration: none; transition: all 0.15s ease;">
-                    <span style="font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Mahasiswa Berisiko EWS Kritis
-                    </span>
-                    <span class="badge bg-danger fw-bold"><?= $attention['at_risk_students'] ?></span>
-                </a>
-
-                <!-- Urgent Deadlines -->
-                <a href="<?= $baseUrl ?>/accreditation" style="display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-radius: 10px; background: var(--surface-hover); border: 1px solid var(--border-subtle); color: var(--text-main); text-decoration: none; transition: all 0.15s ease;">
-                    <span style="font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-clock" style="color: #0ea5e9;"></i> Tenggat Waktu Akreditasi Mendesak
-                    </span>
-                    <span class="badge bg-info text-white fw-bold"><?= $attention['urgent_deadlines'] ?></span>
-                </a>
-
-                <div style="margin-top: auto; padding-top: 10px;">
-                    <a href="<?= $baseUrl ?>/command-center" class="btn btn-outline-primary btn-sm w-100 py-2">
-                        Buka Radar Penuh di Command Center →
-                    </a>
-                </div>
-            </div>
+        <div style="padding: 20px; flex: 1;">
+            <div id="ikuChart" style="min-height: 350px;"></div>
         </div>
     </div>
 

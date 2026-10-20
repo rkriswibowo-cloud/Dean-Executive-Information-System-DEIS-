@@ -3,6 +3,17 @@ use App\Helpers\FormatHelper;
 use App\Helpers\CsrfHelper;
 ?>
 
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="fa-solid fa-user-graduate text-primary me-2"></i>Data Mahasiswa</h3>
+        <div class="text-muted small">Identitas mahasiswa dibaca realtime dari OBE; indikator EWS tetap dikelola di DEIS.</div>
+    </div>
+    <a href="<?= $baseUrl ?>/master/obe?section=students" class="btn btn-primary btn-crud-sm"><i class="fa-solid fa-database me-1"></i>Master Mahasiswa OBE</a>
+</div>
+<?php if (!empty($obeError)): ?>
+<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Data mahasiswa OBE tidak dapat dibaca: <?= htmlspecialchars($obeError, ENT_QUOTES, 'UTF-8') ?></div>
+<?php endif; ?>
+
 <div class="row g-3 mb-4">
     <div class="col-md-3">
         <div class="kpi-card">
@@ -107,12 +118,17 @@ use App\Helpers\CsrfHelper;
                             </td>
                             <td><?= FormatHelper::statusBadge($s['risk_status']) ?></td>
                             <td class="text-end pe-4 text-nowrap">
-                                <button type="button" class="btn btn-sm <?= $s['risk_status'] === 'Critical' ? 'btn-soft-danger' : ($s['risk_status'] === 'Warning' ? 'btn-soft-warning' : 'btn-soft-primary') ?> btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalStudentAction<?= $s['id'] ?>">
+                                <?php if ($s['is_mapped']): ?>
+                                <button type="button" class="btn btn-sm <?= $s['risk_status'] === 'Critical' ? 'btn-soft-danger' : ($s['risk_status'] === 'Warning' ? 'btn-soft-warning' : 'btn-soft-primary') ?> btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalStudentAction<?= $s['local_id'] ?>">
                                     <i class="fa-solid fa-shield-halved me-1"></i> Intervensi EWS
                                 </button>
+                                <?php else: ?>
+                                <span class="badge bg-warning-subtle text-warning">Belum dipetakan</span>
+                                <?php endif; ?>
 
                                 <!-- Modal Intervensi Mahasiswa -->
-                                <div class="modal fade" id="modalStudentAction<?= $s['id'] ?>" tabindex="-1" aria-hidden="true" style="text-align: left;">
+                                <?php if ($s['is_mapped']): ?>
+                                <div class="modal fade" id="modalStudentAction<?= $s['local_id'] ?>" tabindex="-1" aria-hidden="true" style="text-align: left;">
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content">
                                             <div class="modal-header d-flex align-items-center justify-content-between">
@@ -123,7 +139,7 @@ use App\Helpers\CsrfHelper;
                                             </div>
                                             <form action="<?= $baseUrl ?>/students/action" method="POST">
                                                 <?= CsrfHelper::tokenField() ?>
-                                                <input type="hidden" name="student_id" value="<?= $s['id'] ?>">
+                                                <input type="hidden" name="student_id" value="<?= $s['local_id'] ?>">
                                                 <div class="modal-body p-4">
                                                     <div class="p-3 rounded-3 mb-3 border" style="background: var(--surface-hover);">
                                                         <div class="fw-bold"><?= htmlspecialchars($s['name'], ENT_QUOTES, 'UTF-8') ?> (NIM: <?= $s['nim'] ?>)</div>
@@ -154,6 +170,7 @@ use App\Helpers\CsrfHelper;
                                         </div>
                                     </div>
                                 </div>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

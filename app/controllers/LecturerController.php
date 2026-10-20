@@ -4,23 +4,31 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Lecturer;
 use App\Models\StudyProgram;
+use App\Services\Obe\AcademicPersonProjectionService;
+use App\Services\Obe\ObeReadConnection;
+use App\Services\Obe\StudyProgramRepository as ObeStudyProgramRepository;
 
 class LecturerController extends Controller {
     public function index(): void {
         $this->requireAuth();
 
-        $lecturerModel = new Lecturer();
-        $programModel = new StudyProgram();
-
         $filterProgram = (int)$this->getQuery('program_id', 0);
         $filterBkd = $this->getQuery('bkd_status', '');
-
-        $lecturers = $lecturerModel->allWithProgram($filterProgram ?: null);
+        $obeError = null;
+        try {
+            $obe = new ObeReadConnection();
+            $lecturers = (new AcademicPersonProjectionService($obe))->lecturers($filterProgram ?: null);
+            $programs = array_map(static fn(array $program): array => [
+                'id' => $program['obe_id'], 'name' => $program['name'], 'code' => $program['code'],
+            ], (new ObeStudyProgramRepository($obe))->all());
+        } catch (\Throwable $e) {
+            $lecturers = [];
+            $programs = [];
+            $obeError = $e->getMessage();
+        }
         if ($filterBkd) {
             $lecturers = array_filter($lecturers, fn($l) => $l['bkd_status'] === $filterBkd);
         }
-
-        $programs = $programModel->all();
 
         // Statistics
         $totalLecturers = count($lecturers);
@@ -43,6 +51,7 @@ class LecturerController extends Controller {
             'totalPubs'      => $totalPubs,
             'totalPkm'       => $totalPkm,
             'masterReadOnly' => true
+            ,'obeError'      => $obeError
         ]);
     }
 
