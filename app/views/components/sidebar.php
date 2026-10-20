@@ -7,6 +7,7 @@
 use App\Helpers\AuthHelper;
 use App\Services\CommandCenterService;
 use App\Models\AcademicYear;
+use App\Services\Obe\AcademicYearRepository as ObeAcademicYearRepository;
 
 $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
 $currentRole = 'dekan';
@@ -46,19 +47,15 @@ if (!function_exists('isGroupActive')) {
 }
 
 // Ambil tahun akademik aktif
-$activeYearNama = '2025/2026 Genap';
+$activeYearNama = 'OBE tidak tersedia';
 $listAcademicYears = [];
 try {
     $ayModel = new AcademicYear();
-    $listAcademicYears = $ayModel->all('id DESC');
-    foreach ($listAcademicYears as $ay) {
-        if (!empty($ay['is_active'])) {
-            $activeYearNama = ($ay['year'] ?? '') . ' ' . ucfirst($ay['semester'] ?? '');
-            break;
-        }
-    }
+    $activeYear = $ayModel->getActive();
+    $listAcademicYears = (new ObeAcademicYearRepository())->all();
+    $activeYearNama = $activeYear['label'];
 } catch (\Throwable $e) {
-    $activeYearNama = '2025/2026 Genap';
+    $activeYearNama = 'OBE tidak tersedia';
 }
 ?>
 
@@ -84,10 +81,10 @@ try {
             <?php if (!empty($listAcademicYears)): ?>
                 <?php foreach ($listAcademicYears as $ay): ?>
                     <?php 
-                    $ayLabel = ($ay['year'] ?? '') . ' ' . ucfirst($ay['semester'] ?? '');
+                    $ayLabel = $ay['label'] ?? (($ay['year'] ?? '') . ' ' . ucfirst($ay['semester'] ?? ''));
                     $isActive = !empty($ay['is_active']);
                     ?>
-                    <div class="branch-dropdown-item <?= $isActive ? 'active' : '' ?>" onclick="window.switchSemester('<?= htmlspecialchars($ayLabel, ENT_QUOTES, 'UTF-8') ?>')">
+                    <div class="branch-dropdown-item <?= $isActive ? 'active' : '' ?>" style="cursor: default;">
                         <?php if ($isActive): ?>
                             <i class="fa-solid fa-check check-mark"></i>
                         <?php else: ?>
@@ -95,12 +92,12 @@ try {
                         <?php endif; ?>
                         <div>
                             <div class="branch-item-name"><?= htmlspecialchars($ayLabel) ?></div>
-                            <div class="branch-item-sub"><?= $isActive ? 'Semester Berjalan (Aktif)' : 'Semester Akademik' ?></div>
+                            <div class="branch-item-sub"><?= $isActive ? 'Aktif di OBE' : 'Riwayat OBE (tidak aktif)' ?></div>
                         </div>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="branch-dropdown-item active" onclick="window.switchSemester('<?= htmlspecialchars($activeYearNama, ENT_QUOTES, 'UTF-8') ?>')">
+                <div class="branch-dropdown-item active" style="cursor: default;">
                     <i class="fa-solid fa-check check-mark"></i>
                     <div>
                         <div class="branch-item-name"><?= htmlspecialchars($activeYearNama) ?></div>
@@ -199,12 +196,6 @@ try {
                                 <span>Monitoring RPS & CPL</span>
                             </a>
                         </li>
-                        <li class="sidebar-nav-item <?= isNavActive('academic/courses', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/academic/courses" class="sidebar-link">
-                                <i class="fa-solid fa-book-bookmark"></i>
-                                <span>Kurikulum & RPS</span>
-                            </a>
-                        </li>
                         <li class="sidebar-nav-item <?= isNavActive('academic/practicum', $currentPath) ?>">
                             <a href="<?= $baseUrl ?>/academic/practicum" class="sidebar-link">
                                 <i class="fa-solid fa-flask"></i>
@@ -236,7 +227,7 @@ try {
                         <span>Kinerja SDM & Mutu</span>
                     </span>
                     <div class="sidebar-group-meta">
-                        <span class="sidebar-group-badge">7</span>
+                        <span class="sidebar-group-badge">5</span>
                         <i class="fa-solid fa-chevron-down group-chevron"></i>
                     </div>
                 </button>
@@ -246,12 +237,6 @@ try {
                             <a href="<?= $baseUrl ?>/lecturers" class="sidebar-link">
                                 <i class="fa-solid fa-user-check"></i>
                                 <span>SDM & Kepatuhan BKD</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-nav-item <?= isNavActive('lecturers/kpi', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/lecturers/kpi" class="sidebar-link">
-                                <i class="fa-solid fa-medal"></i>
-                                <span>Ranking KPI Dosen</span>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('accreditation', $currentPath) ?>">
@@ -291,7 +276,7 @@ try {
                         <span>Tata Kelola & Laporan</span>
                     </span>
                     <div class="sidebar-group-meta">
-                        <span class="sidebar-group-badge">3</span>
+                        <span class="sidebar-group-badge">2</span>
                         <i class="fa-solid fa-chevron-down group-chevron"></i>
                     </div>
                 </button>
@@ -301,12 +286,6 @@ try {
                             <a href="<?= $baseUrl ?>/meetings" class="sidebar-link">
                                 <i class="fa-solid fa-comments"></i>
                                 <span>Rapat Digital Dekanat</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-nav-item <?= isNavActive('meetings/rtl', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/meetings/rtl" class="sidebar-link">
-                                <i class="fa-solid fa-bars-progress"></i>
-                                <span>Tracking RTL Rapat</span>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('reports', $currentPath) ?>">
@@ -378,7 +357,7 @@ try {
             </div>
 
             <!-- Group 2: Akademik, Kurikulum & Mahasiswa -->
-            <?php $grpAcad = isGroupActive(['academic', 'students'], $currentPath); ?>
+            <?php $grpAcad = isGroupActive(['academic', 'students', 'master/obe'], $currentPath); ?>
             <div class="sidebar-group <?= $grpAcad ? 'expanded' : '' ?>">
                 <button type="button" class="sidebar-group-header" onclick="window.toggleSidebarGroup(this)">
                     <span class="sidebar-section-title">
@@ -398,10 +377,10 @@ try {
                                 <span>Perkuliahan & Kelas</span>
                             </a>
                         </li>
-                        <li class="sidebar-nav-item <?= isNavActive('academic/courses', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/academic/courses" class="sidebar-link">
-                                <i class="fa-solid fa-book-bookmark"></i>
-                                <span>Kurikulum & Kesiapan RPS</span>
+                        <li class="sidebar-nav-item <?= isNavActive('master/obe', $currentPath) ?>">
+                            <a href="<?= $baseUrl ?>/master/obe?section=courses" class="sidebar-link">
+                                <i class="fa-solid fa-database"></i>
+                                <span>Referensi Akademik OBE</span>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('academic/practicum', $currentPath) ?>">
@@ -435,7 +414,7 @@ try {
                         <span>Kinerja SDM & Mutu</span>
                     </span>
                     <div class="sidebar-group-meta">
-                        <span class="sidebar-group-badge">7</span>
+                        <span class="sidebar-group-badge">6</span>
                         <i class="fa-solid fa-chevron-down group-chevron"></i>
                     </div>
                 </button>
@@ -445,12 +424,6 @@ try {
                             <a href="<?= $baseUrl ?>/lecturers" class="sidebar-link">
                                 <i class="fa-solid fa-user-check"></i>
                                 <span>SDM & Kepatuhan BKD</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-nav-item <?= isNavActive('lecturers/kpi', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/lecturers/kpi" class="sidebar-link">
-                                <i class="fa-solid fa-medal"></i>
-                                <span>Ranking KPI Dosen</span>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('accreditation', $currentPath) ?>">
@@ -496,7 +469,7 @@ try {
                         <span>Tata Kelola & Laporan</span>
                     </span>
                     <div class="sidebar-group-meta">
-                        <span class="sidebar-group-badge">3</span>
+                        <span class="sidebar-group-badge">2</span>
                         <i class="fa-solid fa-chevron-down group-chevron"></i>
                     </div>
                 </button>
@@ -506,12 +479,6 @@ try {
                             <a href="<?= $baseUrl ?>/meetings" class="sidebar-link">
                                 <i class="fa-solid fa-comments"></i>
                                 <span>Rapat Digital Dekanat</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-nav-item <?= isNavActive('meetings/rtl', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/meetings/rtl" class="sidebar-link">
-                                <i class="fa-solid fa-bars-progress"></i>
-                                <span>Tracking RTL Rapat</span>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('reports', $currentPath) ?>">
@@ -525,7 +492,7 @@ try {
             </div>
 
             <!-- Group 5: Tata Kelola Sistem & Keamanan -->
-            <?php $grpSys = isGroupActive(['users', 'master/academic-years', 'audit'], $currentPath); ?>
+            <?php $grpSys = isGroupActive(['users', 'audit'], $currentPath); ?>
             <div class="sidebar-group <?= $grpSys ? 'expanded' : '' ?>">
                 <button type="button" class="sidebar-group-header" onclick="window.toggleSidebarGroup(this)">
                     <span class="sidebar-section-title">
@@ -533,7 +500,7 @@ try {
                         <span>Tata Kelola Sistem</span>
                     </span>
                     <div class="sidebar-group-meta">
-                        <span class="sidebar-group-badge">3</span>
+                        <span class="sidebar-group-badge">2</span>
                         <i class="fa-solid fa-chevron-down group-chevron"></i>
                     </div>
                 </button>
@@ -543,12 +510,6 @@ try {
                             <a href="<?= $baseUrl ?>/users" class="sidebar-link">
                                 <i class="fa-solid fa-users-gear"></i>
                                 <span>Manajemen User & RBAC</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-nav-item <?= isNavActive('master/academic-years', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/master/academic-years" class="sidebar-link">
-                                <i class="fa-solid fa-calendar-plus"></i>
-                                <span>Tahun Akademik</span>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('audit', $currentPath) ?>">
@@ -562,7 +523,7 @@ try {
             </div>
 
             <!-- Group 6: Data Master & Skema -->
-            <?php $grpMaster = isGroupActive(['master/faculties', 'master/study-programs'], $currentPath); ?>
+            <?php $grpMaster = isGroupActive(['master/faculties'], $currentPath); ?>
             <div class="sidebar-group <?= $grpMaster ? 'expanded' : '' ?>">
                 <button type="button" class="sidebar-group-header" onclick="window.toggleSidebarGroup(this)">
                     <span class="sidebar-section-title">
@@ -570,7 +531,7 @@ try {
                         <span>Data Master & Skema</span>
                     </span>
                     <div class="sidebar-group-meta">
-                        <span class="sidebar-group-badge">2</span>
+                        <span class="sidebar-group-badge">1</span>
                         <i class="fa-solid fa-chevron-down group-chevron"></i>
                     </div>
                 </button>
@@ -582,12 +543,6 @@ try {
                                 <span>Master Fakultas</span>
                             </a>
                         </li>
-                        <li class="sidebar-nav-item <?= isNavActive('master/study-programs', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/master/study-programs" class="sidebar-link">
-                                <i class="fa-solid fa-sitemap"></i>
-                                <span>Master Program Studi</span>
-                            </a>
-                        </li>
                     </ul>
                 </div>
             </div>
@@ -596,7 +551,7 @@ try {
             <!-- ================= 3. KAPRODI (PROGRAM STUDI) ================= -->
             
             <!-- Group 1: Program Studi & Akademik -->
-            <?php $grpProdi = isGroupActive(['dashboard', 'academic', 'lecturers', 'students'], $currentPath); ?>
+            <?php $grpProdi = isGroupActive(['dashboard', 'academic', 'lecturers', 'students', 'master/obe'], $currentPath); ?>
             <div class="sidebar-group <?= $grpProdi ? 'expanded' : '' ?>">
                 <button type="button" class="sidebar-group-header" onclick="window.toggleSidebarGroup(this)">
                     <span class="sidebar-section-title">
@@ -616,10 +571,10 @@ try {
                                 <span>Dashboard Prodi</span>
                             </a>
                         </li>
-                        <li class="sidebar-nav-item <?= isNavActive('academic/courses', $currentPath) ?>">
-                            <a href="<?= $baseUrl ?>/academic/courses" class="sidebar-link">
-                                <i class="fa-solid fa-book-bookmark"></i>
-                                <span>Kurikulum & RPS</span>
+                        <li class="sidebar-nav-item <?= isNavActive('master/obe', $currentPath) ?>">
+                            <a href="<?= $baseUrl ?>/master/obe?section=courses" class="sidebar-link">
+                                <i class="fa-solid fa-database"></i>
+                                <span>Referensi Akademik OBE</span>
                             </a>
                         </li>
                         <li class="sidebar-nav-item <?= isNavActive('academic', $currentPath) && !isNavActive('academic/courses', $currentPath) && !isNavActive('academic/guidance', $currentPath) ? 'active' : '' ?>">

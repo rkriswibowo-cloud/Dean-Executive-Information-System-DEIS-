@@ -9,15 +9,13 @@ use App\Helpers\CsrfHelper;
         <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
             <i class="fa-solid fa-chalkboard-user text-primary fs-3"></i> Data Master SDM & Kinerja Dosen
         </h3>
-        <p class="text-muted small mb-0">Kelola biodata dosen, jabatan fungsional, kualifikasi pendidikan, kepatuhan BKD, dan capaian Tri Dharma.</p>
+        <p class="text-muted small mb-0">Identitas dosen dikelola di OBE; DEIS tetap mengelola monitoring BKD dan capaian Tri Dharma.</p>
     </div>
     <div class="page-header-actions d-flex gap-2">
         <a href="<?= $baseUrl ?>/lecturers/kpi" class="btn btn-outline-warning btn-crud-sm">
             <i class="fa-solid fa-trophy"></i> Ranking KPI Dosen
         </a>
-        <button type="button" class="btn btn-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalAddLecturer">
-            <i class="fa-solid fa-user-plus"></i> Tambah Dosen Baru
-        </button>
+        <a href="<?= $baseUrl ?>/master/obe?section=lecturers" class="btn btn-primary btn-crud-sm"><i class="fa-solid fa-database"></i> Master Dosen OBE</a>
     </div>
 </div>
 
@@ -130,7 +128,7 @@ use App\Helpers\CsrfHelper;
                                     <a href="<?= $baseUrl ?>/lecturers/detail?id=<?= $l['id'] ?>" class="btn btn-sm btn-outline-info btn-crud-sm" title="Lihat Profil Dosen">
                                         <i class="ti ti-eye"></i> Detail
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline-primary btn-icon-square" data-bs-toggle="modal" data-bs-target="#modalEditLecturer<?= $l['id'] ?>" title="Edit Data Dosen">
+                                    <?php if (empty($masterReadOnly)): ?><button type="button" class="btn btn-sm btn-outline-primary btn-icon-square" data-bs-toggle="modal" data-bs-target="#modalEditLecturer<?= $l['id'] ?>" title="Edit Data Dosen">
                                         <i class="ti ti-edit"></i>
                                     </button>
                                     <form action="<?= $baseUrl ?>/lecturers/delete" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data dosen <?= htmlspecialchars($l['name'], ENT_QUOTES, 'UTF-8') ?>?');">
@@ -140,6 +138,7 @@ use App\Helpers\CsrfHelper;
                                             <i class="ti ti-trash"></i>
                                         </button>
                                     </form>
+                                    <?php endif; ?>
                                 </div>
 
                                 <!-- Modal Aksi BKD Dekanat -->
@@ -187,6 +186,7 @@ use App\Helpers\CsrfHelper;
                                 </div>
 
                                 <!-- Modal Edit Dosen -->
+                                <?php if (empty($masterReadOnly)): ?>
                                 <div class="modal fade" id="modalEditLecturer<?= $l['id'] ?>" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered modal-lg text-start">
                                         <div class="modal-content border-0 shadow">
@@ -301,6 +301,7 @@ use App\Helpers\CsrfHelper;
                                         </div>
                                     </div>
                                 </div>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -311,6 +312,7 @@ use App\Helpers\CsrfHelper;
 </div>
 
 <!-- Modal Tambah Dosen Baru -->
+<?php if (empty($masterReadOnly)): ?>
 <div class="modal fade" id="modalAddLecturer" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow text-start">
@@ -423,3 +425,4 @@ use App\Helpers\CsrfHelper;
         </div>
     </div>
 </div>
+<?php endif; ?>

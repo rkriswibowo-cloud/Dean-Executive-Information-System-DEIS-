@@ -5,6 +5,8 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `obe_entity_mappings`;
+DROP TABLE IF EXISTS `obe_snapshots`;
 DROP TABLE IF EXISTS `app_settings`;
 DROP TABLE IF EXISTS `files`;
 DROP TABLE IF EXISTS `notifications`;
@@ -611,4 +613,36 @@ CREATE TABLE `practicum_modules` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (`study_program_id`) REFERENCES `study_programs`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 36. OBE-to-DEIS identity mapping (stored only in DEIS)
+CREATE TABLE `obe_entity_mappings` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `entity_type` VARCHAR(40) NOT NULL,
+    `obe_id` BIGINT UNSIGNED NOT NULL,
+    `deis_id` BIGINT UNSIGNED NULL,
+    `natural_key` VARCHAR(191) NULL,
+    `match_status` ENUM('MAPPED','UNMAPPED','CONFLICT') NOT NULL DEFAULT 'UNMAPPED',
+    `matched_by` VARCHAR(50) NULL,
+    `last_checked_at` DATETIME NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uq_obe_entity` (`entity_type`, `obe_id`),
+    KEY `idx_obe_mapping_deis` (`entity_type`, `deis_id`),
+    KEY `idx_obe_mapping_status` (`entity_type`, `match_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 37. Immutable historical snapshots of read-only OBE data
+CREATE TABLE `obe_snapshots` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `snapshot_type` VARCHAR(40) NOT NULL DEFAULT 'ACADEMIC_MASTER',
+    `academic_year_obe_id` BIGINT UNSIGNED NULL,
+    `label` VARCHAR(150) NOT NULL,
+    `payload_json` LONGTEXT NOT NULL,
+    `record_count` INT UNSIGNED NOT NULL DEFAULT 0,
+    `checksum` CHAR(64) NOT NULL,
+    `captured_by` INT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY `idx_obe_snapshot_type_date` (`snapshot_type`, `created_at`),
+    KEY `idx_obe_snapshot_year` (`academic_year_obe_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

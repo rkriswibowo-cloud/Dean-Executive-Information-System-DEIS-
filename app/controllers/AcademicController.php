@@ -12,6 +12,8 @@ use App\Models\PracticumModule;
 use App\Models\Approval;
 use App\Models\ClassMeeting;
 use App\Services\AuditService;
+use App\Helpers\AuthHelper;
+use App\Services\Obe\ObeSnapshotService;
 
 class AcademicController extends Controller {
     public function index(): void {
@@ -224,7 +226,7 @@ class AcademicController extends Controller {
         $filterStatus = trim($this->getQuery('status', ''));
         $filterCaseMethod = $this->getQuery('case_method', '');
 
-        $courses = $courseModel->allWithLecturerAndProgram($filterProgram ?: null);
+        $courses = $courseModel->allWithLecturerAndProgram($filterProgram ?: null, true);
 
         // Filter status / case method
         if (!empty($filterStatus)) {
@@ -275,51 +277,39 @@ class AcademicController extends Controller {
             'title'       => 'Data Realtime Mata Kuliah & RPS Langsung dari Sistem OBE',
             'obeCourses'  => $obeCourses,
             'programs'    => $programs,
-            'filterProdi' => $filterProdi
+            'filterProdi' => $filterProdi,
+            'snapshots'   => (new ObeSnapshotService())->latest(8)
         ]);
     }
 
     /**
-     * Eksekusi Sinkronisasi Data Mata Kuliah & RPS dari OBE ke DEIS (Opsi 2)
+     * Endpoint kompatibilitas lama. Penyalinan master sudah dinonaktifkan.
      */
     public function syncObe(): void {
         $this->requireAuth();
         $this->requireCsrf();
 
-        $returnUrl = $this->getPost('return_url', 'academic/rps-monitoring');
+        $returnUrl = $this->getPost('return_url', 'academic/obe-live');
+        $this->redirect($returnUrl, ['warning' => 'Penyalinan master telah dinonaktifkan. DEIS sekarang membaca data OBE secara realtime.']);
+    }
 
+    public function captureObeSnapshot(): void {
+        $this->requireAuth();
+        $this->requireCsrf();
         try {
-            $obeService = new \App\Services\ObeSyncService();
-            $result = $obeService->syncCoursesFromObe();
-
-            AuditService::log('SYNC_OBE_COURSES', 'courses', null, null, $result);
-
-            $msg = "Sinkronisasi berhasil! Sebanyak {$result['total']} mata kuliah dari sistem OBE telah disinkronkan (Baru: {$result['inserted']}, Diperbarui: {$result['updated']}).";
-            $this->redirect($returnUrl, ['success' => $msg]);
-        } catch (\Exception $e) {
-            $this->redirect($returnUrl, ['danger' => 'Gagal menyinkronkan data dari OBE: ' . $e->getMessage()]);
+            $snapshot = (new ObeSnapshotService())->captureAcademicMaster(AuthHelper::id());
+            AuditService::log('CAPTURE_OBE_SNAPSHOT', 'obe_snapshots', (string)$snapshot['id'], null, $snapshot);
+            $this->redirect('academic/obe-live', [
+                'success' => "Snapshot #{$snapshot['id']} berhasil disimpan ({$snapshot['record_count']} record)."
+            ]);
+        } catch (\Throwable $e) {
+            $this->redirect('academic/obe-live', ['danger' => 'Snapshot gagal: ' . $e->getMessage()]);
         }
     }
 
     public function courses(): void {
         $this->requireAuth();
-        $courseModel = new Course();
-        $programModel = new StudyProgram();
-
-        $filterProgram = (int)$this->getQuery('program_id', 0);
-        $courses = $courseModel->allWithLecturerAndProgram($filterProgram ?: null);
-        $programs = $programModel->all();
-
-        $obeService = new \App\Services\ObeSyncService();
-        $obeAvailable = $obeService->isObeAvailable();
-
-        $this->render('academic/courses', [
-            'title'         => 'Data Kurikulum & Mata Kuliah',
-            'courses'       => $courses,
-            'programs'      => $programs,
-            'filterProgram' => $filterProgram,
-            'obeAvailable'  => $obeAvailable
-        ]);
+        $this->redirect('master/obe?section=courses');
     }
 
     /**
@@ -376,7 +366,7 @@ class AcademicController extends Controller {
         $format = $this->getQuery('format', 'csv');
 
         $courseModel = new Course();
-        $courses = $courseModel->allWithLecturerAndProgram();
+        $courses = $courseModel->allWithLecturerAndProgram(null, true);
         $summary = $courseModel->getRpsSummary();
 
         AuditService::log('EXPORT_RPS', 'courses', null, null, ['format' => $format]);
@@ -566,7 +556,7 @@ class AcademicController extends Controller {
         $practicumModel = new PracticumModule();
         $practicumModel->create([
             'study_program_id'  => $studyProgramId,
-            'academic_year_id'  => 1,
+            'academic_year_id'  => (int)(new AcademicYear())->getActive()['id'],
             'semester'          => $semester,
             'course_code'       => $courseCode,
             'course_name'       => $courseName,

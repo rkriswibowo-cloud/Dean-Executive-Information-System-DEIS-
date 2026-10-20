@@ -10,7 +10,7 @@ use App\Helpers\AuthHelper;
         <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
             <i class="fa-solid fa-users-gear text-primary fs-3"></i> Manajemen Pengguna & Hak Akses (RBAC)
         </h3>
-        <p class="text-muted small mb-0">Kelola akun pengguna, peran sistem (Dekan, Kaprodi, Dosen, SPMI, Operator, Admin), dan status akses.</p>
+        <p class="text-muted small mb-0">Identitas akademik dibaca dari OBE; akun login dan hak akses aplikasi tetap dikelola oleh DEIS.</p>
     </div>
     <div class="page-header-actions">
         <button type="button" class="btn btn-primary btn-crud-sm" data-bs-toggle="modal" data-bs-target="#modalAddUser">
@@ -19,9 +19,52 @@ use App\Helpers\AuthHelper;
     </div>
 </div>
 
+<!-- Identitas akademik realtime dari OBE -->
+<div class="card card-lg shadow-sm mb-4">
+    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <h5 class="card-title fw-bold mb-1"><i class="fa-solid fa-database text-success me-2"></i>Pengguna Akademik OBE</h5>
+            <div class="small text-muted">Read-only dan dibaca langsung dari database OBE. Password tidak pernah diambil.</div>
+        </div>
+        <span class="badge bg-success-subtle text-success"><?= count($obeUsers) ?> Pengguna OBE</span>
+    </div>
+    <div class="card-body p-0">
+        <?php if (!empty($obeError)): ?>
+            <div class="p-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>OBE tidak dapat dibaca: <?= htmlspecialchars($obeError, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php elseif (empty($obeUsers)): ?>
+            <div class="p-4 text-muted">Belum ada pengguna pada OBE.</div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" data-auto-paginate="15">
+                    <thead><tr><th class="ps-4">Identitas OBE</th><th>Role</th><th>Program Studi</th><th>Email</th><th>Relasi Akun DEIS</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($obeUsers as $obeUser): ?><tr>
+                        <td class="ps-4">
+                            <div class="fw-bold"><?= htmlspecialchars($obeUser['name'], ENT_QUOTES, 'UTF-8') ?></div>
+                            <div class="small text-muted">ID OBE: <?= (int)$obeUser['obe_id'] ?> &middot; @<?= htmlspecialchars($obeUser['username'], ENT_QUOTES, 'UTF-8') ?></div>
+                            <?php if (!empty($obeUser['nidn'])): ?><div class="small text-muted">NIDN: <?= htmlspecialchars($obeUser['nidn'], ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+                        </td>
+                        <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle"><?= htmlspecialchars($obeUser['role_name'], ENT_QUOTES, 'UTF-8') ?></span></td>
+                        <td><?= htmlspecialchars($obeUser['study_program_name'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><?= htmlspecialchars($obeUser['email'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td>
+                            <?php if (!empty($obeUser['deis_user_id'])): ?>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fa-solid fa-link me-1"></i>Terhubung: <?= htmlspecialchars($obeUser['deis_user_name'], ENT_QUOTES, 'UTF-8') ?></span>
+                            <?php else: ?>
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="fa-solid fa-link-slash me-1"></i>Belum punya akses DEIS</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr><?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
 <div class="card card-lg shadow-sm">
     <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h5 class="card-title fw-bold mb-0">Daftar Pengguna Sistem</h5>
+        <div><h5 class="card-title fw-bold mb-1">Akun Akses DEIS</h5><div class="small text-muted">Khusus autentikasi dan RBAC DEIS; bukan master identitas akademik.</div></div>
         <span class="badge bg-primary-subtle text-primary"><?= count($users) ?> Pengguna</span>
     </div>
     <div class="card-body p-0">
@@ -86,6 +129,15 @@ use App\Helpers\AuthHelper;
                                             <?= $u['status'] === 'active' ? 'Nonaktifkan' : 'Aktifkan' ?>
                                         </button>
                                     </form>
+                                    <?php if ((int)$u['id'] !== (int)AuthHelper::id()): ?>
+                                        <form action="<?= $baseUrl ?>/users/delete" method="POST" class="d-inline" onsubmit="return confirm('Hapus permanen akun DEIS <?= htmlspecialchars($u['username'], ENT_QUOTES, 'UTF-8') ?>? Tindakan ini tidak menghapus pengguna di OBE.');">
+                                            <?= CsrfHelper::tokenField() ?>
+                                            <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger btn-crud-sm" title="Hapus akun DEIS">
+                                                <i class="ti ti-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

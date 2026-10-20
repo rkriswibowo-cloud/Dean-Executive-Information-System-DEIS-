@@ -64,20 +64,23 @@ if ($currentRole === 'dekan') {
             <i class="fa-solid fa-bars-staggered"></i>
         </button>
 
-        <!-- Brand Squircle Logo -->
+        <!-- Brand Squircle Logo & Name (struktur seragam dengan OBE) -->
         <a href="<?= $baseUrl ?>/dashboard" class="brand-squircle-link" title="<?= $appConfig['short_name'] ?> - <?= htmlspecialchars($activeFacultyName) ?>">
             <div class="brand-squircle">
-                <i class="fa-solid fa-graduation-cap"></i>
+                <img src="<?= $baseUrl ?>/assets/images/brand/logo/logo-icon.svg" alt="" class="brand-squircle-image">
+            </div>
+            <div class="brand-text-wrapper">
+                <span class="brand-title">DEIS</span>
+                <span class="brand-subtitle-line">Dean Executive Information</span>
+                <span class="brand-subtitle-line">System</span>
             </div>
         </a>
-
-        <span class="topbar-divider-slash">/</span>
 
         <!-- User / Account Pill Profile Dropdown -->
         <div class="user-pill-dropdown-wrapper" id="userPillWrapper">
             <button type="button" class="user-pill-btn" id="userPillBtn" onclick="window.toggleUserDropdown(event)" title="Informasi Akun & Peran" aria-label="Akun Pengguna">
                 <span class="user-avatar-circle">
-                    <?= strtoupper(substr($currentUser['name'] ?? 'U', 0, 1)) ?>
+                    <i class="fa-regular fa-user"></i>
                 </span>
                 <span class="user-email-text">
                     <?= htmlspecialchars($currentUser['name'] ?? 'Pengguna') ?>
@@ -221,14 +224,19 @@ if ($currentRole === 'dekan') {
         </div>
 
         <!-- Global Search Trigger Pill (⌘K) -->
-        <button type="button" class="btn btn-outline-secondary border-dashed d-none d-md-flex align-items-center gap-2 px-3 py-1 rounded-pill" data-bs-toggle="modal" data-bs-target="#searchModal" style="font-size: 0.8rem; margin-left: 4px; border: 1px dashed var(--border); background: var(--surface);">
+        <button type="button" class="d-none" data-bs-toggle="modal" data-bs-target="#searchModal" aria-hidden="true" tabindex="-1">
             <i class="fa-solid fa-magnifying-glass text-muted" style="font-size: 0.82rem;"></i>
             <span class="text-muted">Cari Dosen, Rapat, IKU...</span>
             <span class="badge bg-light text-dark border ms-1 py-1 px-1.5" style="font-size: 0.65rem;">⌘K</span>
         </button>
+        <div class="obe-topbar-clock" id="deisTopbarClock" aria-label="Tanggal dan waktu saat ini">
+            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+            <span class="obe-topbar-clock-date" id="deisTopbarClockDate"></span>
+            <strong class="obe-topbar-clock-time" id="deisTopbarClockTime"></strong>
+        </div>
     </div>
 
-    <div class="topbar-right" style="display: flex; align-items: center; gap: 10px;">
+    <div class="topbar-right" style="display: flex; align-items: center; gap: 12px;">
         <!-- Impersonation indicator button if currently impersonating -->
         <?php if (!empty($_SESSION['impersonator_id'])): ?>
             <form action="<?= $baseUrl ?>/impersonate/leave" method="POST" class="d-inline mb-0">
@@ -299,3 +307,24 @@ if ($currentRole === 'dekan') {
         </button>
     </div>
 </div>
+<script>
+(function () {
+    const dateNode = document.getElementById('deisTopbarClockDate');
+    const timeNode = document.getElementById('deisTopbarClockTime');
+    if (!dateNode || !timeNode) return;
+
+    function updateDeisTopbarClock() {
+        const now = new Date();
+        dateNode.textContent = new Intl.DateTimeFormat('id-ID', {
+            timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+        }).format(now);
+        timeNode.textContent = new Intl.DateTimeFormat('id-ID', {
+            timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+        }).format(now).replace(/\./g, ':');
+    }
+
+    updateDeisTopbarClock();
+    if (window.deisTopbarClockTimer) clearInterval(window.deisTopbarClockTimer);
+    window.deisTopbarClockTimer = setInterval(updateDeisTopbarClock, 1000);
+})();
+</script>

@@ -55,6 +55,12 @@ class ObeSyncService {
                 r.updated_at as rps_updated_at,
                 r.bentuk_pembelajaran,
                 r.jenis_penilaian_json,
+                r.dosen_pengampu as rps_dosen_pengampu,
+                pjmk.nama_lengkap as pjmk_nama,
+                pjmk.nidn as pjmk_nidn,
+                ta.nama as pjmk_tahun_akademik,
+                dl.id as deis_lecturer_id,
+                dl.name as deis_lecturer_name,
                 -- Deteksi status RPS
                 CASE 
                     WHEN r.id IS NOT NULL AND (r.sistem_penilaian_desc IS NOT NULL OR r.rencana_evaluasi_json IS NOT NULL) THEN 'Lengkap'
@@ -74,6 +80,22 @@ class ObeSyncService {
             JOIN `{$this->obeDbName}`.kurikulum k ON m.kurikulum_id = k.id
             JOIN `{$this->obeDbName}`.program_studi p ON k.prodi_id = p.id
             LEFT JOIN `{$this->obeDbName}`.rps r ON m.id = r.mata_kuliah_id
+            LEFT JOIN `{$this->obeDbName}`.mata_kuliah_pengampu pm
+                ON pm.mata_kuliah_id = m.id
+                AND pm.status = 'ACTIVE'
+                AND pm.tahun_akademik_id = (
+                    SELECT ta_active.id
+                    FROM `{$this->obeDbName}`.tahun_akademik ta_active
+                    WHERE ta_active.is_active = 1
+                    ORDER BY ta_active.id DESC
+                    LIMIT 1
+                )
+            LEFT JOIN `{$this->obeDbName}`.tahun_akademik ta
+                ON ta.id = pm.tahun_akademik_id AND ta.is_active = 1
+            LEFT JOIN `{$this->obeDbName}`.users pjmk
+                ON pjmk.id = pm.pjmk_user_id AND ta.id IS NOT NULL
+            LEFT JOIN lecturers dl
+                ON NULLIF(TRIM(dl.nidn), '') = NULLIF(TRIM(pjmk.nidn), '')
             WHERE m.status = 'ACTIVE'
         ";
 
@@ -94,6 +116,8 @@ class ObeSyncService {
      * Menyinkronkan seluruh mata kuliah dari OBE ke tabel courses di DEIS (Opsi 2)
      */
     public function syncCoursesFromObe(): array {
+        throw new \LogicException('Sinkronisasi salinan master dinonaktifkan. Gunakan lapisan baca realtime OBE.');
+        /* Legacy implementation retained temporarily for migration traceability.
         if (!$this->isObeAvailable()) {
             throw new Exception("Database '{$this->obeDbName}' tidak ditemukan atau tidak dapat diakses.");
         }
@@ -119,10 +143,10 @@ class ObeSyncService {
         $insertStmt = $this->db->prepare("
             INSERT INTO courses (
                 study_program_id, code, name, sks, semester, kurikulum_year,
-                rps_status, cpl_status, case_method_flag, rps_document_url, rps_updated_at, rps_notes
+                lecturer_id, rps_status, cpl_status, case_method_flag, rps_document_url, rps_updated_at, rps_notes
             ) VALUES (
                 :prodi_id, :code, :name, :sks, :semester, :kurikulum_year,
-                :rps_status, :cpl_status, :case_method, :doc_url, :updated_at, :notes
+                :lecturer_id, :rps_status, :cpl_status, :case_method, :doc_url, :updated_at, :notes
             )
         ");
 
@@ -132,6 +156,7 @@ class ObeSyncService {
                 sks = :sks,
                 semester = :semester,
                 kurikulum_year = :kurikulum_year,
+                lecturer_id = COALESCE(:lecturer_id, lecturer_id),
                 rps_status = :rps_status,
                 cpl_status = :cpl_status,
                 case_method_flag = :case_method,
@@ -167,6 +192,7 @@ class ObeSyncService {
                     'sks'            => max(1, (int)$mk['sks']),
                     'semester'       => max(1, (int)$mk['semester']),
                     'kurikulum_year' => $mk['kurikulum_year'] ?: '2024',
+                    'lecturer_id'    => !empty($mk['deis_lecturer_id']) ? (int)$mk['deis_lecturer_id'] : null,
                     'rps_status'     => $mk['rps_status'],
                     'cpl_status'     => $cplStatus,
                     'case_method'    => $mk['is_case_method'],
@@ -183,6 +209,7 @@ class ObeSyncService {
                     'sks'            => max(1, (int)$mk['sks']),
                     'semester'       => max(1, (int)$mk['semester']),
                     'kurikulum_year' => $mk['kurikulum_year'] ?: '2024',
+                    'lecturer_id'    => !empty($mk['deis_lecturer_id']) ? (int)$mk['deis_lecturer_id'] : null,
                     'rps_status'     => $mk['rps_status'],
                     'cpl_status'     => $cplStatus,
                     'case_method'    => $mk['is_case_method'],
@@ -198,6 +225,6 @@ class ObeSyncService {
             'inserted' => $inserted,
             'updated'  => $updated,
             'total'    => count($obeCourses)
-        ];
+        ]; */
     }
 }

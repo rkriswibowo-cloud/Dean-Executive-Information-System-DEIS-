@@ -21,11 +21,10 @@ use App\Helpers\CsrfHelper;
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <form action="<?= $baseUrl ?>/academic/sync-obe" method="POST" onsubmit="return confirm('Terapkan dan salin seluruh data mata kuliah dari sistem OBE ke dalam master data DEIS?');">
+                    <form action="<?= $baseUrl ?>/academic/obe-snapshot" method="POST" onsubmit="return confirm('Simpan kondisi master OBE saat ini sebagai snapshot historis di DEIS?');">
                         <?= CsrfHelper::tokenField() ?>
-                        <input type="hidden" name="return_url" value="academic/obe-live">
                         <button type="submit" class="btn btn-light fw-bold text-success shadow-sm">
-                            <i class="ti ti-refresh me-1"></i> Sinkronkan Semua ke DEIS
+                            <i class="ti ti-camera me-1"></i> Simpan Snapshot Historis
                         </button>
                     </form>
                 </div>
@@ -33,6 +32,21 @@ use App\Helpers\CsrfHelper;
         </div>
     </div>
 </div>
+
+<?php if (!empty($snapshots)): ?>
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header bg-transparent py-3 px-4"><h6 class="fw-bold mb-0"><i class="ti ti-history me-1"></i> Snapshot OBE Terakhir</h6></div>
+    <div class="card-body p-0"><div class="table-responsive"><table class="table table-sm align-middle mb-0">
+        <thead class="bg-body-tertiary"><tr><th class="ps-4">Waktu</th><th>Label</th><th>Record</th><th>Checksum</th></tr></thead>
+        <tbody><?php foreach ($snapshots as $snapshot): ?><tr>
+            <td class="ps-4"><?= htmlspecialchars($snapshot['created_at']) ?></td>
+            <td><?= htmlspecialchars($snapshot['label']) ?></td>
+            <td><?= number_format((int)$snapshot['record_count']) ?></td>
+            <td><code><?= htmlspecialchars(substr($snapshot['checksum'], 0, 12)) ?>…</code></td>
+        </tr><?php endforeach; ?></tbody>
+    </table></div></div>
+</div>
+<?php endif; ?>
 
 <!-- Tabel Realtime Mata Kuliah OBE -->
 <div class="card card-lg shadow-sm border-0 rounded-4">
@@ -61,6 +75,7 @@ use App\Helpers\CsrfHelper;
                         <th>SKS</th>
                         <th>Semester</th>
                         <th>Kelompok Keilmuan</th>
+                        <th>PJMK / Pengampu OBE</th>
                         <th>Status Dokumen RPS</th>
                         <th>IKU-7 (Case Method)</th>
                         <th class="text-end pe-4">Aksi Link</th>
@@ -69,7 +84,7 @@ use App\Helpers\CsrfHelper;
                 <tbody>
                     <?php if (empty($obeCourses)): ?>
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="9" class="text-center py-5 text-muted">
                                 Tidak ada data mata kuliah yang ditemukan di sistem OBE.
                             </td>
                         </tr>
@@ -89,6 +104,34 @@ use App\Helpers\CsrfHelper;
                                 <td>Semester <?= $m['semester'] ?></td>
                                 <td>
                                     <span class="text-muted small"><?= htmlspecialchars($m['kelompok_keilmuan'] ?? '-', ENT_QUOTES, 'UTF-8') ?></span>
+                                </td>
+                                <td style="min-width: 190px;">
+                                    <?php if (!empty($m['pjmk_nama'])): ?>
+                                        <div class="fw-semibold text-dark"><?= htmlspecialchars($m['pjmk_nama'], ENT_QUOTES, 'UTF-8') ?></div>
+                                        <div class="small text-muted">
+                                            NIDN: <?= htmlspecialchars($m['pjmk_nidn'] ?: '-', ENT_QUOTES, 'UTF-8') ?>
+                                            <?php if (!empty($m['pjmk_tahun_akademik'])): ?>
+                                                &middot; <?= htmlspecialchars($m['pjmk_tahun_akademik'], ENT_QUOTES, 'UTF-8') ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <?php if (!empty($m['deis_lecturer_id'])): ?>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">
+                                                <i class="ti ti-link me-1"></i>Cocok di DEIS
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle mt-1">
+                                                <i class="ti ti-unlink me-1"></i>Belum cocok di DEIS
+                                            </span>
+                                        <?php endif; ?>
+                                    <?php elseif (!empty($m['rps_dosen_pengampu'])): ?>
+                                        <div class="small fw-semibold text-dark" style="white-space: pre-line;"><?= htmlspecialchars($m['rps_dosen_pengampu'], ENT_QUOTES, 'UTF-8') ?></div>
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle mt-1">
+                                            <i class="ti ti-file-text me-1"></i>Dari dokumen RPS
+                                        </span>
+                                        <div class="small text-muted mt-1">Belum ada penugasan PJMK aktif yang dapat dicocokkan via NIDN.</div>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-muted border">Belum ditetapkan</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($m['rps_status'] === 'Lengkap'): ?>

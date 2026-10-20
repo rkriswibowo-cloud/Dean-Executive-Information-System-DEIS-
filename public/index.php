@@ -71,6 +71,9 @@ $app->post('/master/faculties', 'MasterController@updateFaculty');
 $app->post('/master/faculties/create', 'MasterController@createFaculty');
 $app->post('/master/faculties/update', 'MasterController@updateFaculty');
 $app->post('/master/faculties/delete', 'MasterController@deleteFaculty');
+$app->get('/master/obe', 'MasterController@obeMaster');
+$app->get('/master/obe/status', 'MasterController@obeStatus');
+$app->post('/master/obe/reconcile', 'MasterController@reconcileObeMappings');
 $app->get('/master/study-programs', 'MasterController@studyPrograms');
 $app->post('/master/study-programs/create', 'MasterController@createStudyProgram');
 $app->post('/master/study-programs/update', 'MasterController@updateStudyProgram');
@@ -88,6 +91,7 @@ $app->get('/academic/courses', 'AcademicController@courses');
 $app->get('/academic/rps-monitoring', 'AcademicController@rpsMonitoring');
 $app->get('/academic/obe-live', 'AcademicController@obeLive');
 $app->post('/academic/sync-obe', 'AcademicController@syncObe');
+$app->post('/academic/obe-snapshot', 'AcademicController@captureObeSnapshot');
 $app->get('/academic/export-lecture', 'AcademicController@exportLecture');
 $app->get('/academic/export-rps', 'AcademicController@exportRps');
 $app->get('/academic/practicum', 'AcademicController@practicum');
@@ -162,6 +166,7 @@ $app->get('/reports/export', 'ReportController@export');
 $app->get('/users', 'UserController@index');
 $app->post('/users/create', 'UserController@create');
 $app->post('/users/toggle-status', 'UserController@toggleStatus');
+$app->post('/users/delete', 'UserController@delete');
 
 // 16. Audit Log
 $app->get('/audit', 'AuditController@index');

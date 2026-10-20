@@ -28,15 +28,8 @@ $caseMethodPct = $totalCourses > 0 ? round(($caseMethodCount / $totalCourses) * 
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <?php if (!empty($obeAvailable)): ?>
-                        <form action="<?= $baseUrl ?>/academic/sync-obe" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menyinkronkan seluruh mata kuliah dan status RPS dari sistem OBE ke DEIS?');">
-                            <?= CsrfHelper::tokenField() ?>
-                            <input type="hidden" name="return_url" value="academic/rps-monitoring">
-                            <button type="submit" class="btn btn-warning btn-sm fw-bold text-dark shadow-sm">
-                                <i class="ti ti-refresh me-1"></i> Sinkronkan dari OBE
-                            </button>
-                        </form>
                         <a href="<?= $baseUrl ?>/academic/obe-live" class="btn btn-light btn-sm fw-semibold text-primary shadow-sm">
-                            <i class="ti ti-database-search me-1"></i> Data Realtime OBE
+                            <i class="ti ti-database-search me-1"></i> Buka Data Realtime OBE
                         </a>
                     <?php endif; ?>
                     <a href="<?= $baseUrl ?>/academic/export-rps?format=csv" class="btn btn-outline-light btn-sm">

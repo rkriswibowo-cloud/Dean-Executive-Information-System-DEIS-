@@ -41,7 +41,8 @@ class LecturerController extends Controller {
             'certifiedCount' => $certifiedCount,
             'bkdMetCount'    => $bkdMetCount,
             'totalPubs'      => $totalPubs,
-            'totalPkm'       => $totalPkm
+            'totalPkm'       => $totalPkm,
+            'masterReadOnly' => true
         ]);
     }
 
@@ -80,6 +81,7 @@ class LecturerController extends Controller {
     public function create(): void {
         $this->requireAuth();
         $this->requireCsrf();
+        $this->redirect('lecturers', ['error' => 'Identitas dosen bersifat read-only di DEIS. Kelola master dosen melalui OBE.']);
 
         $name = trim($this->getPost('name', ''));
         $nidn = trim($this->getPost('nidn', ''));
@@ -138,6 +140,7 @@ class LecturerController extends Controller {
     public function update(): void {
         $this->requireAuth();
         $this->requireCsrf();
+        $this->redirect('lecturers', ['error' => 'Identitas dosen bersifat read-only di DEIS. Kelola master dosen melalui OBE.']);
 
         $id = (int)$this->getPost('id', 0);
         $name = trim($this->getPost('name', ''));
@@ -194,6 +197,7 @@ class LecturerController extends Controller {
     public function delete(): void {
         $this->requireAuth();
         $this->requireCsrf();
+        $this->redirect('lecturers', ['error' => 'Identitas dosen bersifat read-only di DEIS dan tidak dapat dihapus.']);
 
         $id = (int)$this->getPost('id', 0);
         if ($id) {

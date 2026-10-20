@@ -6,8 +6,92 @@ use App\Models\Faculty;
 use App\Models\StudyProgram;
 use App\Models\AcademicYear;
 use App\Services\AuditService;
+use App\Services\Obe\AcademicReferenceRepository;
+use App\Services\Obe\AcademicYearRepository as ObeAcademicYearRepository;
+use App\Services\Obe\CourseRepository as ObeCourseRepository;
+use App\Services\Obe\CurriculumRepository as ObeCurriculumRepository;
+use App\Services\Obe\LecturerRepository as ObeLecturerRepository;
+use App\Services\Obe\ObeHealthService;
+use App\Services\Obe\ObeMappingService;
+use App\Services\Obe\ObeReadinessService;
+use App\Services\Obe\StudentRepository as ObeStudentRepository;
+use App\Services\Obe\StudyProgramRepository as ObeStudyProgramRepository;
 
 class MasterController extends Controller {
+    public function obeStatus(): void {
+        $this->requireAuth();
+        $this->requireRole(['super_admin', 'dekan', 'developer']);
+
+        $this->render('master/obe_status', [
+            'title' => 'Status Kesiapan Integrasi OBE',
+            'report' => (new ObeReadinessService())->report(),
+        ]);
+    }
+
+    public function obeMaster(): void {
+        $this->requireAuth();
+
+        $allowedSections = [
+            'academic-years', 'lecturers', 'students', 'study-programs', 'curricula',
+            'curriculum-rules', 'graduate-profiles', 'learning-outcomes', 'courses',
+            'rubrics', 'imports'
+        ];
+        $section = (string)$this->getQuery('section', 'study-programs');
+        if (!in_array($section, $allowedSections, true)) {
+            $section = 'study-programs';
+        }
+
+        $health = (new ObeHealthService())->check();
+        $records = [];
+        $counts = array_fill_keys($allowedSections, null);
+        if ($health['available']) {
+            $reference = new AcademicReferenceRepository();
+            $records = match ($section) {
+                'academic-years' => (new ObeAcademicYearRepository())->all(),
+                'lecturers' => (new ObeLecturerRepository())->all(),
+                'students' => (new ObeStudentRepository())->all(),
+                'study-programs' => (new ObeStudyProgramRepository())->all(false),
+                'curricula' => (new ObeCurriculumRepository())->all(),
+                'curriculum-rules' => $reference->curriculumRules(),
+                'graduate-profiles' => $reference->graduateProfiles(),
+                'learning-outcomes' => $reference->learningOutcomes(),
+                'courses' => (new ObeCourseRepository())->all(null, null, false),
+                'rubrics' => $reference->rubrics(),
+                default => [],
+            };
+            $counts = $reference->counts();
+        }
+
+        try {
+            $mappingSummary = (new ObeMappingService())->summary();
+        } catch (\Throwable $e) {
+            $mappingSummary = [];
+        }
+
+        $this->render('master/obe', [
+            'title' => 'Master Data Akademik OBE',
+            'section' => $section,
+            'sections' => $allowedSections,
+            'records' => $records,
+            'counts' => $counts,
+            'health' => $health,
+            'mappingSummary' => $mappingSummary,
+        ]);
+    }
+
+    public function reconcileObeMappings(): void {
+        $this->requireAuth();
+        $this->requireRole(['super_admin', 'developer']);
+        $this->requireCsrf();
+        try {
+            $result = (new ObeMappingService())->reconcile();
+            AuditService::log('RECONCILE_OBE_MAPPING', 'obe_entity_mappings', null, null, $result);
+            $this->redirect('master/obe', ['success' => 'Rekonsiliasi ID OBE–DEIS berhasil diperbarui.']);
+        } catch (\Throwable $e) {
+            $this->redirect('master/obe', ['error' => 'Rekonsiliasi gagal: ' . $e->getMessage()]);
+        }
+    }
+
     public function faculties(): void {
         $this->requireAuth();
         $this->requireRole(['super_admin', 'dekan', 'developer']);
@@ -118,18 +202,13 @@ class MasterController extends Controller {
 
     public function studyPrograms(): void {
         $this->requireAuth();
-        $programModel = new StudyProgram();
-        $programs = $programModel->allWithFaculty();
-
-        $this->render('master/study_programs', [
-            'title'    => 'Data Master Program Studi',
-            'programs' => $programs
-        ]);
+        $this->redirect('master/obe?section=study-programs');
     }
 
     public function createStudyProgram(): void {
         $this->requireAuth();
         $this->requireCsrf();
+        $this->redirect('master/obe?section=study-programs', ['error' => 'Master Program Studi bersifat read-only di DEIS. Kelola data melalui OBE.']);
 
         $code = trim($this->getPost('code', ''));
         $name = trim($this->getPost('name', ''));
@@ -166,6 +245,7 @@ class MasterController extends Controller {
     public function updateStudyProgram(): void {
         $this->requireAuth();
         $this->requireCsrf();
+        $this->redirect('master/obe?section=study-programs', ['error' => 'Master Program Studi bersifat read-only di DEIS. Kelola data melalui OBE.']);
 
         $id = (int)$this->getPost('id', 0);
         $code = trim($this->getPost('code', ''));
@@ -202,6 +282,7 @@ class MasterController extends Controller {
     public function deleteStudyProgram(): void {
         $this->requireAuth();
         $this->requireCsrf();
+        $this->redirect('master/obe?section=study-programs', ['error' => 'Master Program Studi bersifat read-only di DEIS. Kelola data melalui OBE.']);
 
         $id = (int)$this->getPost('id', 0);
         if ($id) {
@@ -216,26 +297,10 @@ class MasterController extends Controller {
 
     public function academicYears(): void {
         $this->requireAuth();
-        $this->requireRole(['super_admin', 'developer']);
-        $ayModel = new AcademicYear();
-
         if ($this->isPost()) {
             $this->requireCsrf();
-            $setActiveId = (int)$this->getPost('set_active_id', 0);
-            if ($setActiveId) {
-                // Set all to 0 then selected to 1
-                $ayModel->rawQuery("UPDATE academic_years SET is_active = 0");
-                $ayModel->update($setActiveId, ['is_active' => 1]);
-                AuditService::log('UPDATE_ACTIVE_YEAR', 'academic_years', (string)$setActiveId);
-                $this->redirect('master/academic-years', ['success' => 'Tahun akademik aktif berhasil diperbarui.']);
-            }
+            $this->redirect('master/obe?section=academic-years', ['error' => 'Tahun Akademik bersifat read-only di DEIS. Kelola periode aktif melalui OBE.']);
         }
-
-        $academicYears = $ayModel->all('start_date DESC');
-
-        $this->render('master/academic_years', [
-            'title'         => 'Data Master Tahun Akademik',
-            'academicYears' => $academicYears
-        ]);
+        $this->redirect('master/obe?section=academic-years');
     }
 }
