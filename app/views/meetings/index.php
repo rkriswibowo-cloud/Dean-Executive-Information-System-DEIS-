@@ -6,12 +6,9 @@
         <h4 class="fw-bold text-body mb-1 d-flex align-items-center gap-2">
             <i class="fa-solid fa-calendar-check text-primary"></i> Rapat & Tata Kelola Digital Fakultas
         </h4>
-        <p class="text-muted small mb-0">Manajemen terpusat paket digital rapat: Undangan, Notulensi, Absensi, Materi, Foto Dokumentasi, dan Tracking RTL.</p>
+        <p class="text-muted small mb-0">Manajemen terpusat paket digital rapat: Undangan, Notulensi, Absensi, Materi, dan Foto Dokumentasi.</p>
     </div>
     <div class="page-header-actions d-flex gap-2">
-        <a href="<?= $baseUrl ?>/meetings/rtl" class="btn btn-sm btn-soft-info rounded-3 px-3 shadow-sm d-flex align-items-center gap-2">
-            <i class="fa-solid fa-list-check"></i> Tracking RTL
-        </a>
         <a href="<?= $baseUrl ?>/meetings/create" class="btn btn-sm btn-primary rounded-3 px-3 shadow-sm d-flex align-items-center gap-2">
             <i class="fa-solid fa-plus"></i> Buat Jadwal Rapat
         </a>

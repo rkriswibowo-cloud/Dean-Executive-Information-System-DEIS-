@@ -60,6 +60,22 @@ try {
 ?>
 
 <aside class="sidebar" id="appSidebar">
+    <!-- Mobile Drawer Header (Hanya tampil di mode mobile/tablet <= 900px) -->
+    <div class="sidebar-mobile-header">
+        <div class="sidebar-mobile-brand">
+            <div class="brand-squircle" style="width: 32px; height: 32px;">
+                <img src="<?= $baseUrl ?>/assets/images/brand/logo/logo-icon.svg" alt="" style="width: 22px; height: 22px;">
+            </div>
+            <div class="brand-text-wrapper">
+                <span class="brand-title" style="font-size: 0.95rem;">DEIS</span>
+                <span class="brand-subtitle-line" style="font-size: 0.62rem;">Menu Navigasi Eksekutif</span>
+            </div>
+        </div>
+        <button type="button" class="sidebar-mobile-close-btn" id="sidebarMobileCloseBtn" onclick="window.closeMobileSidebar()" title="Tutup Menu (Esc)" aria-label="Tutup Menu">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
     <!-- Quick Search Menu Box (dengan Shortcut '/') -->
     <div class="sidebar-search-box">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>

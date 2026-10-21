@@ -5,9 +5,16 @@
  * Data murni dari database & controller DEIS tanpa manipulasi data dummy
  */
 use App\Helpers\FormatHelper;
+use App\Helpers\AuthHelper;
 
 $title = 'Dashboard Eksekutif - ' . ($faculty['name'] ?? 'Fakultas');
 $attention = $attention ?? ['total' => 0, 'pending_approvals' => 0, 'overdue_rtl' => 0, 'problematic_lecturers' => 0, 'at_risk_students' => 0, 'urgent_deadlines' => 0];
+$currentRole = 'dekan';
+try {
+    $currentRole = AuthHelper::role();
+} catch (\Throwable $e) {
+    $currentRole = $_SESSION['role'] ?? 'dekan';
+}
 ?>
 
 <div style="display: flex; flex-direction: column; gap: 24px;">
@@ -30,10 +37,12 @@ $attention = $attention ?? ['total' => 0, 'pending_approvals' => 0, 'overdue_rtl
             </p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <?php if ($currentRole !== 'dekan'): ?>
             <a href="<?= $baseUrl ?>/command-center" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; padding: 9px 16px;">
                 <i class="fa-solid fa-tower-broadcast"></i> Radar Command Center
             </a>
-            <a href="<?= $baseUrl ?>/meetings/create" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; padding: 9px 16px;">
+            <?php endif; ?>
+            <a href="<?= $baseUrl ?>/meetings/create" class="btn <?= $currentRole === 'dekan' ? 'btn-primary' : 'btn-secondary' ?>" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; padding: 9px 16px;">
                 <i class="fa-solid fa-calendar-plus"></i> Jadwalkan Rapat
             </a>
             <a href="<?= $baseUrl ?>/reports" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; padding: 9px 16px;">
@@ -42,8 +51,8 @@ $attention = $attention ?? ['total' => 0, 'pending_approvals' => 0, 'overdue_rtl
         </div>
     </div>
 
-    <!-- 2. Critical Alert Banner (Jika Ada Alert Kritis Aktif) -->
-    <?php if (!empty($criticalAlerts)): ?>
+    <!-- 2. Critical Alert Banner (Jika Ada Alert Kritis Aktif & Bukan Role Dekan) -->
+    <?php if (!empty($criticalAlerts) && $currentRole !== 'dekan'): ?>
     <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: var(--radius-md); padding: 18px 22px; display: flex; align-items: flex-start; gap: 14px;">
         <div style="width: 36px; height: 36px; border-radius: 10px; background: #ef4444; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; margin-top: 2px;">
             <i class="fa-solid fa-triangle-exclamation"></i>

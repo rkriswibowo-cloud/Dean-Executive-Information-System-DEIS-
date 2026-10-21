@@ -74,7 +74,91 @@ if ($currentRole === 'dekan') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
     <!-- DEIS Design System Theme CSS (Seragam dengan OBE) -->
-    <link rel="stylesheet" href="<?= $baseUrl ?>/assets/css/app-theme.css">
+    <?php
+    $themeCssPath = __DIR__ . '/../../../public/assets/css/app-theme.css';
+    $themeCssVer = file_exists($themeCssPath) ? filemtime($themeCssPath) : time();
+    ?>
+    <link rel="stylesheet" href="<?= $baseUrl ?>/assets/css/app-theme.css?v=<?= $themeCssVer ?>">
+
+    <!-- Critical Mobile Off-Canvas Drawer Styles: Menjamin sidebar tidak menumpuk di atas main content -->
+    <style>
+        @media (max-width: 900px) {
+            .app-layout {
+                height: auto !important;
+                min-height: 100vh !important;
+                min-height: 100dvh !important;
+                overflow-x: hidden !important;
+            }
+            .app-container {
+                display: block !important;
+                height: auto !important;
+                min-height: calc(100vh - 64px) !important;
+                min-height: calc(100dvh - 64px) !important;
+                overflow: visible !important;
+                padding: 8px 10px 16px 10px !important;
+                gap: 0 !important;
+            }
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                height: auto !important;
+                overflow: visible !important;
+                display: block !important;
+            }
+            #appSidebar.sidebar,
+            .sidebar {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                bottom: 0 !important;
+                width: 290px !important;
+                max-width: 86vw !important;
+                height: 100% !important;
+                height: 100dvh !important;
+                max-height: 100dvh !important;
+                border-radius: 0 20px 20px 0 !important;
+                z-index: 1050 !important;
+                box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5) !important;
+                transform: translateX(-100%) !important;
+                transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.28s !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+                padding: 14px 12px !important;
+                background-color: var(--surface) !important;
+                border: none !important;
+                border-right: 1px solid var(--border) !important;
+                margin: 0 !important;
+            }
+            html.sidebar-mobile-open #appSidebar.sidebar,
+            html.sidebar-mobile-open .sidebar,
+            .sidebar-mobile-open #appSidebar.sidebar,
+            .sidebar-mobile-open .sidebar {
+                transform: translateX(0) !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+            }
+            .sidebar-footer {
+                display: none !important;
+            }
+            .sidebar-collapsed #appSidebar.sidebar,
+            .sidebar-collapsed .sidebar {
+                width: 290px !important;
+                padding: 14px 12px !important;
+                transform: translateX(-100%) !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+            }
+            html.sidebar-mobile-open.sidebar-collapsed #appSidebar.sidebar,
+            html.sidebar-mobile-open.sidebar-collapsed .sidebar,
+            .sidebar-mobile-open.sidebar-collapsed #appSidebar.sidebar,
+            .sidebar-mobile-open.sidebar-collapsed .sidebar {
+                transform: translateX(0) !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+            }
+        }
+    </style>
 
     <!-- Script Anti-FOUC: Eksekusi tema, palet, dan status sidebar sebelum DOM selesai render -->
     <script>
@@ -89,7 +173,7 @@ if ($currentRole === 'dekan') {
                 const savedPalette = localStorage.getItem('accent_palette') || 'slate';
                 document.documentElement.setAttribute('data-palette', savedPalette);
 
-                if (localStorage.getItem('sidebar_collapsed') === 'true') {
+                if (window.innerWidth > 900 && localStorage.getItem('sidebar_collapsed') === 'true') {
                     document.documentElement.classList.add('sidebar-collapsed');
                 }
             } catch(e) {}
@@ -124,6 +208,9 @@ if ($currentRole === 'dekan') {
         <div class="app-container">
             <!-- Floating Sidebar Island Card -->
             <?php require __DIR__ . '/../components/sidebar.php'; ?>
+
+            <!-- Mobile Sidebar Backdrop Overlay -->
+            <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="window.closeMobileSidebar()" aria-hidden="true"></div>
 
             <!-- Main Content Island Card -->
             <div class="main-content">
@@ -362,7 +449,27 @@ if ($currentRole === 'dekan') {
             }
         }
 
+        // Mobile Drawer Open / Close Functions
+        window.openMobileSidebar = function() {
+            document.documentElement.classList.add('sidebar-mobile-open');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeMobileSidebar = function() {
+            document.documentElement.classList.remove('sidebar-mobile-open');
+            document.body.style.overflow = '';
+        };
+
         window.toggleSidebarCollapse = function() {
+            if (window.innerWidth <= 900) {
+                if (document.documentElement.classList.contains('sidebar-mobile-open')) {
+                    window.closeMobileSidebar();
+                } else {
+                    window.openMobileSidebar();
+                }
+                return;
+            }
+
             const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed');
             const newState = !isCollapsed;
 
@@ -382,6 +489,26 @@ if ($currentRole === 'dekan') {
         document.addEventListener('DOMContentLoaded', function() {
             const initCollapsed = document.documentElement.classList.contains('sidebar-collapsed');
             updateSidebarCollapseUI(initCollapsed);
+        });
+
+        // Close mobile drawer on Escape key or link click
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.documentElement.classList.contains('sidebar-mobile-open')) {
+                window.closeMobileSidebar();
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 900 && document.documentElement.classList.contains('sidebar-mobile-open')) {
+                window.closeMobileSidebar();
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('#appSidebar a');
+            if (link && window.innerWidth <= 900) {
+                window.closeMobileSidebar();
+            }
         });
 
         // Sidebar Group Toggle Accordion

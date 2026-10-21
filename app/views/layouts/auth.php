@@ -23,7 +23,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
     <!-- DEIS Theme System CSS -->
-    <link rel="stylesheet" href="<?= $baseUrl ?>/assets/css/app-theme.css">
+    <?php
+    $themeCssPath = __DIR__ . '/../../../public/assets/css/app-theme.css';
+    $themeCssVer = file_exists($themeCssPath) ? filemtime($themeCssPath) : time();
+    ?>
+    <link rel="stylesheet" href="<?= $baseUrl ?>/assets/css/app-theme.css?v=<?= $themeCssVer ?>">
     <link rel="stylesheet" href="<?= $baseUrl ?>/assets/css/auth-login.css?v=20261004-v1">
 
     <!-- Anti-FOUC Script -->

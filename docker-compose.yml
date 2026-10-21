@@ -1,0 +1,36 @@
+# ==============================================================================
+# Docker Compose Configuration - Dean Executive Information System (DEIS)
+# ==============================================================================
+
+services:
+  deis-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: deis-app:latest
+    container_name: deis-web
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8085}:80"
+    environment:
+      # Konfigurasi Database (Tersambung langsung ke database lokal deis_db & obe_cpl)
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${DB_NAME:-deis_db}
+      - OBE_DB_NAME=${OBE_DB_NAME:-obe_cpl}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-rony123}
+      - OBE_DB_USERNAME=${OBE_DB_USERNAME:-root}
+      - OBE_DB_PASSWORD=${OBE_DB_PASSWORD:-rony123}
+      # Konfigurasi Aplikasi
+      - APP_ENV=${APP_ENV:-development}
+      - APP_URL=${APP_URL:-http://localhost:8085}
+    volumes:
+      # Sinkronisasi file kode secara realtime (live code reloading)
+      - ./:/var/www/html
+      # Mount UNIX socket MySQL lokal host agar tersinkron langsung ke deis_db & obe_cpl
+      - /var/run/mysqld:/var/run/mysqld
+      - /var/run/mysqld/mysqld.sock:/tmp/mysql.sock
+    extra_hosts:
+      # Dukungan koneksi TCP ke host (khususnya untuk Windows / macOS / CI)
+      - "host.docker.internal:host-gateway"

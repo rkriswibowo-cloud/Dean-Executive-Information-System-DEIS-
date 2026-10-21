@@ -100,7 +100,6 @@ use App\Helpers\CsrfHelper;
                 <h5 class="card-title fw-bold mb-0 text-body d-flex align-items-center gap-2">
                     <i class="fa-solid fa-list-check text-info"></i> Tindak Lanjut Hasil Rapat (RTL)
                 </h5>
-                <a href="<?= $baseUrl ?>/meetings/rtl" class="btn btn-sm btn-soft-info rounded-3 px-3 py-1">Buka Tracking RTL</a>
             </div>
             <div class="card-body p-0">
                 <?php if (empty($meeting['action_items'])): ?>

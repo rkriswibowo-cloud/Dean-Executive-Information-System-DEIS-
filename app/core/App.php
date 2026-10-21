@@ -33,9 +33,10 @@ class App {
 
         $path = $this->normalizePath($uri);
 
-        // Route matching
-        if (isset($this->routes[$method][$path])) {
-            $this->dispatch($this->routes[$method][$path]);
+        // Route matching (HEAD requests match GET routes)
+        $matchingMethod = ($method === 'HEAD') ? 'GET' : $method;
+        if (isset($this->routes[$matchingMethod][$path])) {
+            $this->dispatch($this->routes[$matchingMethod][$path]);
             return;
         }
 

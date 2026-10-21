@@ -34,7 +34,7 @@ class MasterController extends Controller {
         $allowedSections = [
             'academic-years', 'lecturers', 'students', 'study-programs', 'curricula',
             'curriculum-rules', 'graduate-profiles', 'learning-outcomes', 'courses',
-            'rubrics', 'imports'
+            'rubrics'
         ];
         $section = (string)$this->getQuery('section', 'study-programs');
         if (!in_array($section, $allowedSections, true)) {

@@ -222,29 +222,15 @@ class AcademicController extends Controller {
     public function rpsMonitoring(): void {
         $this->requireAuth();
 
-        $courseModel = new Course();
-        $programModel = new StudyProgram();
-
         $filterProgram = (int)$this->getQuery('program_id', 0);
-        $filterStatus = trim($this->getQuery('status', ''));
+        $filterStatus = trim((string)$this->getQuery('status', ''));
         $filterCaseMethod = $this->getQuery('case_method', '');
 
-        $courses = $courseModel->allWithLecturerAndProgram($filterProgram ?: null, true);
-
-        // Filter status / case method
-        if (!empty($filterStatus)) {
-            $courses = array_filter($courses, fn($c) => $c['rps_status'] === $filterStatus);
-        }
-        if ($filterCaseMethod !== '') {
-            $courses = array_filter($courses, fn($c) => (int)($c['case_method_flag'] ?? 0) === (int)$filterCaseMethod);
-        }
-
-        $programs = $programModel->all();
-        $summary = $courseModel->getRpsSummary();
-        $prodiStats = $courseModel->getRpsByProdi();
-
-        $obeService = new \App\Services\ObeSyncService();
-        $obeAvailable = $obeService->isObeAvailable();
+        [$courses, $summary, $prodiStats, $programs, $obeAvailable] = $this->getNormalizedObeRpsData(
+            $filterProgram ?: null,
+            $filterStatus,
+            $filterCaseMethod
+        );
 
         $this->render('academic/rps_monitoring', [
             'title'             => 'Dashboard Analitik & Monitoring Kesiapan RPS Dekanat',
@@ -257,6 +243,196 @@ class AcademicController extends Controller {
             'prodiStats'        => $prodiStats,
             'obeAvailable'      => $obeAvailable
         ]);
+    }
+
+    /**
+     * Helper data mata kuliah realtime dari master OBE untuk monitoring & ekspor RPS
+     * Mengembalikan data yang strictly sesuai master OBE, mengabaikan dummy data lokal non-OBE
+     */
+    private function getNormalizedObeRpsData(?int $filterProgram = null, string $filterStatus = '', string $filterCaseMethod = ''): array {
+        $obeService = new \App\Services\ObeSyncService();
+        $obeAvailable = $obeService->isObeAvailable();
+
+        // 1. Program Studi OBE
+        $programs = [];
+        try {
+            $studyProgramRepo = new \App\Services\Obe\StudyProgramRepository();
+            $allObePrograms = $studyProgramRepo->all(false);
+            $programs = array_map(function ($p) {
+                return [
+                    'id'     => (int)$p['obe_id'],
+                    'name'   => $p['name'],
+                    'degree' => $p['degree'] ?? 'S1',
+                    'code'   => $p['code'] ?? ''
+                ];
+            }, $allObePrograms);
+        } catch (\Throwable $e) {
+            $programModel = new StudyProgram();
+            $programs = $programModel->all();
+        }
+
+        // Resolusi filter program (jika dikirim ID DEIS lama, cocokkan ke OBE prodi ID)
+        $obeProdiId = null;
+        if ($filterProgram > 0) {
+            $obeProdiId = $filterProgram;
+            $matchingObe = array_filter($programs, fn($p) => (int)$p['id'] === $filterProgram);
+            if (empty($matchingObe)) {
+                try {
+                    $db = \App\Core\Database::getConnection();
+                    $mappedObeId = $db->query("SELECT obe_id FROM obe_entity_mappings WHERE entity_type='study_program' AND deis_id=" . (int)$filterProgram)->fetchColumn();
+                    if ($mappedObeId) {
+                        $obeProdiId = (int)$mappedObeId;
+                    }
+                } catch (\Throwable $e) {}
+            }
+        }
+
+        // Fallback jika database OBE tidak terdeteksi
+        if (!$obeAvailable) {
+            $courseModel = new Course();
+            $courses = $courseModel->allWithLecturerAndProgram($filterProgram ?: null, true);
+            if (!empty($filterStatus)) {
+                $courses = array_filter($courses, fn($c) => $c['rps_status'] === $filterStatus);
+            }
+            if ($filterCaseMethod !== '') {
+                $courses = array_filter($courses, fn($c) => (int)($c['case_method_flag'] ?? 0) === (int)$filterCaseMethod);
+            }
+            return [
+                array_values($courses),
+                $courseModel->getRpsSummary(),
+                $courseModel->getRpsByProdi(),
+                $programs,
+                false
+            ];
+        }
+
+        // 2. Ambil data mentah langsung dari master OBE
+        $rawCourses = $obeService->getRealtimeObeCourses();
+
+        // 3. Ambil data validasi dekanat lokal jika ada
+        $validations = [];
+        try {
+            $db = \App\Core\Database::getConnection();
+            $valRows = $db->query("SELECT * FROM obe_rps_validations")->fetchAll(\PDO::FETCH_ASSOC);
+            foreach ($valRows as $vr) {
+                $validations[(int)$vr['obe_course_id']] = $vr;
+            }
+        } catch (\Throwable $e) {}
+
+        // 4. Normalisasi data mata kuliah master OBE
+        $allCourses = [];
+        foreach ($rawCourses as $m) {
+            $mkId = (int)$m['obe_mk_id'];
+            $val = $validations[$mkId] ?? null;
+
+            $lecturerName = $m['pjmk_nama'] ?? null;
+            if (empty($lecturerName) && !empty($m['rps_dosen_pengampu'])) {
+                $firstLine = trim(strtok((string)$m['rps_dosen_pengampu'], "\r\n"));
+                $firstLine = preg_replace('/^\s*\d+\.\s*/u', '', $firstLine);
+                $clean = trim((string)preg_replace('/\s*\(PJMK\).*$/iu', '', $firstLine));
+                $lecturerName = $clean !== '' ? $clean : null;
+            }
+
+            $rpsStatus = $val['rps_status'] ?? $m['rps_status'];
+            $caseMethod = isset($val['case_method_flag']) ? (int)$val['case_method_flag'] : (int)$m['is_case_method'];
+            $cplStatus = $val['cpl_status'] ?? ($rpsStatus === 'Lengkap' ? 'Memenuhi Standar OBE' : ($rpsStatus === 'Revisi' ? 'Revisi Rubrik Penilaian' : 'Belum Lengkap'));
+            $docUrl = !empty($val['rps_document_url']) ? $val['rps_document_url'] : (!empty($m['obe_rps_id']) ? "http://localhost/obe/rps/preview/{$mkId}" : null);
+            $notes = $val['rps_notes'] ?? null;
+            $updatedAt = $val['rps_updated_at'] ?? (!empty($m['rps_updated_at']) ? date('Y-m-d', strtotime($m['rps_updated_at'])) : null);
+
+            $allCourses[] = [
+                'id'                 => $mkId,
+                'obe_mk_id'          => $mkId,
+                'code'               => $m['code'],
+                'name'               => $m['name'],
+                'sks'                => (int)$m['sks'],
+                'semester'           => (int)$m['semester'],
+                'program_id'         => (int)$m['obe_prodi_id'],
+                'obe_prodi_id'       => (int)$m['obe_prodi_id'],
+                'program_name'       => $m['prodi_nama'],
+                'prodi_jenjang'      => $m['prodi_jenjang'],
+                'kurikulum_year'     => $m['kurikulum_year'],
+                'kurikulum_nama'     => $m['kurikulum_nama'],
+                'lecturer_name'      => $lecturerName,
+                'rps_status'         => $rpsStatus,
+                'cpl_status'         => $cplStatus,
+                'case_method_flag'   => $caseMethod,
+                'rps_document_url'   => $docUrl,
+                'rps_updated_at'     => $updatedAt,
+                'rps_notes'          => $notes,
+            ];
+        }
+
+        // 5. Hitung Summary & Prodi Stats dari master OBE
+        $summary = [
+            'total_courses'     => count($allCourses),
+            'complete_count'    => 0,
+            'revision_count'    => 0,
+            'incomplete_count'  => 0,
+            'case_method_count' => 0
+        ];
+
+        $prodiMap = [];
+        foreach ($programs as $p) {
+            $prodiMap[$p['id']] = [
+                'program_id'        => $p['id'],
+                'program_name'      => $p['name'],
+                'degree'            => $p['degree'],
+                'total_courses'     => 0,
+                'complete_count'    => 0,
+                'revision_count'    => 0,
+                'incomplete_count'  => 0,
+                'case_method_count' => 0
+            ];
+        }
+
+        foreach ($allCourses as $c) {
+            if ($c['rps_status'] === 'Lengkap') $summary['complete_count']++;
+            elseif ($c['rps_status'] === 'Revisi') $summary['revision_count']++;
+            else $summary['incomplete_count']++;
+
+            if (!empty($c['case_method_flag'])) $summary['case_method_count']++;
+
+            $pid = $c['obe_prodi_id'];
+            if (!isset($prodiMap[$pid])) {
+                $prodiMap[$pid] = [
+                    'program_id'        => $pid,
+                    'program_name'      => $c['program_name'],
+                    'degree'            => $c['prodi_jenjang'] ?? 'S1',
+                    'total_courses'     => 0,
+                    'complete_count'    => 0,
+                    'revision_count'    => 0,
+                    'incomplete_count'  => 0,
+                    'case_method_count' => 0
+                ];
+            }
+            $prodiMap[$pid]['total_courses']++;
+            if ($c['rps_status'] === 'Lengkap') $prodiMap[$pid]['complete_count']++;
+            elseif ($c['rps_status'] === 'Revisi') $prodiMap[$pid]['revision_count']++;
+            else $prodiMap[$pid]['incomplete_count']++;
+            if (!empty($c['case_method_flag'])) $prodiMap[$pid]['case_method_count']++;
+        }
+        $prodiStats = array_values($prodiMap);
+
+        // 6. Filter daftar mata kuliah sesuai query
+        $courses = $allCourses;
+        if ($obeProdiId) {
+            $courses = array_filter($courses, fn($c) => (int)$c['obe_prodi_id'] === $obeProdiId);
+        }
+        if (!empty($filterStatus)) {
+            $courses = array_filter($courses, fn($c) => $c['rps_status'] === $filterStatus);
+        }
+        if ($filterCaseMethod !== '') {
+            $courses = array_filter($courses, fn($c) => (int)($c['case_method_flag'] ?? 0) === (int)$filterCaseMethod);
+        }
+
+        return [
+            array_values($courses),
+            $summary,
+            $prodiStats,
+            $programs,
+            true
+        ];
     }
 
     /**
@@ -333,7 +509,7 @@ class AcademicController extends Controller {
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename=monitoring_pertemuan_perkuliahan_' . date('Ymd_His') . '.csv');
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['Kode MK', 'Nama Mata Kuliah', 'SKS', 'Kelas', 'Dosen Pengampu', 'Program Studi', 'Realisasi Pertemuan', 'Target Pertemuan', 'Rata-rata Presensi (%)', 'Status Problem', 'Catatan Dekanat']);
+            fputcsv($out, ['Kode MK', 'Nama Mata Kuliah', 'SKS', 'Kelas', 'Dosen Pengampu', 'Program Studi', 'Realisasi Pertemuan', 'Target Pertemuan', 'Rata-rata Presensi (%)', 'Status Problem', 'Catatan Dekanat'], ',', '"', "\\");
             foreach ($classes as $c) {
                 fputcsv($out, [
                     $c['course_code'],
@@ -347,7 +523,7 @@ class AcademicController extends Controller {
                     $c['average_attendance'],
                     $c['problem_flag'] ? 'Bermasalah / Perlu Evaluasi' : 'Normal',
                     $c['problem_notes'] ?? '-'
-                ]);
+                ], ',', '"', "\\");
             }
             fclose($out);
             exit;
@@ -368,17 +544,23 @@ class AcademicController extends Controller {
         $this->requireAuth();
         $format = $this->getQuery('format', 'csv');
 
-        $courseModel = new Course();
-        $courses = $courseModel->allWithLecturerAndProgram(null, true);
-        $summary = $courseModel->getRpsSummary();
+        $filterProgram = (int)$this->getQuery('program_id', 0);
+        $filterStatus = trim((string)$this->getQuery('status', ''));
+        $filterCaseMethod = $this->getQuery('case_method', '');
 
-        AuditService::log('EXPORT_RPS', 'courses', null, null, ['format' => $format]);
+        [$courses, $summary] = $this->getNormalizedObeRpsData(
+            $filterProgram ?: null,
+            $filterStatus,
+            $filterCaseMethod
+        );
+
+        AuditService::log('EXPORT_RPS', 'obe_courses', null, null, ['format' => $format]);
 
         if ($format === 'csv') {
             header('Content-Type: text/csv; charset=utf-8');
-            header('Content-Disposition: attachment; filename=monitoring_kesiapan_rps_' . date('Ymd_His') . '.csv');
+            header('Content-Disposition: attachment; filename=monitoring_kesiapan_rps_obe_' . date('Ymd_His') . '.csv');
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['Kode MK', 'Nama Mata Kuliah', 'SKS', 'Semester', 'Program Studi', 'Dosen Koordinator', 'Status RPS', 'Kesesuaian CPL', 'Metode Case Method (IKU-7)', 'Link Dokumen RPS', 'Catatan / Review Dekanat']);
+            fputcsv($out, ['Kode MK', 'Nama Mata Kuliah', 'SKS', 'Semester', 'Program Studi', 'Dosen Koordinator', 'Status RPS', 'Kesesuaian CPL', 'Metode Case Method (IKU-7)', 'Link Dokumen RPS', 'Catatan / Review Dekanat'], ',', '"', "\\");
             foreach ($courses as $c) {
                 fputcsv($out, [
                     $c['code'],
@@ -392,7 +574,7 @@ class AcademicController extends Controller {
                     !empty($c['case_method_flag']) ? 'Ya (Case Method)' : 'Reguler',
                     $c['rps_document_url'] ?? '-',
                     $c['rps_notes'] ?? '-'
-                ]);
+                ], ',', '"', "\\");
             }
             fclose($out);
             exit;
@@ -864,24 +1046,59 @@ class AcademicController extends Controller {
             $this->redirect('academic/rps-monitoring', ['danger' => 'ID Mata Kuliah tidak valid.']);
         }
 
-        $courseModel = new Course();
-        $courseModel->update($courseId, [
-            'rps_status'       => $status,
-            'cpl_status'       => $cplStatus,
-            'case_method_flag' => $caseMethod,
-            'rps_document_url' => !empty($docUrl) ? $docUrl : null,
-            'rps_updated_at'   => date('Y-m-d'),
-            'rps_notes'        => $notes
-        ]);
+        // Simpan ke obe_rps_validations di database DEIS
+        try {
+            $db = \App\Core\Database::getConnection();
+            $stmt = $db->prepare("
+                INSERT INTO obe_rps_validations 
+                    (obe_course_id, rps_status, cpl_status, case_method_flag, rps_document_url, rps_updated_at, rps_notes, validated_by)
+                VALUES 
+                    (:cid, :status, :cpl_status, :case_method, :doc_url, :updated_at, :notes, :user_id)
+                ON DUPLICATE KEY UPDATE
+                    rps_status = VALUES(rps_status),
+                    cpl_status = VALUES(cpl_status),
+                    case_method_flag = VALUES(case_method_flag),
+                    rps_document_url = VALUES(rps_document_url),
+                    rps_updated_at = VALUES(rps_updated_at),
+                    rps_notes = VALUES(rps_notes),
+                    validated_by = VALUES(validated_by),
+                    updated_at = NOW()
+            ");
+            $stmt->execute([
+                'cid'         => $courseId,
+                'status'      => $status,
+                'cpl_status'  => $cplStatus,
+                'case_method' => $caseMethod,
+                'doc_url'     => !empty($docUrl) ? $docUrl : null,
+                'updated_at'  => date('Y-m-d'),
+                'notes'       => $notes,
+                'user_id'     => AuthHelper::id()
+            ]);
+        } catch (\Throwable $e) {}
 
-        AuditService::log('APPROVE_RPS', 'courses', (string)$courseId, null, [
+        // Sinkronkan ke tabel courses lokal jika ID cocok untuk kompatibilitas modul lama
+        try {
+            $courseModel = new Course();
+            if ($courseModel->find($courseId)) {
+                $courseModel->update($courseId, [
+                    'rps_status'       => $status,
+                    'cpl_status'       => $cplStatus,
+                    'case_method_flag' => $caseMethod,
+                    'rps_document_url' => !empty($docUrl) ? $docUrl : null,
+                    'rps_updated_at'   => date('Y-m-d'),
+                    'rps_notes'        => $notes
+                ]);
+            }
+        } catch (\Throwable $e) {}
+
+        AuditService::log('APPROVE_RPS', 'obe_courses', (string)$courseId, null, [
             'status'      => $status,
             'cpl_status'  => $cplStatus,
             'case_method' => $caseMethod,
             'notes'       => $notes
         ]);
 
-        $this->redirect($returnUrl, ['success' => "Status RPS dan validasi kurikulum berhasil diperbarui menjadi '{$status}'."]);
+        $this->redirect($returnUrl, ['success' => "Status RPS dan validasi kurikulum OBE berhasil diperbarui menjadi '{$status}'."]);
     }
 
     public function actionGuidance(): void {

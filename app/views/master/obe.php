@@ -6,14 +6,14 @@ $labels = [
     'study-programs' => 'Program Studi', 'curricula' => 'Kurikulum',
     'curriculum-rules' => 'Aturan Kurikulum', 'graduate-profiles' => 'Profil Lulusan',
     'learning-outcomes' => 'CPL', 'courses' => 'Mata Kuliah',
-    'rubrics' => 'Rubrik Penilaian', 'imports' => 'Import Data'
+    'rubrics' => 'Rubrik Penilaian'
 ];
 $obePaths = [
     'academic-years' => 'tahun-akademik', 'lecturers' => 'dosen', 'students' => 'mahasiswa',
     'study-programs' => 'prodi', 'curricula' => 'kurikulum',
     'curriculum-rules' => 'aturan-kurikulum', 'graduate-profiles' => 'profil-lulusan',
     'learning-outcomes' => 'cpl', 'courses' => 'mata-kuliah',
-    'rubrics' => 'rubrik', 'imports' => 'import'
+    'rubrics' => 'rubrik'
 ];
 $columns = match ($section) {
     'academic-years' => ['name'=>'Tahun Akademik','is_active'=>'Status Aktif'],
@@ -85,7 +85,7 @@ $columns = match ($section) {
     </div>
 
     <!-- Toolbar Filter & Pencarian Hierarki OBE -->
-    <?php if ($section !== 'imports' && !empty($health['available'])): ?>
+    <?php if (!empty($health['available'])): ?>
         <div class="px-4 py-3 bg-body-tertiary bg-opacity-50 border-bottom">
             <form method="GET" action="<?= $baseUrl ?>/master/obe" id="obeFilterForm" class="row g-2 align-items-center">
                 <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
@@ -179,13 +179,7 @@ $columns = match ($section) {
     <?php endif; ?>
 
     <div class="card-body p-0">
-        <?php if ($section === 'imports'): ?>
-            <div class="p-5 text-center">
-                <i class="fa-solid fa-file-import fa-3x text-primary mb-3"></i>
-                <h5 class="fw-bold">Import data hanya dilakukan di OBE</h5>
-                <p class="text-muted">DEIS tidak menduplikasi proses import untuk mencegah perbedaan master akademik.</p>
-            </div>
-        <?php elseif (empty($health['available'])): ?>
+        <?php if (empty($health['available'])): ?>
             <div class="p-5 text-center text-danger">
                 <i class="fa-solid fa-triangle-exclamation fa-2x mb-3"></i>
                 <div class="fw-bold">Data OBE tidak dapat dibaca</div>

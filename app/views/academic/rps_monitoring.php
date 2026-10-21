@@ -51,7 +51,7 @@ $caseMethodPct = $totalCourses > 0 ? round(($caseMethodCount / $totalCourses) * 
             <div>
                 <div class="kpi-title">Total Mata Kuliah</div>
                 <div class="kpi-value text-dark"><?= $totalCourses ?></div>
-                <div class="text-muted small mt-1">Kurikulum Aktif 2024</div>
+                <div class="text-muted small mt-1">Master Kurikulum OBE</div>
             </div>
             <div class="kpi-icon-wrap" style="background: rgba(15, 23, 42, 0.08); color: #0f172a;">
                 <i class="ti ti-book fs-3"></i>
@@ -105,7 +105,7 @@ $caseMethodPct = $totalCourses > 0 ? round(($caseMethodCount / $totalCourses) * 
     <div class="col-12">
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-header bg-body border-bottom py-3">
-                <h6 class="card-title fw-bold mb-0">Tingkat Kesiapan RPS & Kepatuhan CPL per Program Studi</h6>
+                <h6 class="card-title fw-bold mb-0">Tingkat Kesiapan RPS & Kepatuhan CPL per Program Studi (Master OBE)</h6>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -138,7 +138,7 @@ $caseMethodPct = $totalCourses > 0 ? round(($caseMethodCount / $totalCourses) * 
                                     <td><span class="badge bg-danger-subtle text-danger"><?= $ps['incomplete_count'] ?> MK</span></td>
                                     <td>
                                         <span class="badge bg-primary-subtle text-primary">
-                                            <i class="ti ti-check me-1"></i><?= $ps['case_method_count'] ?> MK
+                                             <i class="ti ti-check me-1"></i><?= $ps['case_method_count'] ?> MK
                                         </span>
                                     </td>
                                     <td class="pe-4">
@@ -162,21 +162,28 @@ $caseMethodPct = $totalCourses > 0 ? round(($caseMethodCount / $totalCourses) * 
 <!-- Filter & Tabel Rinci Mata Kuliah & Dokumen RPS -->
 <div class="card card-lg shadow-sm border-0 rounded-4">
     <div class="card-header bg-body border-bottom py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h5 class="card-title fw-bold mb-0">Daftar Mata Kuliah, Dokumen RPS & Validasi Dekanat</h5>
+        <div class="d-flex align-items-center gap-2">
+            <h5 class="card-title fw-bold mb-0">Daftar Mata Kuliah, Dokumen RPS & Validasi Dekanat</h5>
+            <span class="badge bg-success-subtle text-success border border-success-subtle"><?= count($courses) ?> MK Sesuai Master OBE</span>
+        </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
-            <select class="form-select form-select-sm" onchange="filterRps(this.value, 'program_id')">
+            <div class="input-group input-group-sm" style="width: 210px;">
+                <span class="input-group-text bg-transparent border-end-0"><i class="ti ti-search text-muted"></i></span>
+                <input type="text" id="searchCourseInput" class="form-control border-start-0" placeholder="Cari kode / nama MK..." onkeyup="filterCoursesTable(this.value)">
+            </div>
+            <select class="form-select form-select-sm" style="width: auto;" onchange="filterRps(this.value, 'program_id')">
                 <option value="">Semua Program Studi</option>
                 <?php foreach ($programs as $p): ?>
                     <option value="<?= $p['id'] ?>" <?= $filterProgram == $p['id'] ? 'selected' : '' ?>><?= $p['name'] ?></option>
                 <?php endforeach; ?>
             </select>
-            <select class="form-select form-select-sm" onchange="filterRps(this.value, 'status')">
+            <select class="form-select form-select-sm" style="width: auto;" onchange="filterRps(this.value, 'status')">
                 <option value="">Semua Status RPS</option>
                 <option value="Lengkap" <?= $filterStatus === 'Lengkap' ? 'selected' : '' ?>>Lengkap</option>
                 <option value="Revisi" <?= $filterStatus === 'Revisi' ? 'selected' : '' ?>>Revisi</option>
                 <option value="Belum Lengkap" <?= $filterStatus === 'Belum Lengkap' ? 'selected' : '' ?>>Belum Lengkap</option>
             </select>
-            <select class="form-select form-select-sm" onchange="filterRps(this.value, 'case_method')">
+            <select class="form-select form-select-sm" style="width: auto;" onchange="filterRps(this.value, 'case_method')">
                 <option value="">Semua Metode</option>
                 <option value="1" <?= $filterCaseMethod === '1' ? 'selected' : '' ?>>Hanya Case Method (IKU-7)</option>
                 <option value="0" <?= $filterCaseMethod === '0' ? 'selected' : '' ?>>Reguler Non-Case Method</option>
@@ -198,7 +205,7 @@ $caseMethodPct = $totalCourses > 0 ? round(($caseMethodCount / $totalCourses) * 
                         <th class="text-end pe-4">Aksi Pengesahan</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="coursesTableBody">
                     <?php if (empty($courses)): ?>
                         <tr>
                             <td colspan="8" class="text-center py-5 text-muted">
@@ -207,7 +214,7 @@ $caseMethodPct = $totalCourses > 0 ? round(($caseMethodCount / $totalCourses) * 
                         </tr>
                     <?php else: ?>
                         <?php foreach ($courses as $c): ?>
-                            <tr>
+                            <tr class="course-row">
                                 <td class="ps-4">
                                     <span class="badge bg-light text-dark border mb-1"><?= htmlspecialchars($c['code'], ENT_QUOTES, 'UTF-8') ?></span>
                                     <div class="fw-bold text-dark"><?= htmlspecialchars($c['name'], ENT_QUOTES, 'UTF-8') ?></div>
@@ -339,5 +346,14 @@ function filterRps(val, param) {
         url.searchParams.delete(param);
     }
     window.location.href = url.toString();
+}
+
+function filterCoursesTable(val) {
+    const term = (val || '').toLowerCase().trim();
+    const rows = document.querySelectorAll('#coursesTableBody tr.course-row');
+    rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        r.style.display = text.includes(term) ? '' : 'none';
+    });
 }
 </script>
